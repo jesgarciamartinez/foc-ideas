@@ -1,6 +1,5 @@
 import * as React from 'react'
 import type { IfunctionView } from './interfaces'
-import { Draggable } from 'react-beautiful-dnd'
 import { VStack, Divider, Badge, Text } from '@chakra-ui/react'
 import './cloneStyles.css'
 
@@ -11,8 +10,8 @@ const BrickFunctionView = ({
 }: IfunctionView) => {
   return (
     <VStack width='50%' borderWidth='1px' borderRadius='lg'>
-      {parameterTypes.map(p => (
-        <Badge>{p}</Badge>
+      {parameterTypes.map((p, i) => (
+        <Badge key={i}>{p}</Badge>
       ))}
       <Divider></Divider>
       <Text>{name}</Text>

@@ -17,7 +17,7 @@
     "framer-motion": "^2.9.4",
     "monaco-editor": "^0.21.2",
     "react": "16.14",
-    "react-beautiful-dnd": "^13.0.0",
+    "react-beautiful-dnd": "12.1.1",
     "react-dom": "16.14",
     "react-icons": "^3.0.0",
     "react-scripts": "4.0.1",
@@ -58,6 +58,7 @@
   "devDependencies": {
     "@types/react-beautiful-dnd": "^13.0.0",
     "@types/react-sortable-tree": "^0.3.12",
-    "@types/react-sortable-tree-theme-file-explorer": "0.0.0"
+    "@types/react-sortable-tree-theme-file-explorer": "0.0.0",
+    "@types/uuid": "^8.3.0"
   }
 }

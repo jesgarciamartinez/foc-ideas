@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { v4 as uuid } from 'uuid'
 // import MonacoEditor from 'react-monaco-editor'
 import MonacoEditor from '@monaco-editor/react'
 import ts from 'typescript'
@@ -27,7 +28,6 @@ import {
   Flex,
 } from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
-import SmallFunctionView from './components/SmallFunctionView'
 import BrickFunctionView from './components/BrickFunctionView'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
@@ -76,7 +76,7 @@ print(sc)
 
 const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
   return (
-    <Droppable droppableId='Card'>
+    <Droppable droppableId='BrickFlowCard'>
       {(provided, snapshot) => {
         return (
           <Box
@@ -143,9 +143,11 @@ function Editor() {
     />
   )
 }
-const fns: Array<IfunctionView> = [
+const fnsInitial: Array<IfunctionView> = [
   { name: 'length', parameterTypes: ['String'], returnType: 'Number' },
   { name: 'exclaim', parameterTypes: ['String'], returnType: 'String' },
+  { name: 'upperCase', parameterTypes: ['String'], returnType: 'String' },
+  { name: 'sth', parameterTypes: ['String'], returnType: 'String' },
 ]
 const reorder = (list: any, startIndex: any, endIndex: any) => {
   const [removed] = list.splice(startIndex, 1)
@@ -165,6 +167,7 @@ const copy = (
 }
 
 export const App = () => {
+  const [fns, setFns] = useState(fnsInitial)
   const [flowBricks, setFlowBricks] = React.useState([])
   const onDragEnd = React.useCallback(
     result => {

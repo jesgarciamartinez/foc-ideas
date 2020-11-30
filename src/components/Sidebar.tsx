@@ -11,9 +11,8 @@ const getRenderItem = (items: Array<IfunctionView>) => (
   rubric: any,
 ) => {
   const { name, returnType, parameterTypes } = items[rubric.source.index]
-  console.log({ provided, snapshot, rubric })
   return (
-    <>
+    <React.Fragment>
       <li
         {...provided.draggableProps}
         {...provided.dragHandleProps}
@@ -23,8 +22,8 @@ const getRenderItem = (items: Array<IfunctionView>) => (
           <Code backgroundColor='white'>{name}</Code>
           <Text as='span'>:</Text>
           <Text as={'span'}>
-            {parameterTypes.map(p => (
-              <Text as='span'>
+            {parameterTypes.map((p, i) => (
+              <Text as='span' key={i}>
                 <Badge>{p}</Badge> <Text as='span'> →</Text>
               </Text>
             ))}
@@ -34,7 +33,7 @@ const getRenderItem = (items: Array<IfunctionView>) => (
           </Text>
         </HStack>
       </li>
-    </>
+    </React.Fragment>
   )
 }
 
@@ -47,7 +46,7 @@ const SideBar = ({ items }: { items: Array<IfunctionView> }) => {
       {(provided, snapshot) => (
         <Box
           ref={provided.innerRef}
-          // {...provided.droppableProps}
+          {...provided.droppableProps}
           as='ul'
           height={'100%'}
           boxShadow='xl'
@@ -65,6 +64,7 @@ const SideBar = ({ items }: { items: Array<IfunctionView> }) => {
           // width='35rem'
         >
           {items.map((props, i) => {
+            // console.log('snapshot', snapshot)
             const shouldRenderClone =
               props.name === snapshot.draggingFromThisWith
             return (
@@ -78,8 +78,8 @@ const SideBar = ({ items }: { items: Array<IfunctionView> }) => {
                       <Code backgroundColor='white'>{props.name}</Code>
                       <Text as='span'>:</Text>
                       <Text as={'span'}>
-                        {props.parameterTypes.map(p => (
-                          <Text as='span'>
+                        {props.parameterTypes.map((p, i) => (
+                          <Text as='span' key={i}>
                             <Badge>{p}</Badge> <Text as='span'> →</Text>
                           </Text>
                         ))}
@@ -103,8 +103,8 @@ const SideBar = ({ items }: { items: Array<IfunctionView> }) => {
                           <Code backgroundColor='white'>{props.name}</Code>
                           <Text as='span'>:</Text>
                           <Text as={'span'}>
-                            {props.parameterTypes.map(p => (
-                              <Text as='span'>
+                            {props.parameterTypes.map((p, i) => (
+                              <Text as='span' key={i}>
                                 <Badge>{p}</Badge> <Text as='span'> →</Text>
                               </Text>
                             ))}
