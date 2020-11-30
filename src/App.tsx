@@ -32,7 +32,8 @@ import BrickFunctionView from './components/BrickFunctionView'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
 import './styles.css'
-import { FaBoxOpen } from 'react-icons/fa'
+// import { DndProvider } from 'react-dnd'
+// import { HTML5Backend as Backend } from 'react-dnd-html5-backend'
 
 const { useState } = React
 const code = 'function add(n,m){ n + m }'
@@ -149,53 +150,17 @@ const fnsInitial: Array<IfunctionView> = [
   { name: 'upperCase', parameterTypes: ['String'], returnType: 'String' },
   { name: 'sth', parameterTypes: ['String'], returnType: 'String' },
 ]
-const reorder = (list: any, startIndex: any, endIndex: any) => {
-  const [removed] = list.splice(startIndex, 1)
-  list.splice(endIndex, 0, removed)
-  return list
-}
-let id = 0
-const copy = (
-  source: any,
-  destination: any,
-  droppableSource: any,
-  droppableDestination: any,
-) => {
-  const item = source[droppableSource.index]
-  destination.splice(droppableDestination.index, 0, { ...item, id: id++ })
-  return destination
-}
 
 export const App = () => {
   const [fns, setFns] = useState(fnsInitial)
-  const [flowBricks, setFlowBricks] = React.useState([])
-  const onDragEnd = React.useCallback(
-    result => {
-      const { source, destination } = result
-      console.log({ source, destination })
-      if (!destination) {
-        return
-      }
-      switch (source.droppableId) {
-        case destination.droppableId:
-          setFlowBricks(state =>
-            reorder(state, source.index, destination.index),
-          )
-          break
-        case 'SideBar':
-          setFlowBricks(state => copy(fns, state, source, destination))
-          break
-        default:
-          break
-      }
-    },
-    [setFlowBricks],
-  )
+  let flowBricks = fns
+
   return (
     <ChakraProvider theme={theme}>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={() => {}}>
         <Flex height='100vh'>
-          <SideBar items={fns} />
+          {/* <SideBar items={fns} /> */}
+          <SideBar></SideBar>
           <CardHStack>
             <BrickFlowCard items={flowBricks}></BrickFlowCard>
             {/* <Card>
