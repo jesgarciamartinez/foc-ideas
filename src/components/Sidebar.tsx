@@ -5,7 +5,11 @@ import { Code, Badge, Text } from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
 import TreeItem from '@material-ui/lab/TreeItem'
-import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons'
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ArrowForwardIcon,
+} from '@chakra-ui/icons'
 import './cloneStyles.css'
 
 const useTreeViewStyles = makeStyles({
@@ -99,7 +103,11 @@ const getRenderItem = (props: IfunctionView) => (
         <Text as={'span'} flexWrap='nowrap'>
           {props.parameterTypes.map((p, i) => (
             <Text as='span' key={i}>
-              <Badge>{p}</Badge> <Text as='span'> →</Text>
+              <Badge>{p}</Badge>{' '}
+              <Text as='span'>
+                {' '}
+                <ArrowForwardIcon />{' '}
+              </Text>
             </Text>
           ))}
         </Text>
@@ -111,6 +119,9 @@ const getRenderItem = (props: IfunctionView) => (
   )
 }
 const useTreeItemStyles = makeStyles({
+  root: {
+    marginBottom: '5px',
+  },
   content: {
     '&:hover': {
       backgroundColor: 'transparent',
@@ -121,10 +132,10 @@ const useTreeItemStyles = makeStyles({
 const FunctionTreeItem = (
   props: IfunctionView & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
-  const { content } = useTreeItemStyles()
+  const { root, content } = useTreeItemStyles()
   return (
     <TreeItem
-      classes={{ content: props.isAnyItemDragging ? content : undefined }}
+      classes={{ root, content: props.isAnyItemDragging ? content : undefined }}
       nodeId={props.nodeId}
       label={
         <Droppable
@@ -145,7 +156,11 @@ const FunctionTreeItem = (
                       <Text as={'span'} flexWrap='nowrap'>
                         {props.parameterTypes.map((p, i) => (
                           <Text as='span' key={i}>
-                            <Badge>{p}</Badge> <Text as='span'> →</Text>
+                            <Badge>{p}</Badge>{' '}
+                            <Text as='span'>
+                              {' '}
+                              <ArrowForwardIcon />{' '}
+                            </Text>
                           </Text>
                         ))}
                       </Text>
@@ -171,7 +186,11 @@ const FunctionTreeItem = (
                             <Text as={'span'} flexWrap='nowrap'>
                               {props.parameterTypes.map((p, i) => (
                                 <Text as='span' key={i}>
-                                  <Badge>{p}</Badge> <Text as='span'> →</Text>
+                                  <Badge>{p}</Badge>{' '}
+                                  <Text as='span'>
+                                    {' '}
+                                    <ArrowForwardIcon />{' '}
+                                  </Text>
                                 </Text>
                               ))}
                             </Text>

@@ -7,6 +7,7 @@ import ts from 'typescript'
 import {
   ChakraProvider,
   Box,
+  Center,
   Button,
   theme,
   HStack,
@@ -26,12 +27,16 @@ import {
   InputLeftAddon,
   InputRightAddon,
   Flex,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
+import CardHStack from './components/CardHStack'
 import BrickFunctionView from './components/BrickFunctionView'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
-// import './styles.css'
+import SplitPane from 'react-split-pane'
+import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 
 const { useState } = React
 const code = 'function add(n,m){ n + m }'
@@ -51,38 +56,39 @@ let result = ts.transpileModule(code, {
 
 print(sc)
 
-// const Card = ({ children }: { children?: any }) => {
-//   return (
-//     <Droppable droppableId='Card'>
-//       {(provided, snapshot) => {
-//         return (
-//           <Box
-//             ref={provided.innerRef}
-//             {...provided.droppableProps}
-//             padding='4'
-//             boxShadow={'base'}
-//             minWidth={'50%'}
-//             minHeight='100%'
-//             backgroundColor='white'>
-//             {children}
-//             {provided.placeholder}
-//           </Box>
-//         )
-//       }}
-//     </Droppable>
-//   )
-// }
-
-const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
+const Card = ({ children }: { children?: any }) => {
   return (
-    <Droppable droppableId='BrickFlowCard'>
+    // <Droppable droppableId='Card'>
+    //   {(provided, snapshot) => {
+    //     return (
+    <Box
+      // ref={provided.innerRef}
+      // {...provided.droppableProps}
+      padding='4'
+      boxShadow={'base'}
+      minWidth={'50%'}
+      minHeight='100%'
+      backgroundColor='white'
+    >
+      {children}
+      {/* {provided.placeholder} */}
+    </Box>
+    //     )
+    //   }}
+    // </Droppable>
+  )
+}
+
+type Itype = 'function' | 'string' | 'number' | 'object' | 'undefined' | 'null'
+
+const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
+  return (
+    <Droppable droppableId='FlowCard'>
       {(provided, snapshot) => {
         return (
           <Box
-            as='ul'
             ref={provided.innerRef}
-            // {...provided.droppableProps}
-            padding='4'
+            {...provided.droppableProps}
             boxShadow={'base'}
             minWidth={'50%'}
             minHeight='100%'
@@ -92,14 +98,62 @@ const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
               return (
                 <Draggable key={item.name} draggableId={item.name} index={i}>
                   {(provided, snapshot) => (
-                    <li
+                    <Grid
+                      templateColumns='repeat(8,1fr)'
+                      gap={4}
+                      maxWidth='100%'
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       style={provided.draggableProps.style}
                     >
-                      <BrickFunctionView {...item} />
-                    </li>
+                      <GridItem
+                        backgroundColor='royalblue'
+                        colSpan={1}
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='center'
+                        colStart={8 - item.parameterTypes.length - 1} // name + parameters + returnType + example
+                      >
+                        {/* <Center> */}
+                        <Code margin='auto'>{item.name}</Code>
+                        {/* </Center> */}
+                      </GridItem>
+
+                      {item.parameterTypes
+                        .slice(0, item.parameterTypes.length - 1)
+                        .map((param, i) => {
+                          return (
+                            <GridItem
+                              colSpan={1}
+                              display='flex'
+                              alignItems='center'
+                              justifyContent='center'
+                            >
+                              {param} <ArrowForwardIcon />
+                            </GridItem>
+                          )
+                        })}
+                      <GridItem
+                        colSpan={1}
+                        display='flex'
+                        flexDir='column'
+                        alignItems='center'
+                        justifyContent='center'
+                      >
+                        {item.parameterTypes.slice(-1).pop()}
+                        <ArrowDownIcon></ArrowDownIcon>
+                        {item.returnType}
+                      </GridItem>
+                      <GridItem
+                        colSpan={1}
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='center'
+                      >
+                        {'some example value'}
+                      </GridItem>
+                    </Grid>
                   )}
                 </Draggable>
               )
@@ -109,14 +163,6 @@ const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
         )
       }}
     </Droppable>
-  )
-}
-
-const CardHStack = ({ children }: { children?: any }) => {
-  return (
-    <HStack overflow='auto' flex='1' padding={5} backgroundColor='purple.50'>
-      {children}
-    </HStack>
   )
 }
 
@@ -146,7 +192,11 @@ function Editor() {
 }
 const fnsInitial: Array<IfunctionView> = [
   { name: 'length', parameterTypes: ['String'], returnType: 'Number' },
-  { name: 'exclaim', parameterTypes: ['String'], returnType: 'String' },
+  {
+    name: 'exclaimmmmmmmmmmmm',
+    parameterTypes: ['String', 'String', 'String', 'string', 'string'],
+    returnType: 'String',
+  },
   { name: 'upperCase', parameterTypes: ['String'], returnType: 'String' },
   { name: 'sth', parameterTypes: ['String'], returnType: 'String' },
 ]
@@ -154,29 +204,34 @@ const fnsInitial: Array<IfunctionView> = [
 export const App = () => {
   const [fns, setFns] = useState(fnsInitial)
   let flowBricks = fns
-
+  //TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON
   return (
     <ChakraProvider theme={theme}>
       <DragDropContext onDragEnd={() => {}}>
-        <Flex height='100vh'>
-          {/* <SideBar items={fns} /> */}
+        <SplitPane
+          style={{ overflow: 'auto', height: '100vh' }}
+          defaultSize='20%'
+          minSize={100}
+          maxSize={-300}
+          resizerStyle={{
+            border: '3px solid rgba(1, 22, 39, 0.21)',
+            zIndex: 20,
+            cursor: 'col-resize',
+          }}
+          split='vertical'
+        >
           <SideBar
             items={[
               {
                 nodeId: 'functions',
                 label: 'Functions',
-                items: [
-                  {
-                    name: 'length',
-                    parameterTypes: ['String'],
-                    returnType: 'Number',
-                  },
-                ],
+                items: fns,
               },
             ]}
           ></SideBar>
           <CardHStack>
-            <BrickFlowCard items={flowBricks}></BrickFlowCard>
+            <FlowCard items={flowBricks}></FlowCard>
+            <Card></Card>
             {/* <Card>
               <form>
                 <InputGroup size='sm'>
@@ -202,7 +257,7 @@ export const App = () => {
               <Editor></Editor>
             </Card> */}
           </CardHStack>
-        </Flex>
+        </SplitPane>
       </DragDropContext>
     </ChakraProvider>
   )
