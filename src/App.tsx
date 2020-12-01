@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { v4 as uuid } from 'uuid'
-// import MonacoEditor from 'react-monaco-editor'
-import MonacoEditor from '@monaco-editor/react'
 import ts from 'typescript'
 import {
   ChakraProvider,
@@ -28,175 +26,40 @@ import {
   InputGroup,
   InputLeftAddon,
   InputRightAddon,
+  Editable,
+  EditablePreview,
+  EditableInput,
   Flex,
-  Grid,
-  GridItem,
   Text,
+  Textarea,
 } from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
 import CardHStack from './components/CardHStack'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
 import SplitPane from 'react-split-pane'
-import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
-import TypeBadge from './components/TypeBadge'
+import { ArrowForwardIcon } from '@chakra-ui/icons'
+import Card from './components/Card'
+import FlowCard from './components/FlowCard'
 
 const { useState } = React
-const code = 'function add(n,m){ n + m }'
-const sc = ts.createSourceFile('x.ts', code, ts.ScriptTarget.Latest, true)
-console.info(sc)
-let indent = 0
-function print(node: ts.Node) {
-  console.log(new Array(indent + 1).join(' ') + ts.SyntaxKind[node.kind])
-  indent++
-  ts.forEachChild(node, print)
-  indent--
-}
+// const code = 'function add(n,m){ n + m }'
+// const sc = ts.createSourceFile('x.ts', code, ts.ScriptTarget.Latest, true)
+// console.info(sc)
+// let indent = 0
+// function print(node: ts.Node) {
+//   console.log(new Array(indent + 1).join(' ') + ts.SyntaxKind[node.kind])
+//   indent++
+//   ts.forEachChild(node, print)
+//   indent--
+// }
 
-let result = ts.transpileModule(code, {
-  compilerOptions: { module: ts.ModuleKind.CommonJS },
-})
+// let result = ts.transpileModule(code, {
+//   compilerOptions: { module: ts.ModuleKind.CommonJS },
+// })
 
-print(sc)
+// print(sc)
 
-const Card = ({ children }: { children?: any }) => {
-  return (
-    // <Droppable droppableId='Card'>
-    //   {(provided, snapshot) => {
-    //     return (
-    <Box
-      // ref={provided.innerRef}
-      // {...provided.droppableProps}
-      padding='4'
-      boxShadow={'base'}
-      minWidth={'50%'}
-      minHeight='100%'
-      backgroundColor='white'
-    >
-      {children}
-      {/* {provided.placeholder} */}
-    </Box>
-    //     )
-    //   }}
-    // </Droppable>
-  )
-}
-
-const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
-  return (
-    <Droppable droppableId='FlowCard'>
-      {(provided, snapshot) => {
-        return (
-          <Box
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            boxShadow={'base'}
-            padding={1}
-            minWidth={'50%'}
-            minHeight='100%'
-            position='relative'
-            backgroundColor='white'
-            display='flex'
-            flexDirection='column'
-            flexBasis={0}
-          >
-            {items.map((item, i) => {
-              return (
-                <Draggable key={item.name} draggableId={item.name} index={i}>
-                  {(provided, snapshot) => {
-                    const hasZeroParams = item.parameterTypes.length === 0
-                    const hasOneParam = item.parameterTypes.length === 1
-                    return (
-                      <Flex
-                        // templateColumns='repeat(8,1fr)'
-                        // gap={4}
-                        // width='100%'
-                        flexBasis={0}
-                        marginY={1}
-                        backgroundColor={i % 2 === 0 ? 'teal.50' : 'gray.100'}
-                        wrap='nowrap'
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={provided.draggableProps.style}
-                      >
-                        {/* <HStack
-                          backgroundColor='royalblue'
-                          justifyContent='center'
-                          colStart={8 - item.parameterTypes.length - 1} // name + parameters + returnType + example
-                        > */}
-                        <Center>
-                          <Code>{item.name}</Code>
-                        </Center>
-                        <Spacer></Spacer>
-                        {/* </HStack> */}
-
-                        {hasZeroParams || hasOneParam
-                          ? null
-                          : item.parameterTypes
-                              .slice(0, item.parameterTypes.length - 1)
-                              .map((param, i) => {
-                                return (
-                                  <HStack>
-                                    <TypeBadge>{param}</TypeBadge>{' '}
-                                    <ArrowForwardIcon />
-                                  </HStack>
-                                )
-                              })}
-                        <VStack>
-                          {hasZeroParams ? (
-                            <Code>()</Code>
-                          ) : (
-                            <TypeBadge>
-                              {
-                                item.parameterTypes[
-                                  item.parameterTypes.length - 1
-                                ]
-                              }
-                            </TypeBadge>
-                          )}
-                          <ArrowDownIcon></ArrowDownIcon>
-                          <TypeBadge>{item.returnType}</TypeBadge>
-                        </VStack>
-                        <Box>{'some example value and more stuff'}</Box>
-                      </Flex>
-                    )
-                  }}
-                </Draggable>
-              )
-            })}
-            {provided.placeholder}
-          </Box>
-        )
-      }}
-    </Droppable>
-  )
-}
-
-function Editor() {
-  // function onChange(newValue: any, e: any) {
-  //   console.log('onChange', newValue, e)
-  // }
-
-  // const code = this.state.code;
-  const options = {
-    selectOnLineNumbers: true,
-  }
-  return (
-    <MonacoEditor
-      width='100%'
-      height='600px'
-      language='typescript'
-      theme='vs-dark'
-      value={code}
-      options={options}
-      // onChange={onChange}
-      editorDidMount={(editor, monaco) =>
-        console.log('editorDidMount', { editor })
-      }
-    />
-  )
-}
 const fnsInitial: Array<IfunctionView> = [
   { name: 'length', parameterTypes: ['string'], returnType: 'number' },
   {
@@ -211,7 +74,7 @@ const fnsInitial: Array<IfunctionView> = [
 export const App = () => {
   const [fns, setFns] = useState(fnsInitial)
   let flowBricks = fns
-  //TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON
+  //TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON, badge: icons/names/both
   return (
     <ChakraProvider theme={theme}>
       <DragDropContext onDragEnd={() => {}}>
@@ -238,7 +101,29 @@ export const App = () => {
           ></SideBar>
           <CardHStack>
             <FlowCard items={flowBricks}></FlowCard>
-            <Card></Card>
+            <Card>
+              <HStack>
+                <Editable defaultValue={'type'}>
+                  <EditablePreview />
+                  <EditableInput />
+                </Editable>
+                <Text> : </Text>
+                <Input maxWidth='50%'></Input>
+                <ArrowForwardIcon></ArrowForwardIcon>
+                <Input maxWidth='50%'></Input>
+              </HStack>
+              <HStack>
+                <Editable defaultValue={'function name'}>
+                  <EditablePreview />
+                  <EditableInput />
+                </Editable>
+                <Text> : </Text>
+                <Input maxWidth='50%'></Input>
+                <ArrowForwardIcon></ArrowForwardIcon>
+                <Input maxWidth='50%'></Input>
+              </HStack>
+              <Textarea></Textarea>
+            </Card>
             {/* <Card>
               <form>
                 <InputGroup size='sm'>
