@@ -86,7 +86,31 @@ export default function SideBar({
     </TreeView>
   )
 }
-const getRenderItem = (props: IfunctionView) => (
+
+const FunctionItem = (props: IfunctionView) => {
+  return (
+    <Text wrap='nowrap'>
+      <Code /*backgroundColor='white'*/>{props.name}</Code>
+      <Text as='span'>:</Text>
+      <Text as={'span'} flexWrap='nowrap'>
+        {props.parameterTypes.map((p, i) => (
+          <Text as='span' key={i}>
+            <TypeBadge>{p}</TypeBadge>{' '}
+            <Text as='span'>
+              {' '}
+              <ArrowForwardIcon />{' '}
+            </Text>
+          </Text>
+        ))}
+      </Text>
+      <Text as='span'>
+        <TypeBadge>{props.returnType}</TypeBadge>
+      </Text>
+    </Text>
+  )
+}
+
+const getFunctionRenderItem = (props: IfunctionView) => (
   provided: any,
   snapshot: any,
   rubric: any,
@@ -99,24 +123,7 @@ const getRenderItem = (props: IfunctionView) => (
       style={provided.draggableProps.style}
     >
       <li>
-        <Text wrap='nowrap'>
-          <Code /*backgroundColor='white'*/>{props.name}</Code>
-          <Text as='span'>:</Text>
-          <Text as={'span'} flexWrap='nowrap'>
-            {props.parameterTypes.map((p, i) => (
-              <Text as='span' key={i}>
-                <TypeBadge>{p}</TypeBadge>{' '}
-                <Text as='span'>
-                  {' '}
-                  <ArrowForwardIcon />{' '}
-                </Text>
-              </Text>
-            ))}
-          </Text>
-          <Text as='span'>
-            <TypeBadge>{props.returnType}</TypeBadge>
-          </Text>
-        </Text>
+        <FunctionItem {...props} />
       </li>
     </ul>
   )
@@ -132,6 +139,7 @@ const useTreeItemStyles = makeStyles({
     },
   },
 })
+
 const FunctionTreeItem = (
   props: IfunctionView & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
@@ -143,7 +151,7 @@ const FunctionTreeItem = (
       label={
         <Droppable
           droppableId={props.nodeId}
-          renderClone={getRenderItem(props)}
+          renderClone={getFunctionRenderItem(props)}
           isDropDisabled={true}
         >
           {(provided, snapshot) => {
@@ -153,24 +161,7 @@ const FunctionTreeItem = (
               <ul ref={provided.innerRef} {...provided.droppableProps}>
                 {shouldRenderClone ? (
                   <li className='react-beautiful-dnd-copy'>
-                    <Text wrap='nowrap'>
-                      <Code /*backgroundColor='white'*/>{props.name}</Code>
-                      <Text as='span'> : </Text>
-                      <Text as={'span'} flexWrap='nowrap'>
-                        {props.parameterTypes.map((p, i) => (
-                          <Text as='span' key={i}>
-                            <TypeBadge>{p}</TypeBadge>{' '}
-                            <Text as='span'>
-                              {' '}
-                              <ArrowForwardIcon />{' '}
-                            </Text>
-                          </Text>
-                        ))}
-                      </Text>
-                      <Text as='span'>
-                        <TypeBadge>{props.returnType}</TypeBadge>
-                      </Text>
-                    </Text>
+                    <FunctionItem {...props}></FunctionItem>
                   </li>
                 ) : (
                   <Draggable draggableId={props.nodeId} index={0}>
@@ -181,26 +172,7 @@ const FunctionTreeItem = (
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
-                          <Text wrap='nowrap'>
-                            <Code /*backgroundColor='white'*/>
-                              {props.name}
-                            </Code>
-                            <Text as='span'> : </Text>
-                            <Text as={'span'} flexWrap='nowrap'>
-                              {props.parameterTypes.map((p, i) => (
-                                <Text as='span' key={i}>
-                                  <TypeBadge>{p}</TypeBadge>{' '}
-                                  <Text as='span'>
-                                    {' '}
-                                    <ArrowForwardIcon />{' '}
-                                  </Text>
-                                </Text>
-                              ))}
-                            </Text>
-                            <Text as='span'>
-                              <TypeBadge>{props.returnType}</TypeBadge>
-                            </Text>
-                          </Text>
+                          <FunctionItem {...props}></FunctionItem>
                         </li>
                       )
                     }}

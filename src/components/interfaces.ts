@@ -9,5 +9,6 @@ export type Itype =
   | 'boolean'
   | 'function'
   | 'object'
+  | 'array'
   | 'undefined'
   | 'null'

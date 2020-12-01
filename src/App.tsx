@@ -96,6 +96,9 @@ const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
             minHeight='100%'
             position='relative'
             backgroundColor='white'
+            display='flex'
+            flexDirection='column'
+            flexBasis={0}
           >
             {items.map((item, i) => {
               return (
@@ -108,7 +111,7 @@ const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
                         // templateColumns='repeat(8,1fr)'
                         // gap={4}
                         // width='100%'
-                        flex={1}
+                        flexBasis={0}
                         marginY={1}
                         backgroundColor={i % 2 === 0 ? 'teal.50' : 'gray.100'}
                         wrap='nowrap'

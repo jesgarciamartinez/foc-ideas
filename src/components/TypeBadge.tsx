@@ -16,6 +16,8 @@ const TypeBadge = ({ children, ...rest }: { children: Itype }) => {
             return 'purple'
           case 'object':
             return 'red'
+          case 'array':
+            return 'red'
           case 'undefined':
             return 'black'
           case 'null':
