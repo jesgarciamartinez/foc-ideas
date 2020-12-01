@@ -11,6 +11,7 @@ import {
   ArrowForwardIcon,
 } from '@chakra-ui/icons'
 import './cloneStyles.css'
+import TypeBadge from './TypeBadge'
 
 const useTreeViewStyles = makeStyles({
   root: {
@@ -97,24 +98,26 @@ const getRenderItem = (props: IfunctionView) => (
       ref={provided.innerRef}
       style={provided.draggableProps.style}
     >
-      <Text wrap='nowrap'>
-        <Code /*backgroundColor='white'*/>{props.name}</Code>
-        <Text as='span'>:</Text>
-        <Text as={'span'} flexWrap='nowrap'>
-          {props.parameterTypes.map((p, i) => (
-            <Text as='span' key={i}>
-              <Badge>{p}</Badge>{' '}
-              <Text as='span'>
-                {' '}
-                <ArrowForwardIcon />{' '}
+      <li>
+        <Text wrap='nowrap'>
+          <Code /*backgroundColor='white'*/>{props.name}</Code>
+          <Text as='span'>:</Text>
+          <Text as={'span'} flexWrap='nowrap'>
+            {props.parameterTypes.map((p, i) => (
+              <Text as='span' key={i}>
+                <TypeBadge>{p}</TypeBadge>{' '}
+                <Text as='span'>
+                  {' '}
+                  <ArrowForwardIcon />{' '}
+                </Text>
               </Text>
-            </Text>
-          ))}
+            ))}
+          </Text>
+          <Text as='span'>
+            <TypeBadge>{props.returnType}</TypeBadge>
+          </Text>
         </Text>
-        <Text as='span'>
-          <Badge>{props.returnType}</Badge>
-        </Text>
-      </Text>
+      </li>
     </ul>
   )
 }
@@ -152,11 +155,11 @@ const FunctionTreeItem = (
                   <li className='react-beautiful-dnd-copy'>
                     <Text wrap='nowrap'>
                       <Code /*backgroundColor='white'*/>{props.name}</Code>
-                      <Text as='span'>:</Text>
+                      <Text as='span'> : </Text>
                       <Text as={'span'} flexWrap='nowrap'>
                         {props.parameterTypes.map((p, i) => (
                           <Text as='span' key={i}>
-                            <Badge>{p}</Badge>{' '}
+                            <TypeBadge>{p}</TypeBadge>{' '}
                             <Text as='span'>
                               {' '}
                               <ArrowForwardIcon />{' '}
@@ -165,7 +168,7 @@ const FunctionTreeItem = (
                         ))}
                       </Text>
                       <Text as='span'>
-                        <Badge>{props.returnType}</Badge>
+                        <TypeBadge>{props.returnType}</TypeBadge>
                       </Text>
                     </Text>
                   </li>
@@ -182,11 +185,11 @@ const FunctionTreeItem = (
                             <Code /*backgroundColor='white'*/>
                               {props.name}
                             </Code>
-                            <Text as='span'>:</Text>
+                            <Text as='span'> : </Text>
                             <Text as={'span'} flexWrap='nowrap'>
                               {props.parameterTypes.map((p, i) => (
                                 <Text as='span' key={i}>
-                                  <Badge>{p}</Badge>{' '}
+                                  <TypeBadge>{p}</TypeBadge>{' '}
                                   <Text as='span'>
                                     {' '}
                                     <ArrowForwardIcon />{' '}
@@ -195,7 +198,7 @@ const FunctionTreeItem = (
                               ))}
                             </Text>
                             <Text as='span'>
-                              <Badge>{props.returnType}</Badge>
+                              <TypeBadge>{props.returnType}</TypeBadge>
                             </Text>
                           </Text>
                         </li>

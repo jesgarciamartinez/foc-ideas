@@ -11,7 +11,9 @@ import {
   Button,
   theme,
   HStack,
+  VStack,
   Code,
+  Spacer,
   Input,
   Menu,
   MenuButton,
@@ -29,14 +31,15 @@ import {
   Flex,
   Grid,
   GridItem,
+  Text,
 } from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
 import CardHStack from './components/CardHStack'
-import BrickFunctionView from './components/BrickFunctionView'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
 import SplitPane from 'react-split-pane'
 import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
+import TypeBadge from './components/TypeBadge'
 
 const { useState } = React
 const code = 'function add(n,m){ n + m }'
@@ -79,8 +82,6 @@ const Card = ({ children }: { children?: any }) => {
   )
 }
 
-type Itype = 'function' | 'string' | 'number' | 'object' | 'undefined' | 'null'
-
 const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
   return (
     <Droppable droppableId='FlowCard'>
@@ -90,71 +91,74 @@ const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
             ref={provided.innerRef}
             {...provided.droppableProps}
             boxShadow={'base'}
+            padding={1}
             minWidth={'50%'}
             minHeight='100%'
+            position='relative'
             backgroundColor='white'
           >
             {items.map((item, i) => {
               return (
                 <Draggable key={item.name} draggableId={item.name} index={i}>
-                  {(provided, snapshot) => (
-                    <Grid
-                      templateColumns='repeat(8,1fr)'
-                      gap={4}
-                      maxWidth='100%'
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      style={provided.draggableProps.style}
-                    >
-                      <GridItem
-                        backgroundColor='royalblue'
-                        colSpan={1}
-                        display='flex'
-                        alignItems='center'
-                        justifyContent='center'
-                        colStart={8 - item.parameterTypes.length - 1} // name + parameters + returnType + example
+                  {(provided, snapshot) => {
+                    const hasZeroParams = item.parameterTypes.length === 0
+                    const hasOneParam = item.parameterTypes.length === 1
+                    return (
+                      <Flex
+                        // templateColumns='repeat(8,1fr)'
+                        // gap={4}
+                        // width='100%'
+                        flex={1}
+                        marginY={1}
+                        backgroundColor={i % 2 === 0 ? 'teal.50' : 'gray.100'}
+                        wrap='nowrap'
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        style={provided.draggableProps.style}
                       >
-                        {/* <Center> */}
-                        <Code margin='auto'>{item.name}</Code>
-                        {/* </Center> */}
-                      </GridItem>
+                        {/* <HStack
+                          backgroundColor='royalblue'
+                          justifyContent='center'
+                          colStart={8 - item.parameterTypes.length - 1} // name + parameters + returnType + example
+                        > */}
+                        <Center>
+                          <Code>{item.name}</Code>
+                        </Center>
+                        <Spacer></Spacer>
+                        {/* </HStack> */}
 
-                      {item.parameterTypes
-                        .slice(0, item.parameterTypes.length - 1)
-                        .map((param, i) => {
-                          return (
-                            <GridItem
-                              colSpan={1}
-                              display='flex'
-                              alignItems='center'
-                              justifyContent='center'
-                            >
-                              {param} <ArrowForwardIcon />
-                            </GridItem>
-                          )
-                        })}
-                      <GridItem
-                        colSpan={1}
-                        display='flex'
-                        flexDir='column'
-                        alignItems='center'
-                        justifyContent='center'
-                      >
-                        {item.parameterTypes.slice(-1).pop()}
-                        <ArrowDownIcon></ArrowDownIcon>
-                        {item.returnType}
-                      </GridItem>
-                      <GridItem
-                        colSpan={1}
-                        display='flex'
-                        alignItems='center'
-                        justifyContent='center'
-                      >
-                        {'some example value'}
-                      </GridItem>
-                    </Grid>
-                  )}
+                        {hasZeroParams || hasOneParam
+                          ? null
+                          : item.parameterTypes
+                              .slice(0, item.parameterTypes.length - 1)
+                              .map((param, i) => {
+                                return (
+                                  <HStack>
+                                    <TypeBadge>{param}</TypeBadge>{' '}
+                                    <ArrowForwardIcon />
+                                  </HStack>
+                                )
+                              })}
+                        <VStack>
+                          {hasZeroParams ? (
+                            <Code>()</Code>
+                          ) : (
+                            <TypeBadge>
+                              {
+                                item.parameterTypes[
+                                  item.parameterTypes.length - 1
+                                ]
+                              }
+                            </TypeBadge>
+                          )}
+                          <ArrowDownIcon></ArrowDownIcon>
+                          <TypeBadge>{item.returnType}</TypeBadge>
+                        </VStack>
+                        <Box>{'some example value and more stuff'}</Box>
+                      </Flex>
+                    )
+                  }}
                 </Draggable>
               )
             })}
@@ -191,14 +195,14 @@ function Editor() {
   )
 }
 const fnsInitial: Array<IfunctionView> = [
-  { name: 'length', parameterTypes: ['String'], returnType: 'Number' },
+  { name: 'length', parameterTypes: ['string'], returnType: 'number' },
   {
-    name: 'exclaimmmmmmmmmmmm',
-    parameterTypes: ['String', 'String', 'String', 'string', 'string'],
-    returnType: 'String',
+    name: 'exclaimmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+    parameterTypes: ['string', 'string', 'string', 'string', 'string'],
+    returnType: 'string',
   },
-  { name: 'upperCase', parameterTypes: ['String'], returnType: 'String' },
-  { name: 'sth', parameterTypes: ['String'], returnType: 'String' },
+  { name: 'upperCase', parameterTypes: [], returnType: 'string' },
+  { name: 'sth', parameterTypes: ['string'], returnType: 'string' },
 ]
 
 export const App = () => {
