@@ -15,60 +15,69 @@ const useTreeViewStyles = makeStyles({
   },
 })
 
+type ItypeView = {
+  name: string
+  type: string
+  typeParameters?: Array<string>
+}
+
 type IsideBarItem =
   | {
       nodeId: 'functions'
-      label: 'functions'
+      label: 'Functions'
       items: Array<IfunctionView>
     }
   | {
       nodeId: 'types'
-      label: 'types'
-      items: Array<IfunctionView>
+      label: 'Types'
+      items: Array<ItypeView>
     }
 
-export default function SideBar({ items }: { items?: Array<IsideBarItem> }) {
-  const TreeViewClasses = useTreeViewStyles()
+export default function SideBar({
+  items,
+  isAnyItemDragging,
+}: {
+  items?: Array<IsideBarItem>
+  isAnyItemDragging?: boolean
+}) {
+  const { root } = useTreeViewStyles()
 
   return (
     <TreeView
       aria-label='Functions and types'
-      className={TreeViewClasses.root}
+      className={root}
       defaultCollapseIcon={<ChevronDownIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
     >
-      <TreeItem nodeId='1' label='Functions'>
-        <StyledTreeItem
-          nodeId='2'
-          name='length'
-          parameterTypes={['String', 'String', 'String', 'String']}
-          returnType='Number'
-          isAnyItemDragging={false}
-        ></StyledTreeItem>
-        <StyledTreeItem
-          nodeId='3'
-          name='pluchus'
-          parameterTypes={['String']}
-          returnType='Number'
-          isAnyItemDragging={true}
-        ></StyledTreeItem>
-        <StyledTreeItem
-          nodeId='4'
-          name='flinchumer'
-          parameterTypes={['String']}
-          returnType='Number'
-          isAnyItemDragging={true}
-        ></StyledTreeItem>
-      </TreeItem>
-      <TreeItem nodeId='5' label='Types'>
-        <TreeItem nodeId='10' label='OSS' />
-        <TreeItem nodeId='6' label='Material-UI'>
-          <TreeItem nodeId='7' label='src'>
-            <TreeItem nodeId='8' label='index.js' />
-            <TreeItem nodeId='9' label='tree-view.js' />
-          </TreeItem>
-        </TreeItem>
-      </TreeItem>
+      {items &&
+        items.map(item => {
+          return (
+            <TreeItem nodeId={item.nodeId} label={item.label}>
+              {(() => {
+                switch (item.nodeId) {
+                  case 'functions':
+                    return item.items.map((innerItem, i) => (
+                      <FunctionTreeItem
+                        {...innerItem}
+                        nodeId={item.nodeId + i}
+                        isAnyItemDragging={!!isAnyItemDragging}
+                      />
+                    ))
+                  case 'types':
+                    return item.items.map((innerItem, i) => (
+                      <TypeTreeItem
+                        {...innerItem}
+                        nodeId={item.nodeId + i}
+                        isAnyItemDragging={!!isAnyItemDragging}
+                      />
+                    ))
+                  default:
+                    let x: never = item
+                }
+              })()}
+            </TreeItem>
+          )
+        })}
     </TreeView>
   )
 }
@@ -109,7 +118,7 @@ const useTreeItemStyles = makeStyles({
     },
   },
 })
-const StyledTreeItem = (
+const FunctionTreeItem = (
   props: IfunctionView & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
   const { content } = useTreeItemStyles()
@@ -181,5 +190,17 @@ const StyledTreeItem = (
         </Droppable>
       }
     ></TreeItem>
+  )
+}
+const TypeTreeItem = (
+  props: ItypeView & { nodeId: string; isAnyItemDragging: boolean },
+) => {
+  const { content } = useTreeItemStyles()
+  return (
+    <TreeItem
+      nodeId={props.nodeId}
+      classes={{ content: props.isAnyItemDragging ? content : undefined }}
+      label={`${props.type} ${props.name}`}
+    />
   )
 }

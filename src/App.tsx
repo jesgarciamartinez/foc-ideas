@@ -160,7 +160,21 @@ export const App = () => {
       <DragDropContext onDragEnd={() => {}}>
         <Flex height='100vh'>
           {/* <SideBar items={fns} /> */}
-          <SideBar></SideBar>
+          <SideBar
+            items={[
+              {
+                nodeId: 'functions',
+                label: 'Functions',
+                items: [
+                  {
+                    name: 'length',
+                    parameterTypes: ['String'],
+                    returnType: 'Number',
+                  },
+                ],
+              },
+            ]}
+          ></SideBar>
           <CardHStack>
             <BrickFlowCard items={flowBricks}></BrickFlowCard>
             {/* <Card>
