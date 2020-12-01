@@ -31,9 +31,7 @@ import SideBar from './components/Sidebar'
 import BrickFunctionView from './components/BrickFunctionView'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
 import { IfunctionView } from './components/interfaces'
-import './styles.css'
-// import { DndProvider } from 'react-dnd'
-// import { HTML5Backend as Backend } from 'react-dnd-html5-backend'
+// import './styles.css'
 
 const { useState } = React
 const code = 'function add(n,m){ n + m }'
@@ -88,7 +86,8 @@ const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
             boxShadow={'base'}
             minWidth={'50%'}
             minHeight='100%'
-            backgroundColor='white'>
+            backgroundColor='white'
+          >
             {items.map((item, i) => {
               return (
                 <Draggable key={item.name} draggableId={item.name} index={i}>
@@ -97,7 +96,8 @@ const BrickFlowCard = ({ items }: { items: Array<IfunctionView> }) => {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      style={provided.draggableProps.style}>
+                      style={provided.draggableProps.style}
+                    >
                       <BrickFunctionView {...item} />
                     </li>
                   )}

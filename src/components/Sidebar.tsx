@@ -1,30 +1,39 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Box } from '@chakra-ui/react'
 import type { IfunctionView } from './interfaces'
-import { HStack, Code, Badge, Text } from '@chakra-ui/react'
-import './cloneStyles.css'
-
+import { Code, Badge, Text } from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
 import TreeItem from '@material-ui/lab/TreeItem'
 import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons'
+import './cloneStyles.css'
 
-const useStyles = makeStyles({
+const useTreeViewStyles = makeStyles({
   root: {
-    height: 240,
-    flexGrow: 1,
-    maxWidth: 400,
+    height: '100%',
+    flex: 1,
   },
 })
 
-export default function FileSystemNavigator() {
-  const classes = useStyles()
+type IsideBarItem =
+  | {
+      nodeId: 'functions'
+      label: 'functions'
+      items: Array<IfunctionView>
+    }
+  | {
+      nodeId: 'types'
+      label: 'types'
+      items: Array<IfunctionView>
+    }
+
+export default function SideBar({ items }: { items?: Array<IsideBarItem> }) {
+  const TreeViewClasses = useTreeViewStyles()
 
   return (
     <TreeView
       aria-label='Functions and types'
-      className={classes.root}
+      className={TreeViewClasses.root}
       defaultCollapseIcon={<ChevronDownIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
     >
@@ -34,6 +43,21 @@ export default function FileSystemNavigator() {
           name='length'
           parameterTypes={['String', 'String', 'String', 'String']}
           returnType='Number'
+          isAnyItemDragging={false}
+        ></StyledTreeItem>
+        <StyledTreeItem
+          nodeId='3'
+          name='pluchus'
+          parameterTypes={['String']}
+          returnType='Number'
+          isAnyItemDragging={true}
+        ></StyledTreeItem>
+        <StyledTreeItem
+          nodeId='4'
+          name='flinchumer'
+          parameterTypes={['String']}
+          returnType='Number'
+          isAnyItemDragging={true}
         ></StyledTreeItem>
       </TreeItem>
       <TreeItem nodeId='5' label='Types'>
@@ -77,10 +101,21 @@ const getRenderItem = (props: IfunctionView) => (
     </ul>
   )
 }
-
-const StyledTreeItem = (props: IfunctionView & { nodeId: string }) => {
+const useTreeItemStyles = makeStyles({
+  content: {
+    '&:hover': {
+      backgroundColor: 'transparent',
+      cursor: 'grabbing',
+    },
+  },
+})
+const StyledTreeItem = (
+  props: IfunctionView & { nodeId: string; isAnyItemDragging: boolean },
+) => {
+  const { content } = useTreeItemStyles()
   return (
     <TreeItem
+      classes={{ content: props.isAnyItemDragging ? content : undefined }}
       nodeId={props.nodeId}
       label={
         <Droppable
@@ -148,57 +183,3 @@ const StyledTreeItem = (props: IfunctionView & { nodeId: string }) => {
     ></TreeItem>
   )
 }
-
-// export default SideBar
-
-// return (
-//   <React.Fragment key={i}>
-//     {shouldRenderClone ? (
-//       <li className='react-beautiful-dnd-copy'>
-//         <HStack
-//           padding={1}
-//           borderWidth='1px'
-//           backgroundColor={'gray.400'}>
-//           <Code backgroundColor='white'>{props.name}</Code>
-//           <Text as='span'>:</Text>
-//           <Text as={'span'}>
-//             {props.parameterTypes.map((p, i) => (
-//               <Text as='span' key={i}>
-//                 <Badge>{p}</Badge> <Text as='span'> →</Text>
-//               </Text>
-//             ))}
-//           </Text>
-//           <Text as='span'>
-//             <Badge>{props.returnType}</Badge>
-//           </Text>
-//         </HStack>
-//       </li>
-//     ) : (
-//       <Draggable draggableId={props.name} index={i}>
-//         {(provided, snapshot) => (
-//           <li
-//             ref={provided.innerRef}
-//             {...provided.draggableProps}
-//             {...provided.dragHandleProps}>
-//             <HStack
-//               padding={1}
-//               borderWidth='1px'
-//               backgroundColor={'white'}>
-//               <Code backgroundColor='white'>{props.name}</Code>
-//               <Text as='span'>:</Text>
-//               <Text as={'span'}>
-//                 {props.parameterTypes.map((p, i) => (
-//                   <Text as='span' key={i}>
-//                     <Badge>{p}</Badge> <Text as='span'> →</Text>
-//                   </Text>
-//                 ))}
-//               </Text>
-//               <Text as='span'>
-//                 <Badge>{props.returnType}</Badge>
-//               </Text>
-//             </HStack>
-//           </li>
-//         )}
-//       </Draggable>
-//     )}
-//   </React.Fragment>
