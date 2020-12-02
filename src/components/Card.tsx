@@ -10,7 +10,7 @@ const Card = ({ children }: { children?: any }) => {
       // {...provided.droppableProps}
       padding='4'
       boxShadow={'base'}
-      minWidth={'50%'}
+      minWidth={'48%'} //@TODO prevent Yscroll another way
       minHeight='100%'
       backgroundColor='white'
     >

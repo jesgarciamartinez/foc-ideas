@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { IfunctionView } from './interfaces'
+import { IsmallFunctionView } from './interfaces'
 import {
   Box,
   Flex,
@@ -13,7 +13,12 @@ import {
 import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 
-const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
+const FlowCard = ({
+  items,
+}: {
+  items: Array<IsmallFunctionView & { id: string }>
+}) => {
+  console.log({ items })
   return (
     <Droppable droppableId='FlowCard'>
       {(provided, snapshot) => {
@@ -33,7 +38,7 @@ const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
             {items.map((item, i) => {
               const isIndexEven = i % 2 === 0
               return (
-                <Draggable key={item.name} draggableId={item.name} index={i}>
+                <Draggable key={item.id} draggableId={item.id} index={i}>
                   {(provided, snapshot) => {
                     const hasZeroParams = item.parameterTypes.length === 0
                     const hasOneParam = item.parameterTypes.length === 1
@@ -42,7 +47,7 @@ const FlowCard = ({ items }: { items: Array<IfunctionView> }) => {
                         flexBasis={0}
                         minWidth={0}
                         marginY={1}
-                        backgroundColor={isIndexEven ? 'teal.50' : 'gray.100'}
+                        // backgroundColor={isIndexEven ? 'teal.50' : 'gray.100'}
                         wrap='nowrap'
                         ref={provided.innerRef}
                         {...provided.draggableProps}

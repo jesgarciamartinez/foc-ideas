@@ -7,7 +7,8 @@ import {
   Box,
   Center,
   Button,
-  theme,
+  theme as _theme,
+  extendTheme,
   HStack,
   VStack,
   Code,
@@ -36,13 +37,19 @@ import {
 import SideBar from './components/Sidebar'
 import CardHStack from './components/CardHStack'
 import { ColorModeSwitcher } from './ColorModeSwitcher'
-import { IfunctionView } from './components/interfaces'
 import SplitPane from 'react-split-pane'
 import { ArrowForwardIcon } from '@chakra-ui/icons'
 import Card from './components/Card'
 import FlowCard from './components/FlowCard'
+import { useAppReducer, fnSelector } from './state'
 
-const { useState } = React
+const theme = extendTheme({
+  styles: {
+    global: {
+      html: { minWidth: '860px' },
+    },
+  },
+})
 // const code = 'function add(n,m){ n + m }'
 // const sc = ts.createSourceFile('x.ts', code, ts.ScriptTarget.Latest, true)
 // console.info(sc)
@@ -60,24 +67,46 @@ const { useState } = React
 
 // print(sc)
 
-const fnsInitial: Array<IfunctionView> = [
-  { name: 'length', parameterTypes: ['string'], returnType: 'number' },
-  {
-    name: 'exclaimmmmmmmmmmmmmmmmmmmmmmmmmmmm',
-    parameterTypes: ['string', 'string', 'string', 'string', 'string'],
-    returnType: 'string',
-  },
-  { name: 'upperCase', parameterTypes: [], returnType: 'string' },
-  { name: 'sth', parameterTypes: ['string'], returnType: 'string' },
-]
+//TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON, badge: icons/names/both
 
 export const App = () => {
-  const [fns, setFns] = useState(fnsInitial)
-  let flowBricks = fns
-  //TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON, badge: icons/names/both
+  const [state, dispatch] = useAppReducer()
+  const onDragEnd = React.useCallback(
+    dropResult => {
+      console.log({ dropResult })
+      if (
+        //SideBar to FlowCard
+        dropResult.source.droppableId !== 'FlowCard' &&
+        dropResult.destination?.droppableId === 'FlowCard'
+      ) {
+        dispatch({
+          type: 'dropFnFromSideBarOnFlowCard',
+          index: dropResult.destination.index,
+          draggableId: dropResult.draggableId,
+        })
+      } else if (
+        dropResult.source.droppableId === 'FlowCard' &&
+        dropResult.destination?.droppableId === 'FlowCard'
+      ) {
+        dispatch({
+          type: 'dropFnFromFlowCardToFlowCard',
+          sourceIndex: dropResult.source.index,
+          destinationIndex: dropResult.destination.index,
+        })
+      } else {
+        dispatch({ type: 'dropOutside' })
+      }
+    },
+    [dispatch],
+  )
   return (
     <ChakraProvider theme={theme}>
-      <DragDropContext onDragEnd={() => {}}>
+      <DragDropContext
+        onDragStart={() => {
+          dispatch({ type: 'isDragging' })
+        }}
+        onDragEnd={onDragEnd}
+      >
         <SplitPane
           style={{ overflow: 'auto', height: '100vh' }}
           defaultSize='20%'
@@ -91,16 +120,19 @@ export const App = () => {
           split='vertical'
         >
           <SideBar
+            isAnyItemDragging={state.isSideBarItemDragging}
             items={[
               {
                 nodeId: 'functions',
                 label: 'Functions',
-                items: fns,
+                items: state.functions,
               },
             ]}
           ></SideBar>
           <CardHStack>
-            <FlowCard items={flowBricks}></FlowCard>
+            <FlowCard
+              items={state.flowCardFunctions.map(fnSelector(state))}
+            ></FlowCard>
             <Card>
               <HStack>
                 <Editable defaultValue={'type'}>

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import type { IfunctionView } from './interfaces'
+import type { IsmallFunctionView } from './interfaces'
 import { Code, Badge, Text } from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
@@ -30,7 +30,7 @@ type IsideBarItem =
   | {
       nodeId: 'functions'
       label: 'Functions'
-      items: Array<IfunctionView>
+      items: Array<IsmallFunctionView>
     }
   | {
       nodeId: 'types'
@@ -43,7 +43,7 @@ export default function SideBar({
   isAnyItemDragging,
 }: {
   items?: Array<IsideBarItem>
-  isAnyItemDragging?: boolean
+  isAnyItemDragging: boolean
 }) {
   const { root } = useTreeViewStyles()
 
@@ -57,27 +57,35 @@ export default function SideBar({
       {items &&
         items.map(item => {
           return (
-            <TreeItem nodeId={item.nodeId} label={item.label}>
+            <TreeItem nodeId={item.nodeId} key={item.nodeId} label={item.label}>
               {(() => {
                 switch (item.nodeId) {
                   case 'functions':
-                    return item.items.map((innerItem, i) => (
-                      <FunctionTreeItem
-                        {...innerItem}
-                        nodeId={item.nodeId + i}
-                        isAnyItemDragging={!!isAnyItemDragging}
-                      />
-                    ))
+                    return item.items.map(innerItem => {
+                      const id = `${item.nodeId}_${innerItem.name}`
+                      return (
+                        <FunctionTreeItem
+                          {...innerItem}
+                          key={id}
+                          nodeId={id}
+                          isAnyItemDragging={!!isAnyItemDragging}
+                        />
+                      )
+                    })
                   case 'types':
-                    return item.items.map((innerItem, i) => (
-                      <TypeTreeItem
-                        {...innerItem}
-                        nodeId={item.nodeId + i}
-                        isAnyItemDragging={!!isAnyItemDragging}
-                      />
-                    ))
+                    return item.items.map(innerItem => {
+                      const id = `${item.nodeId}_${innerItem.name}`
+                      return (
+                        <TypeTreeItem
+                          {...innerItem}
+                          key={id}
+                          nodeId={id}
+                          isAnyItemDragging={!!isAnyItemDragging}
+                        />
+                      )
+                    })
                   default:
-                    let x: never = item
+                    let _: never = item
                 }
               })()}
             </TreeItem>
@@ -87,7 +95,7 @@ export default function SideBar({
   )
 }
 
-const FunctionItem = (props: IfunctionView) => {
+const FunctionItem = (props: IsmallFunctionView) => {
   return (
     <Text wrap='nowrap'>
       <Code /*backgroundColor='white'*/>{props.name}</Code>
@@ -110,7 +118,7 @@ const FunctionItem = (props: IfunctionView) => {
   )
 }
 
-const getFunctionRenderItem = (props: IfunctionView) => (
+const getFunctionRenderItem = (props: IsmallFunctionView) => (
   provided: any,
   snapshot: any,
   rubric: any,
@@ -141,7 +149,7 @@ const useTreeItemStyles = makeStyles({
 })
 
 const FunctionTreeItem = (
-  props: IfunctionView & { nodeId: string; isAnyItemDragging: boolean },
+  props: IsmallFunctionView & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
   const { root, content } = useTreeItemStyles()
   return (
@@ -178,6 +186,7 @@ const FunctionTreeItem = (
                     }}
                   </Draggable>
                 )}
+                {/* {provided.placeholder} */}
               </ul>
             )
           }}
