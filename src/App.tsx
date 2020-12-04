@@ -42,6 +42,8 @@ import { ArrowForwardIcon } from '@chakra-ui/icons'
 import Card from './components/Card'
 import FlowCard from './components/FlowCard'
 import { useAppReducer, fnSelector } from './state'
+import FunctionCreationForm from './components/FunctionCreationForm'
+import './styles.css'
 
 const theme = extendTheme({
   styles: {
@@ -127,35 +129,29 @@ export const App = () => {
                 label: 'Functions',
                 items: state.functions,
               },
+              {
+                nodeId: 'types',
+                label: 'Types',
+                items: [],
+              },
+              {
+                nodeId: 'effects',
+                label: 'Effects',
+                items: [],
+              },
             ]}
           ></SideBar>
           <CardHStack>
             <FlowCard
               items={state.flowCardFunctions.map(fnSelector(state))}
             ></FlowCard>
-            <Card>
-              <HStack>
-                <Editable defaultValue={'type'}>
-                  <EditablePreview />
-                  <EditableInput />
-                </Editable>
-                <Text> : </Text>
-                <Input maxWidth='50%'></Input>
-                <ArrowForwardIcon></ArrowForwardIcon>
-                <Input maxWidth='50%'></Input>
-              </HStack>
-              <HStack>
-                <Editable defaultValue={'function name'}>
-                  <EditablePreview />
-                  <EditableInput />
-                </Editable>
-                <Text> : </Text>
-                <Input maxWidth='50%'></Input>
-                <ArrowForwardIcon></ArrowForwardIcon>
-                <Input maxWidth='50%'></Input>
-              </HStack>
-              <Textarea></Textarea>
-            </Card>
+            <FunctionCreationForm
+              typeSuggestions={[
+                { title: 'string' },
+                { title: 'boolean' },
+                { title: 'number' },
+              ]}
+            />
             {/* <Card>
               <form>
                 <InputGroup size='sm'>

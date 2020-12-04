@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/icons'
 import './cloneStyles.css'
 import TypeBadge from './TypeBadge'
+import { FlowFunctionView } from './FlowCard'
 
 const useTreeViewStyles = makeStyles({
   root: {
@@ -26,6 +27,8 @@ type ItypeView = {
   typeParameters?: Array<string>
 }
 
+type Ieffect = 'console' | 'fetch'
+
 type IsideBarItem =
   | {
       nodeId: 'functions'
@@ -36,6 +39,11 @@ type IsideBarItem =
       nodeId: 'types'
       label: 'Types'
       items: Array<ItypeView>
+    }
+  | {
+      nodeId: 'effects'
+      label: 'Effects'
+      items: Array<Ieffect>
     }
 
 export default function SideBar({
@@ -84,6 +92,8 @@ export default function SideBar({
                         />
                       )
                     })
+                  case 'effects':
+                    return null //@TODO
                   default:
                     let _: never = item
                 }
@@ -132,6 +142,7 @@ const getFunctionRenderItem = (props: IsmallFunctionView) => (
     >
       <li>
         <FunctionItem {...props} />
+        {/* <FlowFunctionView item={{ ...props }} /> */}
       </li>
     </ul>
   )
