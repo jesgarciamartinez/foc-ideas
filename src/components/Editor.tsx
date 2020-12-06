@@ -12,12 +12,11 @@ function Editor({ value }: { value: string }) {
   return (
     <MonacoEditor
       width='100%'
-      height='600px'
+      height='50vh'
       language='typescript'
       theme='vs-dark'
       value={value}
       options={options}
-      // onChange={onChange}
       editorDidMount={(editor, monaco) =>
         console.log('editorDidMount', { editor })
       }

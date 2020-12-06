@@ -69,13 +69,10 @@ const theme = extendTheme({
 
 // print(sc)
 
-//TODO change pane orientation, onDragEnd pane, change theme, dark/light, export code, export JSON, badge: icons/names/both
-
 export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(
     dropResult => {
-      console.log({ dropResult })
       if (
         //SideBar to FlowCard
         dropResult.source.droppableId !== 'FlowCard' &&
@@ -116,12 +113,14 @@ export const App = () => {
           maxSize={-300}
           resizerStyle={{
             border: '3px solid rgba(1, 22, 39, 0.21)',
+            // boxShadow: ,
             zIndex: 20,
             cursor: 'col-resize',
           }}
           split='vertical'
         >
           <SideBar
+            dispatch={dispatch}
             isAnyItemDragging={state.isSideBarItemDragging}
             items={[
               {
@@ -131,7 +130,7 @@ export const App = () => {
               },
               {
                 nodeId: 'types',
-                label: 'Types',
+                label: 'Data Types',
                 items: [],
               },
               {
@@ -145,13 +144,7 @@ export const App = () => {
             <FlowCard
               items={state.flowCardFunctions.map(fnSelector(state))}
             ></FlowCard>
-            <FunctionCreationForm
-              typeSuggestions={[
-                { title: 'string' },
-                { title: 'boolean' },
-                { title: 'number' },
-              ]}
-            />
+            <FunctionCreationForm />
             {/* <Card>
               <form>
                 <InputGroup size='sm'>

@@ -5,90 +5,144 @@ import {
   EditablePreview,
   EditableInput,
   Text,
-  Input,
   Textarea,
   Code,
   EditableProps,
+  IconButton,
 } from '@chakra-ui/react'
-import { ArrowForwardIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import { AddIcon, ArrowForwardIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import Card from './Card'
-import useAutocomplete from '@material-ui/lab/useAutocomplete'
+// import useAutocomplete from '@material-ui/lab/useAutocomplete'
 // import Autosuggest from 'react-autosuggest'
 import { useCombobox, useMultipleSelection } from 'downshift'
 import Editor from './Editor'
-import { Itype } from './interfaces'
+import { Itype, Ifunction } from './interfaces'
 import { matchSorter } from 'match-sorter'
+import TypeBadge from './TypeBadge'
 
 const EditableText = (props: EditableProps) => (
   <Editable {...props}>
     <EditablePreview />
-    <EditableInput _focus={{ outline: '2px solid gray' }} />
+    <EditableInput
+      _focus={{
+        outline: '',
+      }}
+    />
   </Editable>
 )
 
 const defaultName = 'name'
 const defaultType = '_'
+const typeSuggestions: Array<{ title: Itype | 'New type' }> = [
+  { title: 'string' },
+  { title: 'boolean' },
+  { title: 'number' },
+]
+const getFilteredTypeSuggestions = (
+  typeSuggestions_: typeof typeSuggestions,
+  inputValue: string,
+) => matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 
-const FunctionCreationForm = ({
-  typeSuggestions,
-}: {
-  typeSuggestions: Array<{ title: Itype | 'New type' }>
-}) => {
-  const [{ name, params, returnType }, setState] = React.useState({
+const FunctionCreationForm = () => {
+  const [state, setState] = React.useState({
     name: '',
-    params: [{ type: defaultType, isOpen: false }],
-    returnType: defaultType,
+    params: [{ type: defaultType }, { type: defaultType }],
+    description: '',
+    code: '',
   })
+  const { name, params, description, code } = state
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
+  const onChangeDescription = (description: string) =>
+    setState(state => ({ ...state, description }))
   const onChangeParam = (v: string, i: number) => {
     setState(state => {
       const params = [...state.params]
       const param = params[i]
-      params[i] = { type: v, isOpen: true }
+      params[i] = { type: v }
       return { ...state, params }
     })
   }
-  const onChangeReturnType = (returnType: string) => {
-    setState(state => {
-      return { ...state, returnType }
-    })
+  const addParam = () => {
+    setState(state => ({
+      ...state,
+      params: state.params.concat({ type: defaultType }),
+    }))
   }
-  const getFilteredTypeSuggestions = (
-    typeSuggestions_: typeof typeSuggestions,
-    inputValue: string,
-  ) => matchSorter(typeSuggestions, inputValue, { keys: ['title'] })
 
+  const [typeSuggestionsList, setTypeSuggestionsList] = React.useState(
+    typeSuggestions,
+  )
+  const [focusedInputIndex, setFocusedInputIndex] = React.useState(0)
   const [inputValue, setInputValue] = React.useState('')
+  const onFocusInput = (i: number) => {
+    setFocusedInputIndex(i)
+  }
+
   const {
     isOpen,
-    getToggleButtonProps,
-    getLabelProps,
+    // getToggleButtonProps,
+    // getLabelProps,
     getMenuProps,
     getInputProps,
     getComboboxProps,
     highlightedIndex,
     getItemProps,
-    selectItem,
+    // selectItem,
   } = useCombobox({
     inputValue,
-    items: getFilteredTypeSuggestions(typeSuggestions, inputValue),
-    onStateChange: ({ inputValue, type, selectedItem }) => {
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputChange:
-          setInputValue(inputValue as string)
-          break
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-        case useCombobox.stateChangeTypes.InputBlur:
-          if (selectedItem) {
-            setInputValue('')
-          }
+    items: typeSuggestionsList,
+    onInputValueChange: ({ inputValue }) => {
+      console.log({ inputValue })
+      if (!inputValue) {
+        return
       }
+      setTypeSuggestionsList(
+        getFilteredTypeSuggestions(typeSuggestionsList, inputValue),
+      )
     },
   })
-
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
+
+  const typeToName = (x: Itype | string, n: number): string => {
+    const suffix = n || ''
+    switch (x) {
+      case 'string':
+        return 's' + suffix
+      case 'number':
+        return 'n' + suffix
+      case 'boolean':
+        return 'bool' + suffix
+      case 'function':
+        return ['f', 'g', 'h', 'i', 'j'][n]
+      case 'object':
+        return 'o' + suffix
+      default:
+        return x
+      // case 'array':
+      //   return '' //TODO
+      // case 'undefined':
+      // case 'null':
+      //   return ''
+    }
+  }
+
+  // const paramString: string = params.reduce(
+  //   (acc, p) => {
+  //     acc.typeCount[p.type] = acc.typeCount[p.type]
+  //       ? acc.typeCount[p.type] + 1
+  //       : 0
+  //     const prefix = acc.result === '' ? '' : ', '
+  //     acc.result = acc.result + typeToName(p.type, acc.typeCount[p.type])
+  //     return acc
+  //   },
+  //   { result: '', typeCount: {} },
+  // ).result
+
+  const editorValue = `function ${name}(${params
+    .map(({ type }) => type)
+    .join(',')}) {\n}`
   return (
     <Card>
       <EditableText
@@ -109,19 +163,11 @@ const FunctionCreationForm = ({
             value={name}
             textColor={nameColor}
             onChange={onChangeName}
-          />{' '}
-          <Text as='span'> : </Text>
+          />
+          <Text as='span'>: </Text>
           {params.map((param, i) => (
             <React.Fragment key={i}>
-              {/* <EditableText
-                key={i}
-                value={param.type}
-                // placeholder={defaultType} //TODOr
-                textColor={param.type === defaultType ? 'gray.400' : 'normal'}
-                display='inline'
-                width={param.type.length * 12 + 12 + 'px'}
-                onChange={v => onChangeParam(v, i)}
-              /> */}
+              {i === 0 ? null : <ArrowForwardIcon></ArrowForwardIcon>}
               <Editable
                 value={param.type}
                 // placeholder={defaultType} //TODOr
@@ -129,75 +175,93 @@ const FunctionCreationForm = ({
                 display='inline'
                 width={param.type.length * 12 + 12 + 'px'}
                 onChange={v => onChangeParam(v, i)}
+                {...getComboboxProps()}
               >
                 <EditablePreview />
-                <EditableInput _focus={{ outline: 'none' }} />
+                <EditableInput
+                  onFocus={() => onFocusInput(i)}
+                  _focus={{ outline: 'none' }}
+                  {...getInputProps()}
+                />
+                <ul
+                  {...getMenuProps()}
+                  style={{
+                    position: 'absolute',
+                    background: 'white',
+                    borderRadius: '10%',
+                    border: '1px solid gray',
+                    zIndex: '20000',
+                    color: 'black',
+                  }}
+                >
+                  {isOpen &&
+                    i === focusedInputIndex &&
+                    typeSuggestions.map((item, index) => (
+                      <li
+                        style={
+                          highlightedIndex === index
+                            ? { backgroundColor: '#bde4ff' }
+                            : {}
+                        }
+                        key={`${item.title}${index}`}
+                        {...getItemProps({ item, index })}
+                      >
+                        {item.title === 'New type' ? (
+                          <Code>{item.title}</Code>
+                        ) : (
+                          <TypeBadge>{item.title}</TypeBadge>
+                        )}
+                      </li>
+                    ))}
+                </ul>
               </Editable>
-
-              {/* <Autosuggest
-                suggestions={typeSuggestions}
-                renderInputComponent={inputProps => {
-                  return (
-                    <Editable>
-                      <EditablePreview />
-                      <EditableInput
-                        {...inputProps}
-                        onChange={(e: any) => onChangeParam(e.target.value, i)}
-                        _focus={{ outline: '1px solid gray' }}
-                      />
-                    </Editable>
-                    // <input
-                    //   color={'grey'}
-                    //   {...inputProps}
-                    //   value={param.type}
-                    //   onChange={(e: any) => {
-                    //     onChangeParam(e.target.value, i)
-                    //   }}
-                    // />
-                  )
-                }}
-                inputProps={{
-                  value: param.type,
-                  // onChange(_, { newValue }) {
-                  onChange(...args) {
-                    // console.log(args)
-                    // onChangeParam(e.target.value, i)
-                  },
-                }}
-                getSuggestionValue={(x: any) => x}
-                renderSuggestion={(v: any) => <Text>{v}</Text>}
-                onSuggestionsFetchRequested={() => {}}
-                onSuggestionsClearRequested={() => {}}
-              /> */}
-              <ArrowForwardIcon></ArrowForwardIcon>
-              {/* <Text as='span' contentEditable role='textbox'></Text> */}
+              {i === params.length - 1 ? (
+                <IconButton
+                  aria-label='Add parameter'
+                  icon={<AddIcon />}
+                  onClick={addParam}
+                />
+              ) : null}
             </React.Fragment>
           ))}
-          <EditableText
-            value={returnType}
-            // placeholder={defaultType} //TODOr
-            textColor={returnType === defaultType ? 'gray.400' : 'normal'}
-            display='inline'
-            width={returnType.length * 12 + 12 + 'px'}
-            onChange={onChangeReturnType}
-          ></EditableText>
         </HStack>
       </Code>
       {/* <Input maxWidth='50%' value={'a'}></Input> */}
 
       {/* <Input maxWidth='50%'></Input> */}
 
-      <HStack>
-        <Editable defaultValue={'function name'}>
-          <EditablePreview />
-          <EditableInput />
-        </Editable>
+      {/* <HStack>
+        <EditableText></EditableText>
         <Text> : </Text>
         <Input maxWidth='50%'></Input>
         <ArrowForwardIcon></ArrowForwardIcon>
         <Input maxWidth='50%'></Input>
-      </HStack>
-      <Textarea></Textarea>
+      </HStack> */}
+
+      <Textarea
+        fontSize='xl'
+        placeholder='Description'
+        onChange={e => {
+          onChangeDescription(e.target.value)
+        }}
+        value={description}
+        marginTop={5}
+      ></Textarea>
+
+      <Tabs marginTop={5}>
+        <TabList>
+          <Tab>Regular editor</Tab>
+          <Tab>Structured editor</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <Editor value={editorValue}></Editor>
+          </TabPanel>
+          <TabPanel>
+            <Code>{editorValue}</Code>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Card>
   )
 }

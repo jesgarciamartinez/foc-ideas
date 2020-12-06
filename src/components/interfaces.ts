@@ -6,7 +6,7 @@ export type IsmallFunctionView = {
 
 export type Ifunction = IsmallFunctionView & {
   code: string
-  docs: string
+  description: string
   contract?: string
 }
 // tests: [{params: [], return:}]

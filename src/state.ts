@@ -48,18 +48,19 @@ const initialFunctions: Array<Ifunction> = [
     parameterTypes: ['string'],
     returnType: 'number',
     code: 'function length(s){return s.length}',
-    docs: 'Takes a string and returns how many characters it has',
+    description: 'Takes a string and returns how many characters it has',
   },
   {
     name: 'upperCase',
     parameterTypes: ['string'],
     returnType: 'string',
     code: 'function(s){s.toUppercase()}',
-    docs: 'Takes a string and returns is with all characters in uppercase',
+    description:
+      'Takes a string and returns is with all characters in uppercase',
   },
 ]
 
-type Action =
+export type Action =
   | { type: 'isDragging' }
   | { type: 'createFunction'; function: Ifunction }
   | { type: 'dropOutside' }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import type { IsmallFunctionView } from './interfaces'
-import { Code, Badge, Text } from '@chakra-ui/react'
+import { Code, Text } from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
 import TreeItem from '@material-ui/lab/TreeItem'
@@ -9,10 +9,13 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ArrowForwardIcon,
+  ViewIcon,
+  HamburgerIcon,
 } from '@chakra-ui/icons'
 import './cloneStyles.css'
 import TypeBadge from './TypeBadge'
-import { FlowFunctionView } from './FlowCard'
+import { Action } from '../state'
+// import { FlowFunctionView } from './FlowCard'
 
 const useTreeViewStyles = makeStyles({
   root: {
@@ -37,7 +40,7 @@ type IsideBarItem =
     }
   | {
       nodeId: 'types'
-      label: 'Types'
+      label: 'Data Types'
       items: Array<ItypeView>
     }
   | {
@@ -49,9 +52,11 @@ type IsideBarItem =
 export default function SideBar({
   items,
   isAnyItemDragging,
+  dispatch,
 }: {
-  items?: Array<IsideBarItem>
+  items: Array<IsideBarItem>
   isAnyItemDragging: boolean
+  dispatch: React.Dispatch<Action>
 }) {
   const { root } = useTreeViewStyles()
 
@@ -61,6 +66,22 @@ export default function SideBar({
       className={root}
       defaultCollapseIcon={<ChevronDownIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
+      onNodeSelect={(e: any, v: string) => {
+        // console.log('select', { e, v })
+        if (!v.startsWith('functions')) {
+          return
+        }
+        const [label, name, action] = v.split('_')
+        if (action === 'flow') {
+          dispatch({
+            type: 'dropFnFromSideBarOnFlowCard',
+            index: 0, //TODO
+            draggableId: `${label}_${name}`,
+          })
+        } else if (action === 'docs') {
+        }
+      }}
+      // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
     >
       {items &&
         items.map(item => {
@@ -203,7 +224,18 @@ const FunctionTreeItem = (
           }}
         </Droppable>
       }
-    ></TreeItem>
+    >
+      <TreeItem
+        nodeId={props.nodeId + '_docs'}
+        icon={<ViewIcon />}
+        label={'See docs'}
+      ></TreeItem>
+      <TreeItem
+        nodeId={props.nodeId + '_flow'}
+        icon={<HamburgerIcon />}
+        label={'Add to flow pane'}
+      ></TreeItem>
+    </TreeItem>
   )
 }
 const TypeTreeItem = (
