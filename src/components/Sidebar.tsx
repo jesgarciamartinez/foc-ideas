@@ -1,7 +1,14 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import type { IsmallFunctionView } from './interfaces'
-import { Code, Text } from '@chakra-ui/react'
+import type { Ieffect, IsmallFunctionView, ItypeView } from './interfaces'
+import {
+  Box,
+  Code,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Text,
+} from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
 import TreeItem from '@material-ui/lab/TreeItem'
@@ -11,6 +18,7 @@ import {
   ArrowForwardIcon,
   ViewIcon,
   HamburgerIcon,
+  SearchIcon,
 } from '@chakra-ui/icons'
 import './cloneStyles.css'
 import TypeBadge from './TypeBadge'
@@ -23,14 +31,6 @@ const useTreeViewStyles = makeStyles({
     flex: 1,
   },
 })
-
-type ItypeView = {
-  name: string
-  type: string
-  typeParameters?: Array<string>
-}
-
-type Ieffect = 'console' | 'fetch'
 
 type IsideBarItem =
   | {
@@ -53,76 +53,101 @@ export default function SideBar({
   items,
   isAnyItemDragging,
   dispatch,
+  searchValue,
 }: {
   items: Array<IsideBarItem>
   isAnyItemDragging: boolean
   dispatch: React.Dispatch<Action>
+  searchValue: string
 }) {
   const { root } = useTreeViewStyles()
 
   return (
-    <TreeView
-      aria-label='Functions and types'
-      className={root}
-      defaultCollapseIcon={<ChevronDownIcon />}
-      defaultExpandIcon={<ChevronRightIcon />}
-      onNodeSelect={(e: any, v: string) => {
-        // console.log('select', { e, v })
-        if (!v.startsWith('functions')) {
-          return
-        }
-        const [label, name, action] = v.split('_')
-        if (action === 'flow') {
-          dispatch({
-            type: 'dropFnFromSideBarOnFlowCard',
-            index: 0, //TODO
-            draggableId: `${label}_${name}`,
-          })
-        } else if (action === 'docs') {
-        }
-      }}
-      // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
-    >
-      {items &&
-        items.map(item => {
-          return (
-            <TreeItem nodeId={item.nodeId} key={item.nodeId} label={item.label}>
-              {(() => {
-                switch (item.nodeId) {
-                  case 'functions':
-                    return item.items.map(innerItem => {
-                      const id = `${item.nodeId}_${innerItem.name}`
-                      return (
-                        <FunctionTreeItem
-                          {...innerItem}
-                          key={id}
-                          nodeId={id}
-                          isAnyItemDragging={!!isAnyItemDragging}
-                        />
-                      )
-                    })
-                  case 'types':
-                    return item.items.map(innerItem => {
-                      const id = `${item.nodeId}_${innerItem.name}`
-                      return (
-                        <TypeTreeItem
-                          {...innerItem}
-                          key={id}
-                          nodeId={id}
-                          isAnyItemDragging={!!isAnyItemDragging}
-                        />
-                      )
-                    })
-                  case 'effects':
-                    return null //@TODO
-                  default:
-                    let _: never = item
-                }
-              })()}
-            </TreeItem>
-          )
-        })}
-    </TreeView>
+    <Box height='100%' flex={1}>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents='none'
+          children={<SearchIcon color='gray.300' />}
+        />
+        <Input
+          placeholder='Search'
+          size='md'
+          borderRadius='0%'
+          borderX='none'
+          value={searchValue}
+          onChange={e =>
+            dispatch({ type: 'sideBarSearch', value: e.target.value })
+          }
+        />
+      </InputGroup>
+
+      <TreeView
+        aria-label='Functions and types'
+        // className={root}
+        defaultCollapseIcon={<ChevronDownIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+        onNodeSelect={(e: any, v: string) => {
+          // console.log('select', { e, v })
+          if (!v.startsWith('functions')) {
+            return
+          }
+          const [label, name, action] = v.split('_')
+          if (action === 'flow') {
+            dispatch({
+              type: 'dropFnFromSideBarOnFlowCard',
+              index: 0, //TODO
+              draggableId: `${label}_${name}`,
+            })
+          } else if (action === 'docs') {
+          }
+        }}
+        // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
+      >
+        {items &&
+          items.map(item => {
+            return (
+              <TreeItem
+                nodeId={item.nodeId}
+                key={item.nodeId}
+                label={item.label}
+              >
+                {(() => {
+                  switch (item.nodeId) {
+                    case 'functions':
+                      return item.items.map(innerItem => {
+                        const id = `${item.nodeId}_${innerItem.name}`
+                        return (
+                          <FunctionTreeItem
+                            {...innerItem}
+                            key={id}
+                            nodeId={id}
+                            isAnyItemDragging={!!isAnyItemDragging}
+                          />
+                        )
+                      })
+                    case 'types':
+                      return item.items.map(innerItem => {
+                        const id = `${item.nodeId}_${innerItem.name}`
+                        return (
+                          <TypeTreeItem
+                            {...innerItem}
+                            key={id}
+                            nodeId={id}
+                            isAnyItemDragging={!!isAnyItemDragging}
+                          />
+                        )
+                      })
+                    case 'effects':
+                      return null //@TODO
+                    default:
+                      let _: never = item
+                  }
+                })()}
+              </TreeItem>
+            )
+          })}
+      </TreeView>
+    </Box>
   )
 }
 

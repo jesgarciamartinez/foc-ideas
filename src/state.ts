@@ -1,6 +1,11 @@
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
-import { Ifunction, IsmallFunctionView } from './components/interfaces'
+import {
+  Ifunction,
+  IsmallFunctionView,
+  ItypeView,
+  Ieffect,
+} from './components/interfaces'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
@@ -59,6 +64,8 @@ const initialFunctions: Array<Ifunction> = [
       'Takes a string and returns is with all characters in uppercase',
   },
 ]
+const initialDataTypes: Array<ItypeView> = []
+const initialEffects: Array<Ieffect> = []
 
 export type Action =
   | { type: 'isDragging' }
@@ -71,17 +78,24 @@ export type Action =
       destinationIndex: number
     }
   | { type: 'clearFlowCard' }
+  | { type: 'sideBarSearch'; value: string }
 
 type State = {
   functions: Ifunction[]
+  dataTypes: ItypeView[]
+  effects: Ieffect[]
   isSideBarItemDragging: boolean
   flowCardFunctions: Array<{ name: string; id: string }>
+  searchValue: string
 }
 
 const initialState: State = {
   functions: initialFunctions,
+  dataTypes: initialDataTypes,
+  effects: initialEffects,
   isSideBarItemDragging: false,
   flowCardFunctions: [],
+  searchValue: '',
 }
 
 const reorder = (list: any[], startIndex: number, endIndex: number) => {
@@ -128,6 +142,11 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         flowCardFunctions: [],
+      }
+    case 'sideBarSearch':
+      return {
+        ...state,
+        searchValue: action.value,
       }
   }
 }

@@ -43,6 +43,7 @@ import Card from './components/Card'
 import FlowCard from './components/FlowCard'
 import { useAppReducer, fnSelector } from './state'
 import FunctionCreationForm from './components/FunctionCreationForm'
+import { matchSorter } from 'match-sorter'
 import './styles.css'
 
 const theme = extendTheme({
@@ -120,23 +121,30 @@ export const App = () => {
           split='vertical'
         >
           <SideBar
+            searchValue={state.searchValue}
             dispatch={dispatch}
             isAnyItemDragging={state.isSideBarItemDragging}
             items={[
               {
                 nodeId: 'functions',
                 label: 'Functions',
-                items: state.functions,
+                items: matchSorter(state.functions, state.searchValue, {
+                  keys: ['name'],
+                }),
               },
               {
                 nodeId: 'types',
                 label: 'Data Types',
-                items: [],
+                items: matchSorter(state.dataTypes, state.searchValue, {
+                  keys: ['name'],
+                }),
               },
               {
                 nodeId: 'effects',
                 label: 'Effects',
-                items: [],
+                items: matchSorter(state.effects, state.searchValue, {
+                  keys: ['name'],
+                }),
               },
             ]}
           ></SideBar>

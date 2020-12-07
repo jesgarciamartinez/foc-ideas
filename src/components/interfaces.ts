@@ -20,3 +20,13 @@ export type Itype =
   | 'array'
   | 'undefined'
   | 'null'
+
+export type ItypeView = {
+  name: string
+  type: string
+  typeParameters?: Array<string>
+}
+
+export type Ieffect = {
+  name: string
+}
