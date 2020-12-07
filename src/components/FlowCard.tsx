@@ -10,9 +10,13 @@ import {
   HStack,
   VStack,
   forwardRef,
+  Divider,
+  IconButton,
+  Button,
 } from '@chakra-ui/react'
-import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
+import { ArrowDownIcon, ArrowForwardIcon, DeleteIcon } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
+import { Action } from '../state'
 
 export const FlowFunctionView = forwardRef(
   (
@@ -81,10 +85,11 @@ export const FlowFunctionView = forwardRef(
 
 const FlowCard = ({
   items,
+  dispatch,
 }: {
   items: Array<IsmallFunctionView & { id: string }>
+  dispatch: React.Dispatch<Action>
 }) => {
-  console.log({ items })
   return (
     <Droppable droppableId='FlowCard'>
       {(provided, snapshot) => {
@@ -101,6 +106,16 @@ const FlowCard = ({
             display='flex'
             flexDirection='column'
           >
+            <HStack>
+              <Code fontSize='xl'>Flow</Code>
+              <Button
+                leftIcon={<DeleteIcon />}
+                onClick={() => dispatch({ type: 'clearFlowCard' })}
+              >
+                Clear
+              </Button>
+            </HStack>
+            <Divider marginTop={2}></Divider>
             {items.map((item, i) => {
               return (
                 <Draggable key={item.id} draggableId={item.id} index={i}>

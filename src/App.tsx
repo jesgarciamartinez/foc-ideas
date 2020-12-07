@@ -143,6 +143,7 @@ export const App = () => {
           <CardHStack>
             <FlowCard
               items={state.flowCardFunctions.map(fnSelector(state))}
+              dispatch={dispatch}
             ></FlowCard>
             <FunctionCreationForm />
             {/* <Card>

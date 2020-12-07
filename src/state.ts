@@ -70,6 +70,7 @@ export type Action =
       sourceIndex: number
       destinationIndex: number
     }
+  | { type: 'clearFlowCard' }
 
 type State = {
   functions: Ifunction[]
@@ -122,6 +123,11 @@ function reducer(state: State, action: Action): State {
           action.sourceIndex,
           action.destinationIndex,
         ),
+      }
+    case 'clearFlowCard':
+      return {
+        ...state,
+        flowCardFunctions: [],
       }
   }
 }

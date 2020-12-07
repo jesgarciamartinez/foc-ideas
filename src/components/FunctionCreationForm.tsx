@@ -44,12 +44,44 @@ const getFilteredTypeSuggestions = (
   inputValue: string,
 ) => matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 
-const FunctionCreationForm = () => {
+const typeToName = (x: Itype | string, n: number): string => {
+  const suffix = n || ''
+  switch (x) {
+    case 'string':
+      return 's' + suffix
+    case 'number':
+      return 'n' + suffix
+    case 'boolean':
+      return 'bool' + suffix
+    case 'function':
+      return ['f', 'g', 'h', 'i', 'j'][n]
+    case 'object':
+      return 'o' + suffix
+    default:
+      return x
+    // case 'array':
+    //   return '' //TODO
+    // case 'undefined':
+    // case 'null':
+    //   return ''
+  }
+}
+
+const FunctionCreationForm = ({
+  fn,
+}: {
+  fn?: Ifunction & { parameterTypes: Itype | '_' }
+}) => {
   const [state, setState] = React.useState({
-    name: '',
-    params: [{ type: defaultType }, { type: defaultType }],
-    description: '',
-    code: '',
+    name: fn?.name || '',
+    params: /*fn?.parameterTypes
+      .map(type => ({ type }))
+      .concat({ type: fn.returnType }) ||*/ [
+      { type: defaultType },
+      { type: defaultType },
+    ],
+    description: fn?.description || '',
+    code: fn?.code || '',
   })
   const { name, params, description, code } = state
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
@@ -104,29 +136,6 @@ const FunctionCreationForm = () => {
   })
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
-
-  const typeToName = (x: Itype | string, n: number): string => {
-    const suffix = n || ''
-    switch (x) {
-      case 'string':
-        return 's' + suffix
-      case 'number':
-        return 'n' + suffix
-      case 'boolean':
-        return 'bool' + suffix
-      case 'function':
-        return ['f', 'g', 'h', 'i', 'j'][n]
-      case 'object':
-        return 'o' + suffix
-      default:
-        return x
-      // case 'array':
-      //   return '' //TODO
-      // case 'undefined':
-      // case 'null':
-      //   return ''
-    }
-  }
 
   // const paramString: string = params.reduce(
   //   (acc, p) => {
