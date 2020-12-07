@@ -91,53 +91,59 @@ const FlowCard = ({
   dispatch: React.Dispatch<Action>
 }) => {
   return (
-    <Droppable droppableId='FlowCard'>
-      {(provided, snapshot) => {
-        return (
-          <Box
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            boxShadow={'base'}
-            padding={1}
-            minWidth={'50%'}
-            minHeight='100%'
-            position='relative'
-            backgroundColor='white'
-            display='flex'
-            flexDirection='column'
-          >
-            <HStack>
-              <Code fontSize='xl'>Flow</Code>
-              <Button
-                leftIcon={<DeleteIcon />}
-                onClick={() => dispatch({ type: 'clearFlowCard' })}
-              >
-                Clear
-              </Button>
-            </HStack>
-            <Divider marginTop={2}></Divider>
-            {items.map((item, i) => {
-              return (
-                <Draggable key={item.id} draggableId={item.id} index={i}>
-                  {(provided, snapshot) => {
-                    return (
-                      <FlowFunctionView
-                        item={item}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={provided.draggableProps.style}
-                      />
-                    )
-                  }}
-                </Draggable>
-              )
-            })}
-            {provided.placeholder}
-          </Box>
-        )
-      }}
-    </Droppable>
+    <Box
+      boxShadow={'base'}
+      padding={1}
+      minWidth={'50%'}
+      minHeight='100vh'
+      position='relative'
+      backgroundColor='white'
+      display='flex'
+      flexDirection='column'
+    >
+      <HStack>
+        <Code fontSize='xl'>Flow</Code>
+        <Button
+          leftIcon={<DeleteIcon />}
+          onClick={() => dispatch({ type: 'clearFlowCard' })}
+        >
+          Clear
+        </Button>
+      </HStack>
+      <Divider marginTop={2}></Divider>
+      <Droppable droppableId='FlowCard'>
+        {(provided, snapshot) => {
+          return (
+            <Box
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              minWidth={'50%'}
+              flex={1}
+              minHeight='100%'
+            >
+              {items.map((item, i) => {
+                return (
+                  <Draggable key={item.id} draggableId={item.id} index={i}>
+                    {(provided, snapshot) => {
+                      return (
+                        <FlowFunctionView
+                          item={item}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={provided.draggableProps.style}
+                        />
+                      )
+                    }}
+                  </Draggable>
+                )
+              })}
+              {provided.placeholder}
+            </Box>
+          )
+        }}
+      </Droppable>
+    </Box>
   )
 }
 
