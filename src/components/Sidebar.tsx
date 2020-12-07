@@ -187,17 +187,17 @@ const getFunctionRenderItem = (props: IsmallFunctionView) => (
   rubric: any,
 ) => {
   return (
-    <ul
+    <div
       {...provided.draggableProps}
       {...provided.dragHandleProps}
       ref={provided.innerRef}
       style={provided.draggableProps.style}
     >
-      <li>
+      <div>
         <FunctionItem {...props} />
         {/* <FlowFunctionView item={{ ...props }} /> */}
-      </li>
-    </ul>
+      </div>
+    </div>
   )
 }
 const useTreeItemStyles = makeStyles({
@@ -230,28 +230,28 @@ const FunctionTreeItem = (
             const shouldRenderClone =
               props.nodeId === snapshot.draggingFromThisWith
             return (
-              <ul ref={provided.innerRef} {...provided.droppableProps}>
+              <div ref={provided.innerRef} {...provided.droppableProps}>
                 {shouldRenderClone ? (
-                  <li className='react-beautiful-dnd-copy'>
+                  <div className='react-beautiful-dnd-copy'>
                     <FunctionItem {...props}></FunctionItem>
-                  </li>
+                  </div>
                 ) : (
                   <Draggable draggableId={props.nodeId} index={0}>
                     {(provided, snapshot) => {
                       return (
-                        <li
+                        <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
                           <FunctionItem {...props}></FunctionItem>
-                        </li>
+                        </div>
                       )
                     }}
                   </Draggable>
                 )}
                 {/* {provided.placeholder} */}
-              </ul>
+              </div>
             )
           }}
         </Droppable>

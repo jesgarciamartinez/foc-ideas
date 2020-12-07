@@ -104,9 +104,10 @@ export const App = () => {
   return (
     <ChakraProvider theme={theme}>
       <HotKeys
-        keyMap={{ focusSidebar: 'command+b' }}
+        keyMap={{ focusSidebar: ['ctrl+b', 'command+b'] }} //TODO parameterize
         handlers={{
           focusSidebar() {
+            console.log('hey')
             let a = sideBarRef as any
             a.current.focus()
           },
