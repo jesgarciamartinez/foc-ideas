@@ -45,6 +45,7 @@ import { useAppReducer, fnSelector } from './state'
 import FunctionCreationForm from './components/FunctionCreationForm'
 import { matchSorter } from 'match-sorter'
 import './styles.css'
+import { HotKeys } from 'react-hotkeys'
 
 const theme = extendTheme({
   styles: {
@@ -99,62 +100,73 @@ export const App = () => {
     },
     [dispatch],
   )
+  const sideBarRef = React.useRef()
   return (
     <ChakraProvider theme={theme}>
-      <DragDropContext
-        onDragStart={() => {
-          dispatch({ type: 'isDragging' })
+      <HotKeys
+        keyMap={{ focusSidebar: 'command+b' }}
+        handlers={{
+          focusSidebar() {
+            let a = sideBarRef as any
+            a.current.focus()
+          },
         }}
-        onDragEnd={onDragEnd}
       >
-        <SplitPane
-          style={{ overflow: 'auto', height: '100vh' }}
-          defaultSize='20%'
-          minSize={100}
-          maxSize={-300}
-          resizerStyle={{
-            border: '3px solid rgba(1, 22, 39, 0.21)',
-            // boxShadow: ,
-            zIndex: 20,
-            cursor: 'col-resize',
+        <DragDropContext
+          onDragStart={() => {
+            dispatch({ type: 'isDragging' })
           }}
-          split='vertical'
+          onDragEnd={onDragEnd}
         >
-          <SideBar
-            searchValue={state.searchValue}
-            dispatch={dispatch}
-            isAnyItemDragging={state.isSideBarItemDragging}
-            items={[
-              {
-                nodeId: 'functions',
-                label: 'Functions',
-                items: matchSorter(state.functions, state.searchValue, {
-                  keys: ['name'],
-                }),
-              },
-              {
-                nodeId: 'types',
-                label: 'Data Types',
-                items: matchSorter(state.dataTypes, state.searchValue, {
-                  keys: ['name'],
-                }),
-              },
-              {
-                nodeId: 'effects',
-                label: 'Effects',
-                items: matchSorter(state.effects, state.searchValue, {
-                  keys: ['name'],
-                }),
-              },
-            ]}
-          ></SideBar>
-          <CardHStack>
-            <FlowCard
-              items={state.flowCardFunctions.map(fnSelector(state))}
+          <SplitPane
+            style={{ overflow: 'auto', height: '100vh' }}
+            defaultSize='20%'
+            minSize={100}
+            maxSize={-300}
+            resizerStyle={{
+              border: '3px solid rgba(1, 22, 39, 0.21)',
+              // boxShadow: ,
+              zIndex: 20,
+              cursor: 'col-resize',
+            }}
+            split='vertical'
+          >
+            <SideBar
+              ref={sideBarRef}
+              searchValue={state.searchValue}
               dispatch={dispatch}
-            ></FlowCard>
-            <FunctionCreationForm />
-            {/* <Card>
+              isAnyItemDragging={state.isSideBarItemDragging}
+              items={[
+                {
+                  nodeId: 'functions',
+                  label: 'Functions',
+                  items: matchSorter(state.functions, state.searchValue, {
+                    keys: ['name'],
+                  }),
+                },
+                {
+                  nodeId: 'types',
+                  label: 'Data Types',
+                  items: matchSorter(state.dataTypes, state.searchValue, {
+                    keys: ['name'],
+                  }),
+                },
+                {
+                  nodeId: 'effects',
+                  label: 'Effects',
+                  items: matchSorter(state.effects, state.searchValue, {
+                    keys: ['name'],
+                  }),
+                },
+              ]}
+            ></SideBar>
+            <CardHStack>
+              <FlowCard
+                items={state.flowCardFunctions.map(fnSelector(state))}
+                dispatch={dispatch}
+              ></FlowCard>
+              <FunctionCreationForm />
+              {/* <Card>
               <form>
                 <InputGroup size='sm'>
                   <InputLeftAddon>
@@ -178,9 +190,10 @@ export const App = () => {
             <Card>
               <Editor></Editor>
             </Card> */}
-          </CardHStack>
-        </SplitPane>
-      </DragDropContext>
+            </CardHStack>
+          </SplitPane>
+        </DragDropContext>
+      </HotKeys>
     </ChakraProvider>
   )
 }

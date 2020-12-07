@@ -4,6 +4,7 @@ import type { Ieffect, IsmallFunctionView, ItypeView } from './interfaces'
 import {
   Box,
   Code,
+  forwardRef,
   Input,
   InputGroup,
   InputLeftElement,
@@ -25,12 +26,12 @@ import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 // import { FlowFunctionView } from './FlowCard'
 
-const useTreeViewStyles = makeStyles({
-  root: {
-    height: '100%',
-    flex: 1,
-  },
-})
+// const useTreeViewStyles = makeStyles({
+//   root: {
+//     height: '100%',
+//     flex: 1,
+//   },
+// })
 
 type IsideBarItem =
   | {
@@ -49,107 +50,113 @@ type IsideBarItem =
       items: Array<Ieffect>
     }
 
-export default function SideBar({
-  items,
-  isAnyItemDragging,
-  dispatch,
-  searchValue,
-}: {
-  items: Array<IsideBarItem>
-  isAnyItemDragging: boolean
-  dispatch: React.Dispatch<Action>
-  searchValue: string
-}) {
-  const { root } = useTreeViewStyles()
+export default forwardRef(
+  (
+    {
+      items,
+      isAnyItemDragging,
+      dispatch,
+      searchValue,
+    }: {
+      items: Array<IsideBarItem>
+      isAnyItemDragging: boolean
+      dispatch: React.Dispatch<Action>
+      searchValue: string
+    },
+    ref,
+  ) => {
+    // const { root } = useTreeViewStyles()
 
-  return (
-    <Box height='100%' flex={1}>
-      <InputGroup>
-        <InputLeftElement
-          pointerEvents='none'
-          children={<SearchIcon color='gray.300' />}
-        />
-        <Input
-          placeholder='Search'
-          size='md'
-          borderRadius='0%'
-          borderX='none'
-          value={searchValue}
-          onChange={e =>
-            dispatch({ type: 'sideBarSearch', value: e.target.value })
-          }
-        />
-      </InputGroup>
+    return (
+      <Box height='100%' flex={1}>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents='none'
+            children={<SearchIcon color='gray.300' />}
+          />
+          <Input
+            ref={ref}
+            placeholder='Search'
+            size='md'
+            borderRadius='0%'
+            borderX='none'
+            value={searchValue}
+            onChange={e =>
+              dispatch({ type: 'sideBarSearch', value: e.target.value })
+            }
+          />
+        </InputGroup>
 
-      <TreeView
-        aria-label='Functions and types'
-        // className={root}
-        defaultCollapseIcon={<ChevronDownIcon />}
-        defaultExpandIcon={<ChevronRightIcon />}
-        onNodeSelect={(e: any, v: string) => {
-          // console.log('select', { e, v })
-          if (!v.startsWith('functions')) {
-            return
-          }
-          const [label, name, action] = v.split('_')
-          if (action === 'flow') {
-            dispatch({
-              type: 'dropFnFromSideBarOnFlowCard',
-              index: 0, //TODO
-              draggableId: `${label}_${name}`,
-            })
-          } else if (action === 'docs') {
-          }
-        }}
-        // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
-      >
-        {items &&
-          items.map(item => {
-            return (
-              <TreeItem
-                nodeId={item.nodeId}
-                key={item.nodeId}
-                label={item.label}
-              >
-                {(() => {
-                  switch (item.nodeId) {
-                    case 'functions':
-                      return item.items.map(innerItem => {
-                        const id = `${item.nodeId}_${innerItem.name}`
-                        return (
-                          <FunctionTreeItem
-                            {...innerItem}
-                            key={id}
-                            nodeId={id}
-                            isAnyItemDragging={!!isAnyItemDragging}
-                          />
-                        )
-                      })
-                    case 'types':
-                      return item.items.map(innerItem => {
-                        const id = `${item.nodeId}_${innerItem.name}`
-                        return (
-                          <TypeTreeItem
-                            {...innerItem}
-                            key={id}
-                            nodeId={id}
-                            isAnyItemDragging={!!isAnyItemDragging}
-                          />
-                        )
-                      })
-                    case 'effects':
-                      return null //@TODO
-                    default:
-                      let _: never = item
-                  }
-                })()}
-              </TreeItem>
-            )
-          })}
-      </TreeView>
-    </Box>
-  )
-}
+        <TreeView
+          aria-label='Functions and types'
+          // className={root}
+          defaultCollapseIcon={<ChevronDownIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          onNodeSelect={(e: any, v: string) => {
+            // console.log('select', { e, v })
+            if (!v.startsWith('functions')) {
+              return
+            }
+            const [label, name, action] = v.split('_')
+            if (action === 'flow') {
+              dispatch({
+                type: 'dropFnFromSideBarOnFlowCard',
+                index: 0, //TODO
+                draggableId: `${label}_${name}`,
+              })
+            } else if (action === 'docs') {
+            }
+          }}
+          // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
+        >
+          {items &&
+            items.map(item => {
+              return (
+                <TreeItem
+                  nodeId={item.nodeId}
+                  key={item.nodeId}
+                  label={item.label}
+                >
+                  {(() => {
+                    switch (item.nodeId) {
+                      case 'functions':
+                        return item.items.map(innerItem => {
+                          const id = `${item.nodeId}_${innerItem.name}`
+                          return (
+                            <FunctionTreeItem
+                              {...innerItem}
+                              key={id}
+                              nodeId={id}
+                              isAnyItemDragging={!!isAnyItemDragging}
+                            />
+                          )
+                        })
+                      case 'types':
+                        return item.items.map(innerItem => {
+                          const id = `${item.nodeId}_${innerItem.name}`
+                          return (
+                            <TypeTreeItem
+                              {...innerItem}
+                              key={id}
+                              nodeId={id}
+                              isAnyItemDragging={!!isAnyItemDragging}
+                            />
+                          )
+                        })
+                      case 'effects':
+                        return null //@TODO
+                      default:
+                        let _: never = item
+                    }
+                  })()}
+                </TreeItem>
+              )
+            })}
+        </TreeView>
+      </Box>
+    )
+  },
+)
 
 const FunctionItem = (props: IsmallFunctionView) => {
   return (
