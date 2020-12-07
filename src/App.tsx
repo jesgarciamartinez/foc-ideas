@@ -75,6 +75,7 @@ export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(
     dropResult => {
+      console.log({ dropResult })
       if (
         //SideBar to FlowCard
         dropResult.source.droppableId !== 'FlowCard' &&
@@ -96,6 +97,15 @@ export const App = () => {
         })
       } else {
         dispatch({ type: 'dropOutside' })
+
+        //Regain focus after dropping outside - TODO does not work if dragged and esc pressed
+        const li: any = document.querySelector(
+          `[id$='${dropResult.draggableId}']`,
+        )
+        if (li) {
+          console.log({ li })
+          li.focus()
+        }
       }
     },
     [dispatch],

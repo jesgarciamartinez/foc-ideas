@@ -17,13 +17,12 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ArrowForwardIcon,
-  ViewIcon,
-  HamburgerIcon,
   SearchIcon,
 } from '@chakra-ui/icons'
 import './cloneStyles.css'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
+import MouseTrap from 'mousetrap'
 // import { FlowFunctionView } from './FlowCard'
 
 // const useTreeViewStyles = makeStyles({
@@ -66,7 +65,6 @@ export default forwardRef(
     ref,
   ) => {
     // const { root } = useTreeViewStyles()
-
     return (
       <Box height='100%' flex={1}>
         <InputGroup>
@@ -88,25 +86,85 @@ export default forwardRef(
         </InputGroup>
 
         <TreeView
+          selected={[]}
           aria-label='Functions and types'
           // className={root}
           defaultCollapseIcon={<ChevronDownIcon />}
           defaultExpandIcon={<ChevronRightIcon />}
-          onNodeSelect={(e: any, v: string) => {
-            // console.log('select', { e, v })
-            if (!v.startsWith('functions')) {
-              return
-            }
-            const [label, name, action] = v.split('_')
-            if (action === 'flow') {
-              dispatch({
-                type: 'dropFnFromSideBarOnFlowCard',
-                index: 0, //TODO
-                draggableId: `${label}_${name}`,
-              })
-            } else if (action === 'docs') {
+          onNodeFocus={(e, v) => {
+            console.log({ isAnyItemDragging, e, v })
+            const draggable: any = document.querySelector(
+              `[data-rbd-draggable-id="${v}"]`,
+            )
+
+            if (draggable) {
+              const div = draggable.parentElement?.parentElement?.parentElement
+              const li = div?.parentElement
+              const parentMenu =
+                li?.parentElement?.parentElement?.parentElement?.parentElement
+              const previous = li?.previousElementSibling
+              const next = li?.nextElementSibling
+
+              if (!draggable.bound) {
+                draggable.bound = true
+                MouseTrap(draggable).bind('left', e => {
+                  if (isAnyItemDragging) {
+                    return
+                  }
+                  div?.classList.remove('Mui-focused')
+                  parentMenu?.focus()
+                })
+                MouseTrap(draggable).bind('down', e => {
+                  if (isAnyItemDragging) {
+                    return
+                  }
+                  if (next) {
+                    next.focus()
+                    div?.classList.remove('Mui-focused')
+                  } else {
+                    parentMenu?.nextElementSibling?.focus()
+                    div?.classList.remove('Mui-focused')
+                  }
+                })
+                MouseTrap(draggable).bind('up', e => {
+                  if (isAnyItemDragging) {
+                    return
+                  }
+                  if (previous) {
+                    previous.focus()
+                    div?.classList.remove('Mui-focused')
+                  } else {
+                    parentMenu?.focus()
+                    div?.classList.remove('Mui-focused')
+                  }
+                })
+              }
+
+              div?.classList.add('Mui-focused')
+              draggable.focus()
             }
           }}
+          // onNodeSelect={(e: any, v: string) => {
+          // console.log('select', { e, v })
+          // const draggable: HTMLInputElement | null = document.querySelector(
+          //   `[data-rbd-draggable-id="${v}"]`,
+          // )
+          // if (draggable) {
+          //   draggable.focus()
+          // }
+          // if (!v.startsWith('functions')) {
+          //   return
+          // }
+          // const [label, name, action] = v.split('_')
+          // if (action === 'flow') {
+          //   dispatch({
+          //     type: 'dropFnFromSideBarOnFlowCard',
+          //     index: 0, //TODO
+          //     draggableId: `${label}_${name}`,
+          //   })
+          // } else if (action === 'docs') {
+          // }
+          // }}
           // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
         >
           {items &&
@@ -257,7 +315,7 @@ const FunctionTreeItem = (
         </Droppable>
       }
     >
-      <TreeItem
+      {/* <TreeItem
         nodeId={props.nodeId + '_docs'}
         icon={<ViewIcon />}
         label={'See docs'}
@@ -266,7 +324,7 @@ const FunctionTreeItem = (
         nodeId={props.nodeId + '_flow'}
         icon={<HamburgerIcon />}
         label={'Add to flow pane'}
-      ></TreeItem>
+      ></TreeItem> */}
     </TreeItem>
   )
 }
