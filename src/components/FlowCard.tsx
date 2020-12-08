@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { IsmallFunctionView, ItypeView } from './interfaces'
+import { Ifunction, ItypeView } from './interfaces'
 import {
   Box,
   Flex,
@@ -79,15 +79,11 @@ const TypeAndValue = ({
 
 export const FlowFunctionView = forwardRef(
   (
-    {
-      item,
-      style,
-      ...rest
-    }: { item: IsmallFunctionView; style?: React.CSSProperties },
+    { item, style, ...rest }: { item: Ifunction; style?: React.CSSProperties },
     ref,
   ) => {
-    const hasZeroParams = item.parameterTypes.length === 0
-    const hasOneParam = item.parameterTypes.length === 1
+    const hasZeroParams = item.parameters.length === 0
+    const hasOneParam = item.parameters.length === 1
     return (
       <Flex
         {...rest}
@@ -111,17 +107,17 @@ export const FlowFunctionView = forwardRef(
           <Spacer></Spacer>
           {hasZeroParams || hasOneParam
             ? null
-            : item.parameterTypes
-                .slice(0, item.parameterTypes.length - 1)
+            : item.parameters
+                .slice(0, item.parameters.length - 1)
                 .map((param, i) => {
                   const css =
-                    i === item.parameterTypes.length - 2
+                    i === item.parameters.length - 1
                       ? { transform: 'rotate(-45deg)' }
                       : null
                   return (
                     <HStack flex={1}>
                       <TypeAndValue
-                        type={param}
+                        type={param.type}
                         onChange={() => {}}
                         value=''
                         direction='column'
@@ -142,12 +138,12 @@ export const FlowFunctionView = forwardRef(
                 onChange={() => {}}
                 value=''
                 direction='row'
-                type={item.parameterTypes[item.parameterTypes.length - 1]}
+                type={item.parameters[item.parameters.length - 1].type}
               />
             )}
             <ArrowDownIcon></ArrowDownIcon>
             <TypeAndValue
-              type={item.returnType}
+              type={item.returns.type}
               onChange={() => {}}
               value=''
               direction='row'
@@ -165,7 +161,7 @@ const FlowCard = ({
   name,
   dispatch,
 }: {
-  items: Array<IsmallFunctionView & { id: string }>
+  items: Array<Ifunction & { id: string }>
   name: string
   dispatch: React.Dispatch<Action>
 }) => {
@@ -184,15 +180,6 @@ const FlowCard = ({
       flexDirection='column'
     >
       <HStack>
-        {/* <EditableText
-          value={name}
-          onChange={() => {}}
-          placeholder={defaultName}
-          fontSize='3xl'
-          textColor={nameColor}
-          fontStyle={nameFontStyle}
-          width='50%'
-        /> */}
         <Text fontSize='xl'>Flow Card</Text>
         <Button
           leftIcon={<DeleteIcon />}

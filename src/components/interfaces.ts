@@ -1,12 +1,17 @@
-export type IsmallFunctionView = {
-  name: string
-  parameterTypes: Array<Itype['type']>
-  returnType: Itype['type']
-}
+// export type IfunctionDefinition = {
+//   name: string
+//   parameterTypes: Array<Itype['type']>
+//   returnType: Itype['type']
+//   code: string
+//   description: string
+//   contract?: string
+// }
+type Iparameter = Itype & { parameterName: string }
 
-export type Ifunction = IsmallFunctionView & {
+export type Ifunction = {
   name: string
-  parameters: Array<Itype>
+  parameters: Array<Iparameter>
+  returns: Itype
   code: string
   description: string
   contract?: string
@@ -14,12 +19,12 @@ export type Ifunction = IsmallFunctionView & {
 // tests: [{params: [], return:}]
 
 export type Itype =
-  | { type: 'string'; value: string }
-  | { type: 'number'; value: number }
-  | { type: 'boolean'; value: boolean }
-  | { type: 'function'; value: any }
-  | { type: 'object'; value: object }
-  | { type: 'array'; of: Itype; value: any }
+  | { type: 'string'; value?: string }
+  | { type: 'number'; value?: number }
+  | { type: 'boolean'; value?: boolean }
+  | { type: 'function'; value?: any }
+  | { type: 'object'; value?: object }
+  | { type: 'array'; of: Itype | { typeParam: string }; value?: any }
   | { type: 'undefined' }
   | { type: 'null' }
 

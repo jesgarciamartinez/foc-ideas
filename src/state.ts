@@ -1,11 +1,6 @@
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
-import {
-  Ifunction,
-  IsmallFunctionView,
-  ItypeView,
-  Ieffect,
-} from './components/interfaces'
+import { Ifunction, ItypeView, Ieffect } from './components/interfaces'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
@@ -50,39 +45,45 @@ const useLoggerReducer = <A, B extends { type: string | number }>(
 const initialFunctions: Array<Ifunction> = [
   {
     name: 'length',
-    parameterTypes: ['string'],
-    returnType: 'number',
+    parameters: [{ type: 'string', parameterName: 's' }],
+    returns: { type: 'number' },
     code: 'function length(s){return s.length}',
     description: 'Takes a string and returns how many characters it has',
   },
   {
     name: 'upperCase',
-    parameterTypes: ['string'],
-    returnType: 'string',
+    parameters: [{ type: 'string', parameterName: 's' }],
+    returns: { type: 'string' },
     code: 'function(s){s.toUppercase()}',
     description:
       'Takes a string and returns is with all characters in uppercase',
   },
   {
     name: 'add',
-    parameterTypes: ['number', 'number'],
-    returnType: 'number',
+    parameters: [
+      { type: 'number', parameterName: 'x' },
+      { type: 'number', parameterName: 'y' },
+    ],
+    returns: { type: 'number' },
     code: 'function add(x,y){x + y}',
     description: 'Adds two numbers together',
   },
   {
     name: 'map',
-    parameterTypes: ['function', 'array'],
-    returnType: 'array',
+    parameters: [
+      { type: 'function', parameterName: 'f' },
+      { type: 'array', of: { typeParam: 'A' }, parameterName: 'as' },
+    ],
+    returns: { type: 'array', of: { typeParam: 'B' } },
     code: 'function map(f,as){return as.map(f)}',
     description: 'Applies a function to each element of an array',
   },
   {
-    name: '4params',
-    parameterTypes: ['string', 'string', 'string', 'number'],
-    returnType: 'string',
-    code: '',
-    description: 'hast 4 params and probably messes up css',
+    name: 'stringId',
+    parameters: [{ type: 'string', parameterName: 's1' }],
+    returns: { type: 'string' },
+    code: 'function stringId(s1){return s1}',
+    description: 'monomorphic id for string',
   },
 ]
 const initialDataTypes: Array<ItypeView> = []

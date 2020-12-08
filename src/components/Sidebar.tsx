@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import type { Ieffect, IsmallFunctionView, ItypeView } from './interfaces'
+import type { Ieffect, ItypeView, Ifunction } from './interfaces'
 import {
   Box,
   Code,
@@ -41,7 +41,7 @@ type IsideBarItem =
   | {
       nodeId: 'functions'
       label: 'Functions'
-      items: Array<IsmallFunctionView>
+      items: Array<Ifunction>
     }
   | {
       nodeId: 'types'
@@ -242,15 +242,15 @@ export default forwardRef(
   },
 )
 
-const FunctionItem = (props: IsmallFunctionView) => {
+const FunctionItem = (props: Ifunction) => {
   return (
     <Text wrap='nowrap'>
       <Code /*backgroundColor='white'*/>{props.name}</Code>
       <Text as='span'>:</Text>
       <Text as={'span'} flexWrap='nowrap'>
-        {props.parameterTypes.map((p, i) => (
+        {props.parameters.map((p, i) => (
           <Text as='span' key={i}>
-            <TypeBadge typeAsString={p} />{' '}
+            <TypeBadge typeAsString={p.type} />{' '}
             <Text as='span'>
               {' '}
               <ArrowForwardIcon />{' '}
@@ -259,13 +259,13 @@ const FunctionItem = (props: IsmallFunctionView) => {
         ))}
       </Text>
       <Text as='span'>
-        <TypeBadge typeAsString={props.returnType} />
+        <TypeBadge typeAsString={props.returns.type} />
       </Text>
     </Text>
   )
 }
 
-const getFunctionRenderItem = (props: IsmallFunctionView) => (
+const getFunctionRenderItem = (props: Ifunction) => (
   provided: any,
   snapshot: any,
   rubric: any,
@@ -297,7 +297,7 @@ const useTreeItemStyles = makeStyles({
 })
 
 const FunctionTreeItem = (
-  props: IsmallFunctionView & { nodeId: string; isAnyItemDragging: boolean },
+  props: Ifunction & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
   const { root, content } = useTreeItemStyles()
   return (
@@ -340,18 +340,7 @@ const FunctionTreeItem = (
           }}
         </Droppable>
       }
-    >
-      {/* <TreeItem
-        nodeId={props.nodeId + '_docs'}
-        icon={<ViewIcon />}
-        label={'See docs'}
-      ></TreeItem>
-      <TreeItem
-        nodeId={props.nodeId + '_flow'}
-        icon={<HamburgerIcon />}
-        label={'Add to flow pane'}
-      ></TreeItem> */}
-    </TreeItem>
+    ></TreeItem>
   )
 }
 const TypeTreeItem = (
