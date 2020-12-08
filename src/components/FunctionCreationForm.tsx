@@ -35,37 +35,37 @@ const EditableText = (props: EditableProps) => (
 const defaultName = 'name'
 const defaultType = '_'
 const typeSuggestions: Array<{ title: Itype | 'New type' }> = [
-  { title: 'string' },
-  { title: 'boolean' },
-  { title: 'number' },
+  { title: { type: 'string' } },
+  { title: { type: 'boolean', value: true } },
+  { title: { type: 'number' } },
 ]
 const getFilteredTypeSuggestions = (
   typeSuggestions_: typeof typeSuggestions,
   inputValue: string,
 ) => matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 
-const typeToName = (x: Itype | string, n: number): string => {
-  const suffix = n || ''
-  switch (x) {
-    case 'string':
-      return 's' + suffix
-    case 'number':
-      return 'n' + suffix
-    case 'boolean':
-      return 'bool' + suffix
-    case 'function':
-      return ['f', 'g', 'h', 'i', 'j'][n]
-    case 'object':
-      return 'o' + suffix
-    default:
-      return x
-    // case 'array':
-    //   return '' //TODO
-    // case 'undefined':
-    // case 'null':
-    //   return ''
-  }
-}
+// const typeToName = (x: Itype | string, n: number): string => {
+//   const suffix = n || ''
+//   switch (x) {
+//     case 'string':
+//       return 's' + suffix
+//     case 'number':
+//       return 'n' + suffix
+//     case 'boolean':
+//       return 'bool' + suffix
+//     case 'function':
+//       return ['f', 'g', 'h', 'i', 'j'][n]
+//     case 'object':
+//       return 'o' + suffix
+//     default:
+//       return x
+// case 'array':
+//   return '' //TODO
+// case 'undefined':
+// case 'null':
+//   return ''
+//   }
+// }
 
 const FunctionCreationForm = ({
   fn,
@@ -218,7 +218,7 @@ const FunctionCreationForm = ({
                         {item.title === 'New type' ? (
                           <Code>{item.title}</Code>
                         ) : (
-                          <TypeBadge>{item.title}</TypeBadge>
+                          <TypeBadge typeAsString={item.title.type} />
                         )}
                       </li>
                     ))}

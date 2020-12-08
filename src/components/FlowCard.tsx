@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { IsmallFunctionView } from './interfaces'
+import { IsmallFunctionView, ItypeView } from './interfaces'
 import {
   Box,
   Flex,
@@ -13,10 +13,72 @@ import {
   Divider,
   IconButton,
   Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverFooter,
+  PopoverArrow,
+  PopoverCloseButton,
+  Input,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Checkbox,
 } from '@chakra-ui/react'
-import { ArrowDownIcon, ArrowForwardIcon, DeleteIcon } from '@chakra-ui/icons'
+import {
+  ArrowDownIcon,
+  ArrowForwardIcon,
+  DeleteIcon,
+  QuestionIcon,
+} from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
+import { Itype } from './interfaces'
+
+const TypeAndValue = ({
+  type,
+  value,
+  onChange,
+}: {
+  type: Itype
+  value: string
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
+  return (
+    <>
+      <TypeBadge typeAsString={type.type} />
+      {(() => {
+        switch (type.type) {
+          case 'string':
+            return <Input size='sm' onChange={onChange}></Input>
+          case 'number':
+            return (
+              <NumberInput size='sm'>
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            )
+          case 'boolean':
+            return (
+              <Checkbox isChecked={type.value}>
+                {value ? 'true' : 'false'}
+              </Checkbox>
+            )
+          default:
+            return null
+            break
+        }
+      })()}
+    </>
+  )
+}
 
 export const FlowFunctionView = forwardRef(
   (
@@ -57,7 +119,7 @@ export const FlowFunctionView = forwardRef(
                 .map((param, i) => {
                   return (
                     <HStack flex={1}>
-                      <TypeBadge>{param}</TypeBadge> <ArrowForwardIcon />
+                      <TypeBadge typeAsString={param} /> <ArrowForwardIcon />
                     </HStack>
                   )
                 })}
@@ -69,12 +131,14 @@ export const FlowFunctionView = forwardRef(
             {hasZeroParams ? (
               <Code>()</Code>
             ) : (
-              <TypeBadge>
-                {item.parameterTypes[item.parameterTypes.length - 1]}
-              </TypeBadge>
+              <TypeBadge
+                typeAsString={
+                  item.parameterTypes[item.parameterTypes.length - 1]
+                }
+              />
             )}
             <ArrowDownIcon></ArrowDownIcon>
-            <TypeBadge>{item.returnType}</TypeBadge>
+            <TypeBadge typeAsString={item.returnType} />
           </VStack>
           <Box>{'some example value and more stuff'}</Box>
         </Flex>
@@ -109,6 +173,28 @@ const FlowCard = ({
         >
           Clear
         </Button>
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              aria-label='Explain flow card'
+              icon={<QuestionIcon />}
+            />
+          </PopoverTrigger>
+          <PopoverContent>
+            <PopoverArrow />
+            <PopoverCloseButton />
+            {/* <PopoverHeader>Confirmation!</PopoverHeader> */}
+            <PopoverBody>
+              Flow is a special view for the flow/pipe function (left-to-right
+              variadic compose). This is meant as a "functional Scratch" to
+              visually explore funcion composition. Last argument and return
+              type line up vertically to reinforce the pipeline metaphor. JS is
+              executed and shown on the right if functions don't have
+              side-effects, otherwise a 'Play' button will appear. `console.log`
+              is the only effect so far.
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
       </HStack>
       <Divider marginTop={2}></Divider>
       <Droppable droppableId='FlowCard'>

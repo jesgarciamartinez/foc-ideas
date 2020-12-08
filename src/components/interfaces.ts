@@ -1,7 +1,7 @@
 export type IsmallFunctionView = {
   name: string
-  parameterTypes: Itype[]
-  returnType: Itype
+  parameterTypes: Array<Itype['type']>
+  returnType: Itype['type']
 }
 
 export type Ifunction = IsmallFunctionView & {
@@ -12,14 +12,14 @@ export type Ifunction = IsmallFunctionView & {
 // tests: [{params: [], return:}]
 
 export type Itype =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'function'
-  | 'object'
-  | 'array'
-  | 'undefined'
-  | 'null'
+  | { type: 'string' }
+  | { type: 'number' }
+  | { type: 'boolean'; value: boolean }
+  | { type: 'function' }
+  | { type: 'object' }
+  | { type: 'array' }
+  | { type: 'undefined' }
+  | { type: 'null' }
 
 export type ItypeView = {
   name: string

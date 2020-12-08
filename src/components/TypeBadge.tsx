@@ -1,11 +1,16 @@
 import * as React from 'react'
 import { Code } from '@chakra-ui/react'
 import { Itype } from './interfaces'
-const TypeBadge = ({ children, ...rest }: { children: Itype }) => {
+const TypeBadge = ({
+  typeAsString,
+  ...rest
+}: {
+  typeAsString: Itype['type']
+}) => {
   return (
     <Code
       colorScheme={(() => {
-        switch (children) {
+        switch (typeAsString) {
           case 'string':
             return 'yellow'
           case 'number':
@@ -23,11 +28,11 @@ const TypeBadge = ({ children, ...rest }: { children: Itype }) => {
           case 'null':
             return 'black'
           default:
-            let x: never = children
+            let x: never = typeAsString
         }
       })()}
     >
-      {children}
+      {typeAsString}
     </Code>
   )
 }

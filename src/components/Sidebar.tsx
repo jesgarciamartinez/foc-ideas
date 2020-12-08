@@ -224,7 +224,7 @@ const FunctionItem = (props: IsmallFunctionView) => {
       <Text as={'span'} flexWrap='nowrap'>
         {props.parameterTypes.map((p, i) => (
           <Text as='span' key={i}>
-            <TypeBadge>{p}</TypeBadge>{' '}
+            <TypeBadge typeAsString={p} />{' '}
             <Text as='span'>
               {' '}
               <ArrowForwardIcon />{' '}
@@ -233,7 +233,7 @@ const FunctionItem = (props: IsmallFunctionView) => {
         ))}
       </Text>
       <Text as='span'>
-        <TypeBadge>{props.returnType}</TypeBadge>
+        <TypeBadge typeAsString={props.returnType} />
       </Text>
     </Text>
   )

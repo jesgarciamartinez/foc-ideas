@@ -63,6 +63,27 @@ const initialFunctions: Array<Ifunction> = [
     description:
       'Takes a string and returns is with all characters in uppercase',
   },
+  {
+    name: 'add',
+    parameterTypes: ['number', 'number'],
+    returnType: 'number',
+    code: 'function add(x,y){x + y}',
+    description: 'Adds two numbers together',
+  },
+  {
+    name: 'map',
+    parameterTypes: ['function', 'array'],
+    returnType: 'array',
+    code: 'function map(f,as){return as.map(f)}',
+    description: 'Applies a function to each element of an array',
+  },
+  {
+    name: '4params',
+    parameterTypes: ['string', 'string', 'string', 'number'],
+    returnType: 'string',
+    code: '',
+    description: 'hast 4 params and probably messes up css',
+  },
 ]
 const initialDataTypes: Array<ItypeView> = []
 const initialEffects: Array<Ieffect> = []
