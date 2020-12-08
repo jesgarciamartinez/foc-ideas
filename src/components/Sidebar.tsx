@@ -9,6 +9,10 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
+  Kbd,
+  ListItem,
+  UnorderedList,
+  Center,
 } from '@chakra-ui/react'
 import { makeStyles } from '@material-ui/core/styles'
 import TreeView from '@material-ui/lab/TreeView'
@@ -24,6 +28,7 @@ import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import MouseTrap from 'mousetrap'
 // import { FlowFunctionView } from './FlowCard'
+import PopoverExplanation from './PopoverExplanation'
 
 // const useTreeViewStyles = makeStyles({
 //   root: {
@@ -84,6 +89,27 @@ export default forwardRef(
             }
           />
         </InputGroup>
+        <Center>
+          <PopoverExplanation label='Sidebar explanation' title='Sidebar'>
+            <UnorderedList>
+              <ListItem>
+                Drag functions and drop them onto Flow Card or Docs Card
+              </ListItem>
+              <ListItem>
+                <Kbd>ctrl</Kbd> + <Kbd>B</Kbd> or <Kbd>⌘</Kbd> + <Kbd>B</Kbd> to
+                focus sidebar search
+              </ListItem>
+              <ListItem>
+                <Kbd>up</Kbd>, <Kbd>down</Kbd>, <Kbd>left</Kbd>,{' '}
+                <Kbd>right</Kbd> to move in Sidebar
+              </ListItem>
+              <ListItem>
+                <Kbd>space</Kbd> to drag, <Kbd>right</Kbd> then <Kbd>space</Kbd>{' '}
+                to drop
+              </ListItem>
+            </UnorderedList>
+          </PopoverExplanation>
+        </Center>
 
         <TreeView
           selected={[]}

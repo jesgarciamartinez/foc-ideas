@@ -39,6 +39,7 @@ import {
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import { Itype } from './interfaces'
+import PopoverExplanation from './PopoverExplanation'
 
 const TypeAndValue = ({
   type,
@@ -188,28 +189,15 @@ const FlowCard = ({
         >
           Clear
         </Button>
-        <Popover>
-          <PopoverTrigger>
-            <IconButton
-              aria-label='Explain flow card'
-              icon={<QuestionIcon />}
-            />
-          </PopoverTrigger>
-          <PopoverContent>
-            <PopoverArrow />
-            <PopoverCloseButton />
-            {/* <PopoverHeader>Confirmation!</PopoverHeader> */}
-            <PopoverBody>
-              Flow is a special view for the flow/pipe function (left-to-right
-              variadic compose). This is meant as a "functional Scratch" to
-              visually explore funcion composition. Last argument and return
-              type line up vertically to reinforce the pipeline metaphor. JS is
-              executed and shown on the right if functions don't have
-              side-effects, otherwise a 'Play' button will appear. `console.log`
-              is the only effect so far.
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+        <PopoverExplanation label='Flow card explanation' title='Flow card'>
+          Flow is a special view for the flow/pipe function (left-to-right
+          variadic compose). This is meant as a "functional Scratch" to visually
+          explore function composition. Last argument and return type line up
+          vertically to reinforce the pipeline metaphor. JS is executed and
+          shown on the right if functions don't have side-effects, otherwise a
+          'Play' button will appear. `console.log` is the only effect so far.
+          Note that functions are not curried automatically.
+        </PopoverExplanation>
       </HStack>
       <Divider marginTop={2}></Divider>
       <Droppable droppableId='FlowCard'>
