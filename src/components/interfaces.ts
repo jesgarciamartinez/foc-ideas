@@ -6,7 +6,7 @@
 //   description: string
 //   contract?: string
 // }
-type Iparameter = Itype & { parameterName: string }
+export type Iparameter = Itype & { parameterName: string }
 
 export type Ifunction = {
   name: string

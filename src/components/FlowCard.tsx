@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Ifunction, ItypeView } from './interfaces'
+import { Ifunction, Iparameter, ItypeView } from './interfaces'
 import {
   Box,
   Flex,
@@ -112,7 +112,7 @@ export const FlowFunctionView = forwardRef(
                       ? { transform: 'rotate(-45deg)' }
                       : null
                   return (
-                    <HStack flex={1}>
+                    <HStack flex={1} key={i}>
                       <TypeAndValue
                         type={param.type}
                         onChange={() => {}}
@@ -142,7 +142,7 @@ export const FlowFunctionView = forwardRef(
             <TypeAndValue
               type={item.returns.type}
               onChange={() => {}}
-              value=''
+              value={''}
               direction='row'
             />
           </VStack>
@@ -152,7 +152,45 @@ export const FlowFunctionView = forwardRef(
     )
   },
 )
+
 const defaultName = 'name'
+const getItemsWithComputedValues = (
+  items: Array<Ifunction & { id: string }>,
+) => {
+  let previousReturn = null
+  let newItems: Array<Ifunction & { id: string }> = []
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    const parameters = [...item.parameters]
+    const previouslastParam: Iparameter | undefined = parameters.pop()
+
+    if (previouslastParam) {
+      parameters.push({
+        ...previouslastParam,
+        value:
+          previousReturn === null ? previouslastParam?.value : previousReturn,
+      })
+    }
+    // try {
+    // } catch (error) {} TODO
+
+    const returnValue = eval(
+      `${item.code}(${parameters.map(p => p.value).join(',')})`,
+    )
+
+    newItems.push({
+      ...item,
+      parameters,
+      returns: { ...item.returns, value: returnValue },
+    })
+
+    previousReturn = returnValue
+  }
+
+  return newItems
+}
+
 const FlowCard = ({
   items,
   name,
@@ -164,7 +202,7 @@ const FlowCard = ({
 }) => {
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
-
+  const itemsWithComputedValues = getItemsWithComputedValues(items)
   return (
     <Box
       boxShadow={'base'}
@@ -211,7 +249,7 @@ const FlowCard = ({
               flex={1}
               minHeight='100%'
             >
-              {items.map((item, i) => {
+              {itemsWithComputedValues.map((item, i) => {
                 return (
                   <Draggable key={item.id} draggableId={item.id} index={i}>
                     {(provided, snapshot) => {
