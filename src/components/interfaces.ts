@@ -5,6 +5,8 @@ export type IsmallFunctionView = {
 }
 
 export type Ifunction = IsmallFunctionView & {
+  name: string
+  parameters: Array<Itype>
   code: string
   description: string
   contract?: string
@@ -12,12 +14,12 @@ export type Ifunction = IsmallFunctionView & {
 // tests: [{params: [], return:}]
 
 export type Itype =
-  | { type: 'string' }
-  | { type: 'number' }
+  | { type: 'string'; value: string }
+  | { type: 'number'; value: number }
   | { type: 'boolean'; value: boolean }
-  | { type: 'function' }
-  | { type: 'object' }
-  | { type: 'array' }
+  | { type: 'function'; value: any }
+  | { type: 'object'; value: object }
+  | { type: 'array'; of: Itype; value: any }
   | { type: 'undefined' }
   | { type: 'null' }
 

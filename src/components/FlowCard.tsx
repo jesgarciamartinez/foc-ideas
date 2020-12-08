@@ -11,16 +11,7 @@ import {
   VStack,
   forwardRef,
   Divider,
-  IconButton,
   Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
   Input,
   NumberInput,
   NumberInputField,
@@ -28,18 +19,20 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Checkbox,
-  FlexProps,
+  Text,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
   ArrowForwardIcon,
   DeleteIcon,
+  PlusSquareIcon,
   QuestionIcon,
 } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import { Itype } from './interfaces'
 import PopoverExplanation from './PopoverExplanation'
+import EditableText from './EditableText'
 
 const TypeAndValue = ({
   type,
@@ -121,6 +114,10 @@ export const FlowFunctionView = forwardRef(
             : item.parameterTypes
                 .slice(0, item.parameterTypes.length - 1)
                 .map((param, i) => {
+                  const css =
+                    i === item.parameterTypes.length - 2
+                      ? { transform: 'rotate(-45deg)' }
+                      : null
                   return (
                     <HStack flex={1}>
                       <TypeAndValue
@@ -129,7 +126,7 @@ export const FlowFunctionView = forwardRef(
                         value=''
                         direction='column'
                       />{' '}
-                      <ArrowForwardIcon css={{ transform: 'rotate(-45deg)' }} />
+                      <ArrowForwardIcon css={css} />
                     </HStack>
                   )
                 })}
@@ -162,14 +159,19 @@ export const FlowFunctionView = forwardRef(
     )
   },
 )
-
+const defaultName = 'name'
 const FlowCard = ({
   items,
+  name,
   dispatch,
 }: {
   items: Array<IsmallFunctionView & { id: string }>
+  name: string
   dispatch: React.Dispatch<Action>
 }) => {
+  const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
+  const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
+
   return (
     <Box
       boxShadow={'base'}
@@ -182,12 +184,27 @@ const FlowCard = ({
       flexDirection='column'
     >
       <HStack>
-        <Code fontSize='xl'>Flow</Code>
+        {/* <EditableText
+          value={name}
+          onChange={() => {}}
+          placeholder={defaultName}
+          fontSize='3xl'
+          textColor={nameColor}
+          fontStyle={nameFontStyle}
+          width='50%'
+        /> */}
+        <Text fontSize='xl'>Flow Card</Text>
         <Button
           leftIcon={<DeleteIcon />}
           onClick={() => dispatch({ type: 'clearFlowCard' })}
         >
           Clear
+        </Button>
+        <Button
+          leftIcon={<PlusSquareIcon />}
+          onClick={() => dispatch({ type: 'clearFlowCard' })}
+        >
+          Create function
         </Button>
         <PopoverExplanation label='Flow card explanation' title='Flow card'>
           Flow is a special view for the flow/pipe function (left-to-right
@@ -196,7 +213,7 @@ const FlowCard = ({
           vertically to reinforce the pipeline metaphor. JS is executed and
           shown on the right if functions don't have side-effects, otherwise a
           'Play' button will appear. `console.log` is the only effect so far.
-          Note that functions are not curried automatically.
+          Note that functions need to be curried manually.
         </PopoverExplanation>
       </HStack>
       <Divider marginTop={2}></Divider>

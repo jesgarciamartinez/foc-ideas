@@ -20,17 +20,7 @@ import Editor from './Editor'
 import { Itype, Ifunction } from './interfaces'
 import { matchSorter } from 'match-sorter'
 import TypeBadge from './TypeBadge'
-
-const EditableText = (props: EditableProps) => (
-  <Editable {...props}>
-    <EditablePreview />
-    <EditableInput
-      _focus={{
-        outline: '',
-      }}
-    />
-  </Editable>
-)
+import EditableText from './EditableText'
 
 const defaultName = 'name'
 const defaultType = '_'
