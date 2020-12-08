@@ -28,6 +28,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Checkbox,
+  FlexProps,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -43,16 +44,18 @@ const TypeAndValue = ({
   type,
   value,
   onChange,
+  direction,
 }: {
-  type: Itype
+  type: Itype['type']
   value: string
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  direction: 'row' | 'column'
 }) => {
   return (
-    <>
-      <TypeBadge typeAsString={type.type} />
+    <Flex direction={direction}>
+      <TypeBadge typeAsString={type} />
       {(() => {
-        switch (type.type) {
+        switch (type) {
           case 'string':
             return <Input size='sm' onChange={onChange}></Input>
           case 'number':
@@ -67,7 +70,7 @@ const TypeAndValue = ({
             )
           case 'boolean':
             return (
-              <Checkbox isChecked={type.value}>
+              <Checkbox /*isChecked={type.value}*/>
                 {value ? 'true' : 'false'}
               </Checkbox>
             )
@@ -76,7 +79,7 @@ const TypeAndValue = ({
             break
         }
       })()}
-    </>
+    </Flex>
   )
 }
 
@@ -119,7 +122,13 @@ export const FlowFunctionView = forwardRef(
                 .map((param, i) => {
                   return (
                     <HStack flex={1}>
-                      <TypeBadge typeAsString={param} /> <ArrowForwardIcon />
+                      <TypeAndValue
+                        type={param}
+                        onChange={() => {}}
+                        value=''
+                        direction='column'
+                      />{' '}
+                      <ArrowForwardIcon css={{ transform: 'rotate(-45deg)' }} />
                     </HStack>
                   )
                 })}
@@ -131,16 +140,22 @@ export const FlowFunctionView = forwardRef(
             {hasZeroParams ? (
               <Code>()</Code>
             ) : (
-              <TypeBadge
-                typeAsString={
-                  item.parameterTypes[item.parameterTypes.length - 1]
-                }
+              <TypeAndValue
+                onChange={() => {}}
+                value=''
+                direction='row'
+                type={item.parameterTypes[item.parameterTypes.length - 1]}
               />
             )}
             <ArrowDownIcon></ArrowDownIcon>
-            <TypeBadge typeAsString={item.returnType} />
+            <TypeAndValue
+              type={item.returnType}
+              onChange={() => {}}
+              value=''
+              direction='row'
+            />
           </VStack>
-          <Box>{'some example value and more stuff'}</Box>
+          {/* <Box>{'some example value and more stuff'}</Box> */}
         </Flex>
       </Flex>
     )
