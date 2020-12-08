@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
-import { Ifunction, ItypeView, Ieffect } from './components/interfaces'
+import { Ifunction, ItypeView, Ieffect, Itype } from './components/interfaces'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
@@ -107,7 +107,7 @@ type State = {
   dataTypes: ItypeView[]
   effects: Ieffect[]
   isSideBarItemDragging: boolean
-  flowCardFunctions: Array<{ name: string; id: string }>
+  flowCardFunctions: Array<Ifunction & { id: string }>
   searchValue: string
 }
 
@@ -131,6 +131,41 @@ const insert = <A>(list: Array<A>, index: number, item: A) => {
   listCopy.splice(index, 0, item)
   return listCopy
 }
+const getDefaultValue = (p: Itype) => {
+  return p.type === 'string'
+    ? ''
+    : p.type === 'number'
+    ? 0
+    : p.type === 'boolean'
+    ? false
+    : p.type === 'object'
+    ? ''
+    : p.type === 'undefined'
+    ? undefined
+    : p.type === 'null'
+    ? undefined
+    : ''
+}
+const findFunction = ({
+  state,
+  name,
+  id,
+}: {
+  state: State
+  name: string
+  id: string
+}) => {
+  const fn = state.functions.find(f => f.name === name) as Ifunction
+  const parameters = fn.parameters.map(p => {
+    const value = getDefaultValue(p)
+    return {
+      ...p,
+      value,
+    }
+  })
+  const returns = { ...fn.returns, value: getDefaultValue(fn.returns) }
+  return { ...fn, parameters, returns, id }
+}
 
 function reducer(state: State, action: Action): State {
   let flowCardFunctions
@@ -145,10 +180,15 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         isSideBarItemDragging: false,
-        flowCardFunctions: insert(state.flowCardFunctions, action.index, {
-          name: action.draggableId.split('_')[1],
-          id: uuid(),
-        }),
+        flowCardFunctions: insert(
+          state.flowCardFunctions,
+          action.index,
+          findFunction({
+            state,
+            name: action.draggableId.split('_')[1],
+            id: uuid(),
+          }),
+        ),
       }
     case 'dropFnFromFlowCardToFlowCard':
       return {
@@ -177,14 +217,3 @@ export const useAppReducer =
   process.env.NODE_ENV === 'development'
     ? () => useLoggerReducer(reducer, initialState)
     : () => React.useReducer(reducer, initialState)
-
-export const fnSelector = (state: State) => ({
-  name,
-  id,
-}: {
-  name: string
-  id: string
-}) => {
-  const fn = state.functions.find(f => f.name === name) as Ifunction
-  return { ...fn, id }
-}

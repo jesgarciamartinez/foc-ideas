@@ -19,14 +19,14 @@ export type Ifunction = {
 // tests: [{params: [], return:}]
 
 export type Itype =
-  | { type: 'string'; value?: string }
-  | { type: 'number'; value?: number }
-  | { type: 'boolean'; value?: boolean }
+  | { type: 'string'; value?: any }
+  | { type: 'number'; value?: any }
+  | { type: 'boolean'; value?: any }
   | { type: 'function'; value?: any }
-  | { type: 'object'; value?: object }
+  | { type: 'object'; value?: any }
   | { type: 'array'; of: Itype | { typeParam: string }; value?: any }
-  | { type: 'undefined' }
-  | { type: 'null' }
+  | { type: 'undefined'; value?: any }
+  | { type: 'null'; value?: any }
 
 export type ItypeView = {
   name: string

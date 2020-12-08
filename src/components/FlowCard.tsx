@@ -26,13 +26,12 @@ import {
   ArrowForwardIcon,
   DeleteIcon,
   PlusSquareIcon,
-  QuestionIcon,
 } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import { Itype } from './interfaces'
 import PopoverExplanation from './PopoverExplanation'
-import EditableText from './EditableText'
+// import EditableText from './EditableText'
 
 const TypeAndValue = ({
   type,
@@ -41,7 +40,7 @@ const TypeAndValue = ({
   direction,
 }: {
   type: Itype['type']
-  value: string
+  value: any
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   direction: 'row' | 'column'
 }) => {
@@ -51,10 +50,10 @@ const TypeAndValue = ({
       {(() => {
         switch (type) {
           case 'string':
-            return <Input size='sm' onChange={onChange}></Input>
+            return <Input size='sm' value={value} onChange={onChange}></Input>
           case 'number':
             return (
-              <NumberInput size='sm'>
+              <NumberInput size='sm' value={value}>
                 <NumberInputField />
                 <NumberInputStepper>
                   <NumberIncrementStepper />
@@ -64,9 +63,7 @@ const TypeAndValue = ({
             )
           case 'boolean':
             return (
-              <Checkbox /*isChecked={type.value}*/>
-                {value ? 'true' : 'false'}
-              </Checkbox>
+              <Checkbox isChecked={value}>{value ? 'true' : 'false'}</Checkbox>
             )
           default:
             return null
@@ -111,7 +108,7 @@ export const FlowFunctionView = forwardRef(
                 .slice(0, item.parameters.length - 1)
                 .map((param, i) => {
                   const css =
-                    i === item.parameters.length - 1
+                    i === item.parameters.length - 2
                       ? { transform: 'rotate(-45deg)' }
                       : null
                   return (
@@ -119,7 +116,7 @@ export const FlowFunctionView = forwardRef(
                       <TypeAndValue
                         type={param.type}
                         onChange={() => {}}
-                        value=''
+                        value={param.value}
                         direction='column'
                       />{' '}
                       <ArrowForwardIcon css={css} />
@@ -129,14 +126,14 @@ export const FlowFunctionView = forwardRef(
         </Flex>
 
         <Flex paddingY={1}>
-          {/* Last param, Return type, example */}
+          {/* Last param, return type */}
           <VStack>
             {hasZeroParams ? (
               <Code>()</Code>
             ) : (
               <TypeAndValue
                 onChange={() => {}}
-                value=''
+                value={item.parameters[item.parameters.length - 1].value}
                 direction='row'
                 type={item.parameters[item.parameters.length - 1].type}
               />

@@ -1,51 +1,17 @@
 import * as React from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { v4 as uuid } from 'uuid'
-import ts from 'typescript'
-import {
-  ChakraProvider,
-  Box,
-  Center,
-  Button,
-  theme as _theme,
-  extendTheme,
-  HStack,
-  VStack,
-  Code,
-  Spacer,
-  Input,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuIcon,
-  MenuCommand,
-  MenuDivider,
-  InputGroup,
-  InputLeftAddon,
-  InputRightAddon,
-  Editable,
-  EditablePreview,
-  EditableInput,
-  Flex,
-  Text,
-  Textarea,
-} from '@chakra-ui/react'
+import { DragDropContext } from 'react-beautiful-dnd'
+import { ChakraProvider, theme as _theme, extendTheme } from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
 import CardHStack from './components/CardHStack'
-import { ColorModeSwitcher } from './ColorModeSwitcher'
 import SplitPane from 'react-split-pane'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
-import Card from './components/Card'
 import FlowCard from './components/FlowCard'
-import { useAppReducer, fnSelector } from './state'
+import { useAppReducer } from './state'
 import FunctionCreationForm from './components/FunctionCreationForm'
 import { matchSorter } from 'match-sorter'
 import './styles.css'
 import { HotKeys } from 'react-hotkeys'
+// import { ColorModeSwitcher } from './ColorModeSwitcher'
+// import ts from 'typescript'
 
 const theme = extendTheme({
   styles: {
@@ -172,7 +138,7 @@ export const App = () => {
             ></SideBar>
             <CardHStack>
               <FlowCard
-                items={state.flowCardFunctions.map(fnSelector(state))}
+                items={state.flowCardFunctions}
                 dispatch={dispatch}
                 name=''
               ></FlowCard>
