@@ -1,7 +1,7 @@
 import produce from 'immer'
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
-import { Ifunction, ItypeView, Ieffect, Itype } from './components/interfaces'
+import { Ifunction, Ieffect, Itype } from './components/interfaces'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
@@ -95,7 +95,7 @@ const initialFunctions: Array<Ifunction> = [
     description: 'monomorphic id for string',
   },
 ]
-const initialDataTypes: Array<ItypeView> = []
+const initialDataTypes: Array<Itype> = [{ type: 'string' }]
 const initialEffects: Array<Ieffect> = []
 
 export type Action =
@@ -119,7 +119,7 @@ export type Action =
 
 type State = {
   functions: Ifunction[]
-  dataTypes: ItypeView[]
+  dataTypes: Itype[]
   effects: Ieffect[]
   isSideBarItemDragging: boolean
   flowCardFunctions: Array<Ifunction & { id: string }>

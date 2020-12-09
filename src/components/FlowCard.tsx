@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Ifunction, Iparameter, ItypeView } from './interfaces'
+import { Ifunction, Iparameter, Itype } from './interfaces'
 import {
   Box,
   Flex,
@@ -29,9 +29,8 @@ import {
 } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
-import { Itype } from './interfaces'
 import PopoverExplanation from './PopoverExplanation'
-import produce from 'immer'
+// import produce from 'immer'
 // import EditableText from './EditableText'
 
 const TypeAndValue = ({
@@ -39,16 +38,21 @@ const TypeAndValue = ({
   value,
   onChange,
   direction,
+  noInput = false,
 }: {
   type: Itype['type']
   value: any
   onChange: (v: string | number | boolean) => void
   direction: 'row' | 'column'
+  noInput?: boolean
 }) => {
   return (
     <Flex direction={direction}>
       <TypeBadge typeAsString={type} />
       {(() => {
+        if (noInput) {
+          return <Code>{value}</Code>
+        }
         switch (type) {
           case 'string':
             return (
@@ -103,10 +107,12 @@ export const FlowFunctionView = React.memo(
         item,
         style,
         onChangeParam,
+        isFirstFunctionInFlow,
         ...rest
       }: {
         item: Ifunction
         style?: React.CSSProperties
+        isFirstFunctionInFlow: boolean
         onChangeParam: (_: {
           paramValue: string | number | boolean
           paramIndex: number
@@ -177,6 +183,7 @@ export const FlowFunctionView = React.memo(
                   }} //TODO only let change if it's the first one
                   value={item.parameters[item.parameters.length - 1].value}
                   direction='row'
+                  noInput={!isFirstFunctionInFlow}
                   type={item.parameters[item.parameters.length - 1].type}
                 />
               )}
@@ -184,6 +191,7 @@ export const FlowFunctionView = React.memo(
               <TypeAndValue
                 type={item.returns.type}
                 onChange={() => {}} //TODO disable
+                noInput
                 value={item.returns.value}
                 direction='row'
               />
@@ -231,110 +239,114 @@ const getItemsWithComputedValues = (
   return newItems
 }
 
-const FlowCard = ({
-  items,
-  name,
-  dispatch,
-}: {
-  items: Array<Ifunction & { id: string }>
-  name: string
-  dispatch: React.Dispatch<Action>
-}) => {
-  const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
-  const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
-  const itemsWithComputedValues = getItemsWithComputedValues(items)
-  // const [itemsWithComputedValues, setItemsWithComputedValues] = React.useState<
-  //   Array<Ifunction & { id: string }>
-  // >(items)
-  // React.useEffect(() => {
-  //   setItemsWithComputedValues(getItemsWithComputedValues(items))
-  // }, [items])
+const FlowCard = React.memo(
+  ({
+    items,
+    name,
+    dispatch,
+  }: {
+    items: Array<Ifunction & { id: string }>
+    name: string
+    dispatch: React.Dispatch<Action>
+  }) => {
+    const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
+    const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
+    const itemsWithComputedValues = getItemsWithComputedValues(items)
+    // const [itemsWithComputedValues, setItemsWithComputedValues] = React.useState<
+    //   Array<Ifunction & { id: string }>
+    // >(items)
+    // React.useEffect(() => {
+    //   setItemsWithComputedValues(getItemsWithComputedValues(items))
+    // }, [items])
 
-  return (
-    <Box
-      boxShadow={'base'}
-      padding={1}
-      minWidth={'50%'}
-      minHeight='100vh'
-      position='relative'
-      backgroundColor='white'
-      display='flex'
-      flexDirection='column'
-    >
-      <HStack>
-        <Text fontSize='xl'>Flow Card</Text>
-        <Button
-          leftIcon={<DeleteIcon />}
-          onClick={() => dispatch({ type: 'clearFlowCard' })}
-        >
-          Clear
-        </Button>
-        <Button
-          leftIcon={<PlusSquareIcon />}
-          onClick={() => dispatch({ type: 'clearFlowCard' })}
-        >
-          Create function
-        </Button>
-        <PopoverExplanation label='Flow card explanation' title='Flow card'>
-          Flow is a special view for the flow/pipe function (left-to-right
-          variadic compose). This is meant as a "functional Scratch" to visually
-          explore function composition. Last argument and return type line up
-          vertically to reinforce the pipeline metaphor. JS is executed and
-          shown on the right if functions don't have side-effects, otherwise a
-          'Play' button will appear. `console.log` is the only effect so far.
-          Note that functions need to be curried manually.
-        </PopoverExplanation>
-      </HStack>
-      <Divider marginTop={2}></Divider>
-      <Droppable droppableId='FlowCard'>
-        {(provided, snapshot) => {
-          return (
-            <Box
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              minWidth={'50%'}
-              flex={1}
-              minHeight='100%'
-            >
-              {itemsWithComputedValues.map((item, i) => {
-                return (
-                  <Draggable key={item.id} draggableId={item.id} index={i}>
-                    {(provided, snapshot) => {
-                      return (
-                        <FlowFunctionView
-                          item={item}
-                          onChangeParam={({ paramValue, paramIndex }) => {
-                            // setItemsWithComputedValues(
-                            //   produce(itemsWithComputedValues, draft => {
-                            //     let fn = draft.find(({ id }) => id === item.id)
-                            //     if (!fn) return //should not happen
-                            //     fn.parameters[paramIndex].value = paramValue
-                            //   }),
-                            // )
-                            dispatch({
-                              type: 'changeFunctionParamValue',
-                              functionId: item.id,
-                              paramValue,
-                              paramIndex,
-                            })
-                          }}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={provided.draggableProps.style}
-                        />
-                      )
-                    }}
-                  </Draggable>
-                )
-              })}
-              {provided.placeholder}
-            </Box>
-          )
-        }}
-      </Droppable>
-    </Box>
-  )
-}
+    return (
+      <Box
+        boxShadow={'base'}
+        padding={1}
+        minWidth={'50%'}
+        minHeight='100vh'
+        position='relative'
+        backgroundColor='white'
+        display='flex'
+        flexDirection='column'
+      >
+        <HStack>
+          <Text fontSize='xl'>Flow Card</Text>
+          <Button
+            leftIcon={<DeleteIcon />}
+            onClick={() => dispatch({ type: 'clearFlowCard' })}
+          >
+            Clear
+          </Button>
+          <Button
+            leftIcon={<PlusSquareIcon />}
+            onClick={() => dispatch({ type: 'clearFlowCard' })}
+          >
+            Create function
+          </Button>
+          <PopoverExplanation label='Flow card explanation' title='Flow card'>
+            Flow is a special view for the flow/pipe function (left-to-right
+            variadic compose). This is meant as a "functional Scratch" to
+            visually explore function composition. Last argument and return type
+            line up vertically to reinforce the pipeline metaphor. JS is
+            executed and shown on the right if functions don't have
+            side-effects, otherwise a 'Play' button will appear. `console.log`
+            is the only effect so far. Note that functions need to be curried
+            manually.
+          </PopoverExplanation>
+        </HStack>
+        <Divider marginTop={2}></Divider>
+        <Droppable droppableId='FlowCard'>
+          {(provided, snapshot) => {
+            return (
+              <Box
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                minWidth={'50%'}
+                flex={1}
+                minHeight='100%'
+              >
+                {itemsWithComputedValues.map((item, i) => {
+                  return (
+                    <Draggable key={item.id} draggableId={item.id} index={i}>
+                      {(provided, snapshot) => {
+                        return (
+                          <FlowFunctionView
+                            isFirstFunctionInFlow={i === 0}
+                            item={item}
+                            onChangeParam={({ paramValue, paramIndex }) => {
+                              // setItemsWithComputedValues(
+                              //   produce(itemsWithComputedValues, draft => {
+                              //     let fn = draft.find(({ id }) => id === item.id)
+                              //     if (!fn) return //should not happen
+                              //     fn.parameters[paramIndex].value = paramValue
+                              //   }),
+                              // )
+                              dispatch({
+                                type: 'changeFunctionParamValue',
+                                functionId: item.id,
+                                paramValue,
+                                paramIndex,
+                              })
+                            }}
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={provided.draggableProps.style}
+                          />
+                        )
+                      }}
+                    </Draggable>
+                  )
+                })}
+                {provided.placeholder}
+              </Box>
+            )
+          }}
+        </Droppable>
+      </Box>
+    )
+  },
+)
 
 export default FlowCard

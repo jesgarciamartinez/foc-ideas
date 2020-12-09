@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import type { Ieffect, ItypeView, Ifunction } from './interfaces'
+import type { Ieffect, Itype, Ifunction } from './interfaces'
 import {
   Box,
   Code,
@@ -46,7 +46,7 @@ type IsideBarItem =
   | {
       nodeId: 'types'
       label: 'Data Types'
-      items: Array<ItypeView>
+      items: Array<Itype>
     }
   | {
       nodeId: 'effects'
@@ -170,28 +170,6 @@ export default forwardRef(
               draggable.focus()
             }
           }}
-          // onNodeSelect={(e: any, v: string) => {
-          // console.log('select', { e, v })
-          // const draggable: HTMLInputElement | null = document.querySelector(
-          //   `[data-rbd-draggable-id="${v}"]`,
-          // )
-          // if (draggable) {
-          //   draggable.focus()
-          // }
-          // if (!v.startsWith('functions')) {
-          //   return
-          // }
-          // const [label, name, action] = v.split('_')
-          // if (action === 'flow') {
-          //   dispatch({
-          //     type: 'dropFnFromSideBarOnFlowCard',
-          //     index: 0, //TODO
-          //     draggableId: `${label}_${name}`,
-          //   })
-          // } else if (action === 'docs') {
-          // }
-          // }}
-          // onNodeToggle={(e: any, v: any) => console.log('toggle', { e, v })}
         >
           {items &&
             items.map(item => {
@@ -217,7 +195,7 @@ export default forwardRef(
                         })
                       case 'types':
                         return item.items.map(innerItem => {
-                          const id = `${item.nodeId}_${innerItem.name}`
+                          const id = `${item.nodeId}_${innerItem.type}`
                           return (
                             <TypeTreeItem
                               {...innerItem}
@@ -344,14 +322,14 @@ const FunctionTreeItem = (
   )
 }
 const TypeTreeItem = (
-  props: ItypeView & { nodeId: string; isAnyItemDragging: boolean },
+  props: Itype & { nodeId: string; isAnyItemDragging: boolean },
 ) => {
   const { content } = useTreeItemStyles()
   return (
     <TreeItem
       nodeId={props.nodeId}
       classes={{ content: props.isAnyItemDragging ? content : undefined }}
-      label={`${props.type} ${props.name}`}
+      label={props.type}
     />
   )
 }

@@ -28,12 +28,6 @@ export type Itype =
   | { type: 'undefined'; value?: any }
   | { type: 'null'; value?: any }
 
-export type ItypeView = {
-  name: string
-  type: string
-  typeParameters?: Array<string>
-}
-
 export type Ieffect = {
   name: string
 }

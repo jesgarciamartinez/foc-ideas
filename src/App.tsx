@@ -124,7 +124,7 @@ export const App = () => {
                   nodeId: 'types',
                   label: 'Data Types',
                   items: matchSorter(state.dataTypes, state.searchValue, {
-                    keys: ['name'],
+                    keys: ['type'],
                   }),
                 },
                 {
