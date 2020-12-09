@@ -31,6 +31,7 @@ import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import { Itype } from './interfaces'
 import PopoverExplanation from './PopoverExplanation'
+import produce from 'immer'
 // import EditableText from './EditableText'
 
 const TypeAndValue = ({
@@ -41,7 +42,7 @@ const TypeAndValue = ({
 }: {
   type: Itype['type']
   value: any
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange: (v: string | number | boolean) => void
   direction: 'row' | 'column'
 }) => {
   return (
@@ -50,10 +51,24 @@ const TypeAndValue = ({
       {(() => {
         switch (type) {
           case 'string':
-            return <Input size='sm' value={value} onChange={onChange}></Input>
+            return (
+              <Input
+                size='sm'
+                value={value}
+                onChange={e => {
+                  onChange(e.target.value) /*onChangeParam*/
+                }}
+              ></Input>
+            )
           case 'number':
             return (
-              <NumberInput size='sm' value={value}>
+              <NumberInput
+                size='sm'
+                value={value}
+                onChange={(s, n) => {
+                  onChange(n)
+                }}
+              >
                 <NumberInputField />
                 <NumberInputStepper>
                   <NumberIncrementStepper />
@@ -63,7 +78,14 @@ const TypeAndValue = ({
             )
           case 'boolean':
             return (
-              <Checkbox isChecked={value}>{value ? 'true' : 'false'}</Checkbox>
+              <Checkbox
+                isChecked={value}
+                onChange={e => {
+                  onChange(e.target.checked)
+                }}
+              >
+                {value ? 'true' : 'false'}
+              </Checkbox>
             )
           default:
             return null
@@ -74,83 +96,104 @@ const TypeAndValue = ({
   )
 }
 
-export const FlowFunctionView = forwardRef(
-  (
-    { item, style, ...rest }: { item: Ifunction; style?: React.CSSProperties },
-    ref,
-  ) => {
-    const hasZeroParams = item.parameters.length === 0
-    const hasOneParam = item.parameters.length === 1
-    return (
-      <Flex
-        {...rest}
-        ref={ref}
-        style={style}
-        flexBasis={0}
-        minWidth={0}
-        marginY={3}
-        wrap='nowrap'
-      >
-        <Flex flex={1} minWidth={0}>
-          {/*name and params*/}
-          <Center
-            flex={1}
-            whiteSpace='nowrap'
-            overflow='hidden'
-            textOverflow='ellipsis'
-          >
-            <Code>{item.name}</Code>
-          </Center>
-          <Spacer></Spacer>
-          {hasZeroParams || hasOneParam
-            ? null
-            : item.parameters
-                .slice(0, item.parameters.length - 1)
-                .map((param, i) => {
-                  const css =
-                    i === item.parameters.length - 2
-                      ? { transform: 'rotate(-45deg)' }
-                      : null
-                  return (
-                    <HStack flex={1} key={i}>
-                      <TypeAndValue
-                        type={param.type}
-                        onChange={() => {}}
-                        value={param.value}
-                        direction='column'
-                      />{' '}
-                      <ArrowForwardIcon css={css} />
-                    </HStack>
-                  )
-                })}
-        </Flex>
+export const FlowFunctionView = React.memo(
+  forwardRef(
+    (
+      {
+        item,
+        style,
+        onChangeParam,
+        ...rest
+      }: {
+        item: Ifunction
+        style?: React.CSSProperties
+        onChangeParam: (_: {
+          paramValue: string | number | boolean
+          paramIndex: number
+        }) => void
+      },
+      ref,
+    ) => {
+      const hasZeroParams = item.parameters.length === 0
+      const hasOneParam = item.parameters.length === 1
+      return (
+        <Flex
+          {...rest}
+          ref={ref}
+          style={style}
+          flexBasis={0}
+          minWidth={0}
+          marginY={3}
+          wrap='nowrap'
+        >
+          <Flex flex={1} minWidth={0}>
+            {/*name and params*/}
+            <Center
+              flex={1}
+              whiteSpace='nowrap'
+              overflow='hidden'
+              textOverflow='ellipsis'
+            >
+              <Code>{item.name}</Code>
+            </Center>
+            <Spacer></Spacer>
+            {hasZeroParams || hasOneParam
+              ? null
+              : item.parameters
+                  .slice(0, item.parameters.length - 1)
+                  .map((param, i) => {
+                    const css =
+                      i === item.parameters.length - 2
+                        ? { transform: 'rotate(-45deg)' }
+                        : null
+                    return (
+                      <HStack flex={1} key={i}>
+                        <TypeAndValue
+                          type={param.type}
+                          onChange={paramValue => {
+                            onChangeParam({ paramValue, paramIndex: i })
+                          }}
+                          value={param.value}
+                          direction='column'
+                        />{' '}
+                        <ArrowForwardIcon css={css} />
+                      </HStack>
+                    )
+                  })}
+          </Flex>
 
-        <Flex paddingY={1}>
-          {/* Last param, return type */}
-          <VStack>
-            {hasZeroParams ? (
-              <Code>()</Code>
-            ) : (
+          <Flex paddingY={1}>
+            {/* Last param, return type */}
+            <VStack>
+              {hasZeroParams ? (
+                <Code>()</Code>
+              ) : (
+                <TypeAndValue
+                  onChange={paramValue => {
+                    onChangeParam({
+                      paramValue,
+                      paramIndex: item.parameters.length - 1,
+                    })
+                  }} //TODO only let change if it's the first one
+                  value={item.parameters[item.parameters.length - 1].value}
+                  direction='row'
+                  type={item.parameters[item.parameters.length - 1].type}
+                />
+              )}
+              <ArrowDownIcon></ArrowDownIcon>
               <TypeAndValue
-                onChange={() => {}}
-                value={item.parameters[item.parameters.length - 1].value}
+                type={item.returns.type}
+                onChange={() => {}} //TODO disable
+                value={item.returns.value}
                 direction='row'
-                type={item.parameters[item.parameters.length - 1].type}
               />
-            )}
-            <ArrowDownIcon></ArrowDownIcon>
-            <TypeAndValue
-              type={item.returns.type}
-              onChange={() => {}}
-              value={''}
-              direction='row'
-            />
-          </VStack>
-          {/* <Box>{'some example value and more stuff'}</Box> */}
+            </VStack>
+            {/* <Box>{'some example value and more stuff'}</Box> */}
+          </Flex>
         </Flex>
-      </Flex>
-    )
-  },
+      )
+    },
+  ),
 )
 
 const defaultName = 'name'
@@ -172,12 +215,9 @@ const getItemsWithComputedValues = (
           previousReturn === null ? previouslastParam?.value : previousReturn,
       })
     }
-    // try {
-    // } catch (error) {} TODO
 
-    const returnValue = eval(
-      `${item.code}(${parameters.map(p => p.value).join(',')})`,
-    )
+    //TODO typecheck
+    const returnValue = item.fn(parameters.map(p => p.value).join(','))
 
     newItems.push({
       ...item,
@@ -203,6 +243,13 @@ const FlowCard = ({
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
   const itemsWithComputedValues = getItemsWithComputedValues(items)
+  // const [itemsWithComputedValues, setItemsWithComputedValues] = React.useState<
+  //   Array<Ifunction & { id: string }>
+  // >(items)
+  // React.useEffect(() => {
+  //   setItemsWithComputedValues(getItemsWithComputedValues(items))
+  // }, [items])
+
   return (
     <Box
       boxShadow={'base'}
@@ -256,6 +303,21 @@ const FlowCard = ({
                       return (
                         <FlowFunctionView
                           item={item}
+                          onChangeParam={({ paramValue, paramIndex }) => {
+                            // setItemsWithComputedValues(
+                            //   produce(itemsWithComputedValues, draft => {
+                            //     let fn = draft.find(({ id }) => id === item.id)
+                            //     if (!fn) return //should not happen
+                            //     fn.parameters[paramIndex].value = paramValue
+                            //   }),
+                            // )
+                            dispatch({
+                              type: 'changeFunctionParamValue',
+                              functionId: item.id,
+                              paramValue,
+                              paramIndex,
+                            })
+                          }}
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}

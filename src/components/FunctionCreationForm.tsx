@@ -58,20 +58,20 @@ const getFilteredTypeSuggestions = (
 // }
 
 const FunctionCreationForm = ({
-  fn,
+  func,
 }: {
-  fn?: Ifunction & { parameterTypes: Itype | '_' }
+  func?: Ifunction & { parameterTypes: Itype | '_' }
 }) => {
   const [state, setState] = React.useState({
-    name: fn?.name || '',
-    params: /*fn?.parameterTypes
+    name: func?.name || '',
+    params: /*func?.parameterTypes
       .map(type => ({ type }))
-      .concat({ type: fn.returnType }) ||*/ [
+      .concat({ type: func.returnType }) ||*/ [
       { type: defaultType },
       { type: defaultType },
     ],
-    description: fn?.description || '',
-    code: fn?.code || '',
+    description: func?.description || '',
+    code: func?.fn.toString() || '',
   })
   const { name, params, description, code } = state
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))

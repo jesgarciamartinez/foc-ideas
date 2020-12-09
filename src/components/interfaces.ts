@@ -12,7 +12,7 @@ export type Ifunction = {
   name: string
   parameters: Array<Iparameter>
   returns: Itype
-  code: string
+  fn: Function
   description: string
   contract?: string
 }

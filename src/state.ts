@@ -1,3 +1,4 @@
+import produce from 'immer'
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
 import { Ifunction, ItypeView, Ieffect, Itype } from './components/interfaces'
@@ -47,14 +48,18 @@ const initialFunctions: Array<Ifunction> = [
     name: 'length',
     parameters: [{ type: 'string', parameterName: 's' }],
     returns: { type: 'number' },
-    code: 'function length(s){return s.length}',
+    fn: function length(s: any) {
+      return s.length
+    },
     description: 'Takes a string and returns how many characters it has',
   },
   {
     name: 'upperCase',
     parameters: [{ type: 'string', parameterName: 's' }],
     returns: { type: 'string' },
-    code: 'function(s){s.toUppercase()}',
+    fn: function (s: any) {
+      return s.toUpperCase()
+    },
     description:
       'Takes a string and returns is with all characters in uppercase',
   },
@@ -65,24 +70,28 @@ const initialFunctions: Array<Ifunction> = [
       { type: 'number', parameterName: 'y' },
     ],
     returns: { type: 'number' },
-    code: 'function add(x,y){x + y}',
+    fn: function add(x: any, y: any) {
+      return x + y
+    },
     description: 'Adds two numbers together',
   },
+  // {
+  //   name: 'map',
+  //   parameters: [
+  //     { type: 'function', parameterName: 'f' },
+  //     { type: 'array', of: { typeParam: 'A' }, parameterName: 'as' },
+  //   ],
+  //   returns: { type: 'array', of: { typeParam: 'B' } },
+  //   code: 'function map(f,as){return as.map(f)}',
+  //   description: 'Applies a function to each element of an array',
+  // },
   {
-    name: 'map',
-    parameters: [
-      { type: 'function', parameterName: 'f' },
-      { type: 'array', of: { typeParam: 'A' }, parameterName: 'as' },
-    ],
-    returns: { type: 'array', of: { typeParam: 'B' } },
-    code: 'function map(f,as){return as.map(f)}',
-    description: 'Applies a function to each element of an array',
-  },
-  {
-    name: 'stringId',
+    name: 'id',
     parameters: [{ type: 'string', parameterName: 's1' }],
     returns: { type: 'string' },
-    code: 'function stringId(s1){return s1}',
+    fn: function id(s: any) {
+      return s
+    },
     description: 'monomorphic id for string',
   },
 ]
@@ -101,6 +110,12 @@ export type Action =
     }
   | { type: 'clearFlowCard' }
   | { type: 'sideBarSearch'; value: string }
+  | {
+      type: 'changeFunctionParamValue'
+      paramValue: string | number | boolean
+      paramIndex: number
+      functionId: string
+    }
 
 type State = {
   functions: Ifunction[]
@@ -168,7 +183,6 @@ const findFunction = ({
 }
 
 function reducer(state: State, action: Action): State {
-  let flowCardFunctions
   switch (action.type) {
     case 'isDragging':
       return { ...state, isSideBarItemDragging: true }
@@ -210,6 +224,14 @@ function reducer(state: State, action: Action): State {
         ...state,
         searchValue: action.value,
       }
+    case 'changeFunctionParamValue':
+      return produce(state, draft => {
+        let fn = draft.flowCardFunctions.find(
+          ({ id }) => id === action.functionId,
+        )
+        if (!fn) return //should not happen
+        fn.parameters[action.paramIndex].value = action.paramValue
+      })
   }
 }
 
