@@ -39,13 +39,11 @@ const TypeAndValue = React.memo(
     value,
     onChange,
     direction,
-  }: // noInput = false,
-  {
+  }: {
     type: Itype['type']
     value: any
     onChange?: (v: string | number | boolean) => void
     direction: 'row' | 'column'
-    // noInput?: boolean
   }) => {
     return (
       <Flex direction={direction}>
@@ -61,7 +59,7 @@ const TypeAndValue = React.memo(
                   size='sm'
                   value={value}
                   onChange={e => {
-                    onChange(e.target.value) /*onChangeParam*/
+                    onChange(e.target.value)
                   }}
                 ></Input>
               )
@@ -71,7 +69,9 @@ const TypeAndValue = React.memo(
                   size='sm'
                   value={value}
                   onChange={(s, n) => {
-                    if (isNaN(Number(n))) return
+                    if (isNaN(Number(n))) {
+                      return
+                    }
                     onChange(n)
                   }}
                   allowMouseWheel
@@ -114,7 +114,6 @@ const getParamValues = (
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     const parameters = [...item.parameters]
-    // const { parameters } = item
     if (i === 0) {
       //donde se ha producido el cambio
       const param =
@@ -195,7 +194,6 @@ const C_TypeAndValue = React.memo(
         value={param.value}
         onChange={onChange}
         direction={direction}
-        // noInput={noInput}
       />
     )
   },
@@ -315,28 +313,14 @@ const getFnsValuesFromItems = (
   items: Array<IfunctionWithId>,
   previousItems: Array<IfunctionWithId> = [],
 ) => {
-  // return items.map(item => {
-  //   return previousItems.find(pi => pi.id === item.id) ?? item
-  // })
   let previousReturn = null
   let newItems: IfunctionWithId[] = []
 
   for (let i = 0; i < items.length; i++) {
     const item = previousItems.find(pi => pi.id === items[i].id) ?? items[i]
-
     const parameters = [...item.parameters]
-    // const { parameters } = item
-    //  if (i === 0) {
-    //    //donde se ha producido el cambio
-    //    const param =
-    //      paramIndex === 'last'
-    //        ? parameters[parameters.length - 1]
-    //        : parameters[paramIndex]
-    //    param.value = v
-    //  }
     const previouslastParam: Iparameter | undefined =
       parameters[parameters.length - 1]
-
     if (previouslastParam) {
       parameters[parameters.length - 1] = {
         ...previouslastParam,
@@ -346,8 +330,6 @@ const getFnsValuesFromItems = (
     }
 
     //TODO typecheck
-
-    console.log({ parameters })
     const returnValue = item.fn(...parameters.map(p => p.value))
 
     newItems.push({
@@ -393,21 +375,6 @@ const FlowFunctionsList = React.memo(
                   <FlowFunctionView
                     isFirstFunctionInFlow={i === 0}
                     item={item}
-                    // onChangeParam={({ paramValue, paramIndex }) => {
-                    // setItemsWithComputedValues(
-                    //   produce(itemsWithComputedValues, draft => {
-                    //    y let fn = draft.find(({ id }) => id === item.id)
-                    //     if (!fn) return //should not happen
-                    //     fn.parameters[paramIndex].value = paramValue
-                    //   }),
-                    // )
-                    // dispatch({
-                    //   type: 'changeFunctionParamValue',
-                    //   functionId: item.id,
-                    //   paramValue,
-                    //   paramIndex,
-                    // })
-                    // }}
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
@@ -433,15 +400,6 @@ const FlowCard = React.memo(
     name: string
     dispatch: React.Dispatch<Action>
   }) => {
-    // const itemsWithComputedValues = getItemsWithComputedValues(items)
-
-    // const [itemsWithComputedValues, setItemsWithComputedValues] = React.useState<
-    //   Array<Ifunction & { id: string }>
-    // >(items)
-    // React.useEffect(() => {
-    //   setItemsWithComputedValues(getItemsWithComputedValues(items))
-    // }, [items])
-
     return (
       <Box
         boxShadow={'base'}
