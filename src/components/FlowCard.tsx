@@ -71,8 +71,10 @@ const TypeAndValue = React.memo(
                   size='sm'
                   value={value}
                   onChange={(s, n) => {
+                    if (isNaN(Number(n))) return
                     onChange(n)
                   }}
+                  allowMouseWheel
                 >
                   <NumberInputField />
                   <NumberInputStepper>
@@ -100,29 +102,21 @@ const TypeAndValue = React.memo(
     )
   },
 )
+
 const getParamValues = (
-  items: {
-    id: string
-    parameters: Iparameter[]
-    returns: Itype
-    fn: Function
-  }[],
+  items: IfunctionWithId[],
   v: string | number | boolean,
   paramIndex: number | 'last',
 ) => {
   let previousReturn = null
-  let newItems: {
-    id: string
-    parameters: Iparameter[]
-    returns: Itype
-    fn: Function
-  }[] = []
+  let newItems: IfunctionWithId[] = []
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     const parameters = [...item.parameters]
     // const { parameters } = item
     if (i === 0) {
+      //donde se ha producido el cambio
       const param =
         paramIndex === 'last'
           ? parameters[parameters.length - 1]
@@ -130,7 +124,7 @@ const getParamValues = (
       param.value = v
     }
     const previouslastParam: Iparameter | undefined =
-      item.parameters[item.parameters.length - 1]
+      parameters[parameters.length - 1]
 
     if (previouslastParam) {
       parameters[parameters.length - 1] = {
@@ -141,8 +135,9 @@ const getParamValues = (
     }
 
     //TODO typecheck
-    console.log('>>', parameters.map(p => p.value).join(','))
-    const returnValue = item.fn(parameters.map(p => p.value).join(','))
+
+    console.log({ parameters })
+    const returnValue = item.fn(...parameters.map(p => p.value))
 
     newItems.push({
       ...item,
@@ -317,49 +312,65 @@ export const FlowFunctionView = React.memo(
 )
 
 const getFnsValuesFromItems = (
-  items: Array<Ifunction & { id: string }>,
-  previousItems: Array<{
-    id: string
-    parameters: Iparameter[]
-    returns: Itype
-    fn: Function
-  }> = [],
+  items: Array<IfunctionWithId>,
+  previousItems: Array<IfunctionWithId> = [],
 ) => {
-  return items.map(({ id, parameters, returns, fn }) => {
-    return (
-      previousItems.find(pi => pi.id === id) ?? { id, parameters, returns, fn }
-    )
-  })
+  // return items.map(item => {
+  //   return previousItems.find(pi => pi.id === item.id) ?? item
+  // })
+  let previousReturn = null
+  let newItems: IfunctionWithId[] = []
+
+  for (let i = 0; i < items.length; i++) {
+    const item = previousItems.find(pi => pi.id === items[i].id) ?? items[i]
+
+    const parameters = [...item.parameters]
+    // const { parameters } = item
+    //  if (i === 0) {
+    //    //donde se ha producido el cambio
+    //    const param =
+    //      paramIndex === 'last'
+    //        ? parameters[parameters.length - 1]
+    //        : parameters[paramIndex]
+    //    param.value = v
+    //  }
+    const previouslastParam: Iparameter | undefined =
+      parameters[parameters.length - 1]
+
+    if (previouslastParam) {
+      parameters[parameters.length - 1] = {
+        ...previouslastParam,
+        value:
+          previousReturn === null ? previouslastParam?.value : previousReturn,
+      }
+    }
+
+    //TODO typecheck
+
+    console.log({ parameters })
+    const returnValue = item.fn(...parameters.map(p => p.value))
+
+    newItems.push({
+      ...item,
+      parameters,
+      returns: { ...item.returns, value: returnValue },
+    })
+
+    previousReturn = returnValue
+  }
+
+  return newItems
 }
 
-function usePrevious<A>(value: A) {
-  const ref = React.useRef<A>()
-  React.useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
 const ParameterContext = React.createContext<{
-  fns: Array<{
-    id: string
-    parameters: Iparameter[]
-    returns: Itype
-    fn: Function
-  }>
-  setFns: React.Dispatch<
-    React.SetStateAction<
-      {
-        id: string
-        parameters: Iparameter[]
-        returns: Itype
-        fn: Function
-      }[]
-    >
-  >
+  fns: Array<IfunctionWithId>
+  setFns: React.Dispatch<React.SetStateAction<IfunctionWithId[]>>
 }>({ fns: [], setFns() {} })
 
+type IfunctionWithId = Ifunction & { id: string }
+
 const FlowFunctionsList = React.memo(
-  ({ items }: { items: Array<Ifunction & { id: string }> }) => {
+  ({ items }: { items: Array<IfunctionWithId> }) => {
     const [fns, setFns] = React.useState(getFnsValuesFromItems(items))
     const [previousItems, setPreviousItems] = React.useState(items)
     if (previousItems !== items) {
