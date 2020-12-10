@@ -110,12 +110,12 @@ export type Action =
     }
   | { type: 'clearFlowCard' }
   | { type: 'sideBarSearch'; value: string }
-  | {
-      type: 'changeFunctionParamValue'
-      paramValue: string | number | boolean
-      paramIndex: number
-      functionId: string
-    }
+// | {
+//     type: 'changeFunctionParamValue'
+//     paramValue: string | number | boolean
+//     paramIndex: number
+//     functionId: string
+//   }
 
 type State = {
   functions: Ifunction[]
@@ -146,6 +146,7 @@ const insert = <A>(list: Array<A>, index: number, item: A) => {
   listCopy.splice(index, 0, item)
   return listCopy
 }
+
 const getDefaultValue = (p: Itype) => {
   return p.type === 'string'
     ? ''
@@ -181,6 +182,26 @@ const findFunction = ({
   const returns = { ...fn.returns, value: getDefaultValue(fn.returns) }
   return { ...fn, parameters, returns, id }
 }
+
+// return {
+//   ...state,
+//   isSideBarItemDragging: false,
+//   flowCardFunctions: insert(state.flowCardFunctions, action.index, {
+//     name: action.draggableId.split('_')[1],
+//     id: uuid(),
+//   }),
+// }
+
+// export const fnSelector = (state: State) => ({
+//   name,
+//   id,
+// }: {
+//   name: string
+//   id: string
+// }) => {
+//   const fn = state.functions.find(f => f.name === name) as Ifunction
+//   return { ...fn, id }
+// }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -224,14 +245,14 @@ function reducer(state: State, action: Action): State {
         ...state,
         searchValue: action.value,
       }
-    case 'changeFunctionParamValue':
-      return produce(state, draft => {
-        let fn = draft.flowCardFunctions.find(
-          ({ id }) => id === action.functionId,
-        )
-        if (!fn) return //should not happen
-        fn.parameters[action.paramIndex].value = action.paramValue
-      })
+    // case 'changeFunctionParamValue':
+    //   return produce(state, draft => {
+    //     let fn = draft.flowCardFunctions.find(
+    //       ({ id }) => id === action.functionId,
+    //     )
+    //     if (!fn) return //should not happen
+    //     fn.parameters[action.paramIndex].value = action.paramValue
+    //   })
   }
 }
 

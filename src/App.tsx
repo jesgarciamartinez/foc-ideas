@@ -101,7 +101,6 @@ export const App = () => {
             maxSize={-300}
             resizerStyle={{
               border: '3px solid rgba(1, 22, 39, 0.21)',
-              // boxShadow: ,
               zIndex: 20,
               cursor: 'col-resize',
             }}
