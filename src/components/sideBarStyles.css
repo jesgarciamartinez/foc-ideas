@@ -1,0 +1,26 @@
+/* Copy dnd styles */
+
+.react-beatiful-dnd-copy ~ div {
+  transform: none !important;
+}
+
+.react-beatiful-dnd-copy ~ [data-rbd-placeholder-context-id] {
+  display: none !important;
+}
+
+/* Tree styles  */
+.MuiTreeItem-content:hover {
+  background-color: #e6fffa !important;
+}
+
+.MuiTreeItem-content .Mui-focused {
+  /* teal.50 */
+  background-color: #e6fffa !important;
+}
+
+.Mui-focused {
+  background-color: #e6fffa !important;
+}
+.Mui-expanded {
+  background-color: #e6fffa !important;
+}

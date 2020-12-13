@@ -406,6 +406,7 @@ const FlowCard = React.memo(
         padding={1}
         minWidth={'50%'}
         minHeight='100vh'
+        height='100%'
         position='relative'
         backgroundColor='white'
         display='flex'
@@ -420,9 +421,6 @@ const FlowCard = React.memo(
             }}
           >
             Clear
-          </Button>
-          <Button leftIcon={<PlusSquareIcon />} onClick={() => {}}>
-            Create function
           </Button>
           <PopoverExplanation label='Flow card explanation' title='Flow card'>
             Flow is a special view for the flow/pipe function (left-to-right
@@ -442,9 +440,11 @@ const FlowCard = React.memo(
               <Box
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                minWidth={'50%'}
+                // minWidth={'50%'}
                 flex={1}
                 minHeight='100%'
+                height='100%'
+                overflow='auto'
               >
                 <FlowFunctionsList items={items}></FlowFunctionsList>
                 {provided.placeholder}

@@ -9,6 +9,7 @@ import {
   Code,
   EditableProps,
   IconButton,
+  Input,
 } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { AddIcon, ArrowForwardIcon, ChevronDownIcon } from '@chakra-ui/icons'
@@ -55,7 +56,7 @@ const getFilteredTypeSuggestions = (
 // case 'null':
 //   return ''
 //   }
-// }
+//
 
 const FunctionCreationForm = ({
   func,
@@ -142,9 +143,68 @@ const FunctionCreationForm = ({
   const editorValue = `function ${name}(${params
     .map(({ type }) => type)
     .join(',')}) {\n}`
+
+  const [signature2, setSignature2] = React.useState('')
+  const signature2Ref = React.useRef<HTMLInputElement>(null)
+  const signature2PreviousValueRef = React.useRef('')
+  const onChangeSignature2 = (value: string) => {
+    const arrow = '→'
+    let newValue = value
+    const isDeleting = signature2PreviousValueRef.current.length > value.length
+    const triggerArrow = value.endsWith(',') || value.endsWith(' ')
+    if (
+      triggerArrow && // trigger arrow
+      !isDeleting
+    ) {
+      const previousMeaningfulCharIsArrow = value
+        .replace(',', ' ')
+        .trimEnd()
+        .endsWith(arrow)
+      const previousCharIsClosingBracket = value
+        .substr(0, value.length - 1)
+        .endsWith('}')
+      if (previousMeaningfulCharIsArrow) {
+        newValue = value.substr(0, value.length - 1)
+      } else if (previousCharIsClosingBracket && value.endsWith(' ')) {
+        //abilities
+        newValue = value
+      } else {
+        // only if last non-space or comma char is not arrow
+        newValue = value.substr(0, value.length - 1).concat(` ${arrow} `)
+      }
+    }
+    if (value.endsWith('[') && !isDeleting) {
+      newValue = value.concat(']')
+    }
+    if (value.endsWith('{') && !isDeleting) {
+      const valueWithoutLastLetter = value.substr(0, value.length - 1)
+      const previousValueIsArrow = valueWithoutLastLetter
+        .trimEnd()
+        .endsWith(arrow)
+      if (previousValueIsArrow) {
+        newValue = valueWithoutLastLetter.trimEnd().concat('{}')
+      } else {
+        newValue = value.concat('}')
+      }
+    }
+
+    setSignature2(newValue)
+  }
+  React.useEffect(() => {
+    const isDeleting =
+      signature2PreviousValueRef.current.length > signature2.length //TODO fix this
+    if ((signature2.endsWith(']') || signature2.endsWith('}')) && !isDeleting) {
+      const range = signature2.length - 1
+      // signature2Ref.current!.focus()
+      signature2Ref.current!.setSelectionRange(range, range)
+    }
+    signature2PreviousValueRef.current = signature2
+  }, [signature2])
+
   return (
     <Card>
       <EditableText
+        /* NAME */
         value={name}
         onChange={onChangeName}
         placeholder={defaultName}
@@ -153,6 +213,7 @@ const FunctionCreationForm = ({
         fontStyle={nameFontStyle}
       />
       <Code fontSize='xl'>
+        {/* SIGNATURE */}
         <HStack>
           <EditableText
             as='span'
@@ -225,19 +286,32 @@ const FunctionCreationForm = ({
           ))}
         </HStack>
       </Code>
-      {/* <Input maxWidth='50%' value={'a'}></Input> */}
 
-      {/* <Input maxWidth='50%'></Input> */}
-
-      {/* <HStack>
-        <EditableText></EditableText>
-        <Text> : </Text>
-        <Input maxWidth='50%'></Input>
-        <ArrowForwardIcon></ArrowForwardIcon>
-        <Input maxWidth='50%'></Input>
-      </HStack> */}
+      <Code fontSize='xl' display='block' marginTop={2}>
+        {/* SIGNATURE 2 */}
+        <EditableText
+          ref={signature2Ref}
+          placeholder={defaultName}
+          fontStyle={nameFontStyle}
+          width={(signature2 || defaultName).length * 12 + 12 + 'px'}
+          maxWidth='100%'
+          value={signature2}
+          textColor={nameColor}
+          onChange={onChangeSignature2}
+        />
+        {/* <Input
+          onChange={e => onChangeSignature2(e.target.value)}
+          ref={signature2Ref}
+          placeholder={defaultName}
+          fontStyle={nameFontStyle}
+          width={(signature2 || defaultName).length * 12 + 12 + 'px'}
+          maxWidth='100%'
+          value={signature2}
+        ></Input> */}
+      </Code>
 
       <Textarea
+        /* DESCRIPTION */
         fontSize='xl'
         placeholder='Description'
         onChange={e => {

@@ -1,4 +1,4 @@
-import { QuestionIcon } from '@chakra-ui/icons'
+import { QuestionIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
 import {
   Popover,
   PopoverTrigger,
@@ -20,12 +20,25 @@ const PopoverExplanation = (props: {
   return (
     <Popover>
       <PopoverTrigger>
-        <IconButton aria-label={props.label} icon={<QuestionIcon />} />
+        <IconButton
+          aria-label={props.label}
+          // icon={<QuestionIcon />}
+          icon={<QuestionOutlineIcon />}
+          size='lg'
+          colorScheme='purple'
+          color='unison.purple'
+          variant='ghost'
+          sx={{
+            '&:hover': {
+              color: 'unison.teal',
+            },
+          }}
+        />
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent borderColor='unison.purple'>
         <PopoverArrow />
         <PopoverCloseButton />
-        <PopoverHeader>{props.title}</PopoverHeader>
+        <PopoverHeader borderColor='unison.purple'>{props.title}</PopoverHeader>
         <PopoverBody>{props.children}</PopoverBody>
       </PopoverContent>
     </Popover>
