@@ -37,7 +37,6 @@ import { Action } from '../state'
 import MouseTrap from 'mousetrap'
 // import { FlowFunctionView } from './FlowCard'
 import PopoverExplanation from './PopoverExplanation'
-import { ColorModeSwitcher } from '../ColorModeSwitcher'
 
 type IsideBarItem =
   | {
@@ -259,7 +258,6 @@ const Sidebar = React.memo(
             ) : null}
           </InputGroup>
           <Center>
-            <ColorModeSwitcher></ColorModeSwitcher>
             <PopoverExplanation label='Sidebar explanation' title='Sidebar'>
               <UnorderedList>
                 <ListItem>
