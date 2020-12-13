@@ -28,6 +28,7 @@ import {
   SearchIcon,
 } from '@chakra-ui/icons'
 import { FaShapes } from 'react-icons/fa'
+// import { VscSymbolMisc as FaShapes } from 'react-icons/vsc'
 import { GiMineExplosion } from 'react-icons/gi'
 // import { IoShapes } from 'react-icons/io' //RiFunctionLine, RiFunctionFill //IoShapesOutline
 import './sideBarStyles.css'
@@ -57,7 +58,11 @@ type IsideBarItem =
 
 const FunctionItem = (props: Ifunction) => {
   return (
-    <Text wrap='nowrap'>
+    <Text
+      wrap='nowrap'
+      color='unison.purple'
+      _hover={{ color: 'unison.lightPurple' }}
+    >
       <Code
         fontSize='sm'
         // fontWeight='700'
@@ -65,6 +70,7 @@ const FunctionItem = (props: Ifunction) => {
         paddingY={0.5}
         rounded='base'
         backgroundColor='transparent'
+        color='inherit'
       >
         {props.name}
       </Code>
@@ -72,17 +78,12 @@ const FunctionItem = (props: Ifunction) => {
       <Text as={'span'} flexWrap='nowrap'>
         {props.parameters.map((p, i) => (
           <Text as='span' key={i}>
-            <TypeBadge typeAsString={p.type} />{' '}
-            <Text as='span'>
-              {' '}
-              <ArrowForwardIcon color='unison.purple' />{' '}
-            </Text>
+            <TypeBadge typeAsString={p.type} />
+            <ArrowForwardIcon marginX={1} />
           </Text>
         ))}
       </Text>
-      <Text as='span'>
-        <TypeBadge typeAsString={props.returns.type} />
-      </Text>
+      <TypeBadge typeAsString={props.returns.type} />
     </Text>
   )
 }
@@ -178,42 +179,6 @@ const TypeTreeItem = (
   )
 }
 
-const useTreeViewStyles = (theme: any) =>
-  makeStyles({
-    root: {
-      // backgroundColor: theme.colors.purple['100'],
-    },
-  })()
-
-const useRootTreeItemStyles = (theme: any) =>
-  makeStyles({
-    root: {
-      // '&:hover': {
-      //   backgroundColor: theme.colors.teal['100'],
-      // },
-    },
-    group: {
-      // borderTop: `1px solid ${theme.colors.unison.purple}`,
-      // borderBottom: `1px solid ${theme.colors.unison.purple}`,
-      // backgroundColor: theme.colors.purple['50'],
-      // '&:hover': {
-      //   backgroundColor: theme.colors.purple['50'],
-      // },
-    },
-    content: {
-      // borderBottom: `1px solid ${theme.colors.unison.purple}`,
-      // '&:hover': {
-      //   backgroundColor: theme.colors.teal['50'],
-      // },
-    },
-    expanded: {
-      // backgroundColor: theme.colors.teal['50'],
-    },
-    focused: {
-      // backgroundColor: theme.colors.teal['50'],
-    },
-  })()
-
 const Sidebar = React.memo(
   forwardRef(
     (
@@ -236,8 +201,6 @@ const Sidebar = React.memo(
           unison: { purple, lightPurple, pink },
         },
       } = theme
-      const { root } = useTreeViewStyles(theme)
-      const rootTreeItemStyles = useRootTreeItemStyles(theme)
 
       //Search
       const [isHoveringSearch, setIsHoveringSearch] = React.useState(false)
@@ -287,10 +250,11 @@ const Sidebar = React.memo(
                 right={2}
                 top={2}
               >
-                <Kbd backgroundColor='transparent'>ctrl</Kbd>{' '}
-                <Text backgroundColor='transparent'>/</Text>{' '}
-                <Kbd backgroundColor='transparent'>⌘</Kbd>
-                <Kbd backgroundColor='transparent'>B</Kbd>
+                <Kbd>ctrl</Kbd>
+                <Text>/</Text>
+                <Kbd>⌘</Kbd>
+                <Text>+</Text>
+                <Kbd>B</Kbd>
               </HStack>
             ) : null}
           </InputGroup>
@@ -300,10 +264,6 @@ const Sidebar = React.memo(
               <UnorderedList>
                 <ListItem>
                   Drag functions and drop them onto Flow Card or Docs Card
-                </ListItem>
-                <ListItem>
-                  <Kbd>ctrl</Kbd> + <Kbd>B</Kbd> or <Kbd>⌘</Kbd> + <Kbd>B</Kbd>{' '}
-                  to focus sidebar search
                 </ListItem>
                 <ListItem>
                   <Kbd>up</Kbd>, <Kbd>down</Kbd>, <Kbd>left</Kbd>,{' '}
@@ -320,9 +280,8 @@ const Sidebar = React.memo(
           <TreeView
             selected={[]}
             aria-label='Functions, types and effects'
-            classes={{ root }}
-            defaultCollapseIcon={<ChevronDownIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
+            defaultCollapseIcon={<ChevronDownIcon color='unison.purple' />}
+            defaultExpandIcon={<ChevronRightIcon color='unison.purple' />}
             onNodeFocus={(e, v) => {
               const draggable: any = document.querySelector(
                 `[data-rbd-draggable-id="${v}"]`,
@@ -383,34 +342,28 @@ const Sidebar = React.memo(
           >
             {items &&
               items.map(item => {
+                const label = (
+                  <Text fontSize='xl' color={'unison.purple'}>
+                    {item.label}
+                  </Text>
+                )
                 return (
                   <TreeItem
                     nodeId={item.nodeId}
                     key={item.nodeId}
-                    classes={{
-                      root: rootTreeItemStyles.root,
-                      group: rootTreeItemStyles.group,
-                      content: rootTreeItemStyles.content,
-                    }}
                     label={
-                      item.nodeId === 'functions' ? (
-                        <HStack>
-                          <Text fontWeight='bold' fontSize='xl'>
+                      <HStack>
+                        {item.nodeId === 'functions' ? (
+                          <Text fontWeight='bold' fontSize='xl' color={purple}>
                             λ
-                          </Text>{' '}
-                          <Text fontSize='xl'>{item.label}</Text>
-                        </HStack>
-                      ) : item.nodeId === 'types' ? (
-                        <HStack>
-                          <FaShapes />
-                          <Text fontSize='xl'>{item.label}</Text>
-                        </HStack>
-                      ) : item.nodeId === 'effects' ? (
-                        <HStack>
-                          <GiMineExplosion />{' '}
-                          <Text fontSize='xl'>{item.label}</Text>
-                        </HStack>
-                      ) : null
+                          </Text>
+                        ) : item.nodeId === 'types' ? (
+                          <FaShapes color={purple} />
+                        ) : item.nodeId === 'effects' ? (
+                          <GiMineExplosion color={purple} />
+                        ) : null}
+                        {label}
+                      </HStack>
                     }
                   >
                     {(() => {

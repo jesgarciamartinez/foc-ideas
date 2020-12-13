@@ -17,8 +17,22 @@ const TypeBadge = ({
     <Code
       paddingX={1}
       paddingY={0.5}
-      sx={{ color: orange, backgroundColor: yellow }}
-      // borderLeftRadius='20%'
+      // colorScheme={'yellow'}
+      sx={
+        {
+          string: { color: 'unison.darkOrange', backgroundColor: 'yellow.100' },
+          number: {
+            color: 'unison.darkGreen',
+            backgroundColor: 'green.100',
+          },
+          boolean: { color: 'unison.pink', backgroundColor: 'pink.100' },
+          function: { color: 'unison.purple', backgroundColor: 'purple.100' },
+          object: { color: 'black', backgroundColor: 'gray.100' },
+          array: { color: 'black', backgroundColor: 'gray.100' },
+          undefined: { color: 'black', backgroundColor: 'gray.100' },
+          null: { color: 'black', backgroundColor: 'gray.100' },
+        }[typeAsString]
+      }
       rounded={'base'}
       //   colorScheme={(() => {
       //     switch (typeAsString) {

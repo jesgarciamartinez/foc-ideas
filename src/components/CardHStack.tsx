@@ -8,7 +8,7 @@ const CardHStack = ({ children }: { children?: any }) => {
       height='100%'
       // flex='1'
       // padding={1}
-      backgroundColor='yellow.50'
+      backgroundColor='purple.50'
     >
       {children}
     </HStack>

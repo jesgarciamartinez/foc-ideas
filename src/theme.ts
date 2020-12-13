@@ -12,6 +12,8 @@ export default extendTheme({
       },
     },
   },
+  number: 3,
+  bool: false,
   shadows: {
     outline: 'none',
   },
@@ -30,6 +32,9 @@ export default extendTheme({
       darkblue: '#00018f',
       gray: '#616c77',
       //derived:
+      darkOrange: '#572E00',
+      darkGreen: '#005C1F',
+      darkPink: '#C4333F',
     },
   },
 })

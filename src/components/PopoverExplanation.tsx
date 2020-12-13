@@ -30,15 +30,16 @@ const PopoverExplanation = (props: {
           variant='ghost'
           sx={{
             '&:hover': {
-              color: 'unison.teal',
+              color: 'unison.aqua',
             },
           }}
         />
       </PopoverTrigger>
-      <PopoverContent borderColor='unison.purple'>
+      {/* <PopoverContent borderColor='unison.purple'> */}
+      <PopoverContent>
         <PopoverArrow />
         <PopoverCloseButton />
-        <PopoverHeader borderColor='unison.purple'>{props.title}</PopoverHeader>
+        <PopoverHeader>{props.title}</PopoverHeader>
         <PopoverBody>{props.children}</PopoverBody>
       </PopoverContent>
     </Popover>

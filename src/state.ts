@@ -94,6 +94,15 @@ const initialFunctions: Array<Ifunction> = [
     },
     description: 'monomorphic id for string',
   },
+  {
+    name: 'id',
+    parameters: [{ type: 'number', parameterName: 'n' }],
+    returns: { type: 'boolean' },
+    fn: function id(n: number, m: number) {
+      return m > n
+    },
+    description: 'Number is greater than another',
+  },
 ]
 const initialDataTypes: Array<Itype> = [{ type: 'string' }]
 const initialEffects: Array<Ieffect> = []
