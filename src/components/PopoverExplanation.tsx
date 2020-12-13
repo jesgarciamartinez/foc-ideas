@@ -9,6 +9,7 @@ import {
   PopoverBody,
   PopoverHeader,
   PopoverBodyProps,
+  Tooltip,
 } from '@chakra-ui/react'
 import React from 'react'
 
@@ -22,8 +23,12 @@ const PopoverExplanation = (props: {
       <PopoverTrigger>
         <IconButton
           aria-label={props.label}
-          // icon={<QuestionIcon />}
-          icon={<QuestionOutlineIcon />}
+          icon={
+            <Tooltip label={props.label} aria-label={props.label} hasArrow>
+              {/* <QuestionOutlineIcon /> */}
+              <QuestionIcon />
+            </Tooltip>
+          }
           size='lg'
           colorScheme='purple'
           color='unison.purple'
@@ -35,6 +40,7 @@ const PopoverExplanation = (props: {
           }}
         />
       </PopoverTrigger>
+
       {/* <PopoverContent borderColor='unison.purple'> */}
       <PopoverContent>
         <PopoverArrow />

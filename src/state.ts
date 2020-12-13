@@ -95,10 +95,13 @@ const initialFunctions: Array<Ifunction> = [
     description: 'monomorphic id for string',
   },
   {
-    name: 'id',
-    parameters: [{ type: 'number', parameterName: 'n' }],
+    name: 'greaterThan',
+    parameters: [
+      { type: 'number', parameterName: 'n' },
+      { type: 'number', parameterName: 'm' },
+    ],
     returns: { type: 'boolean' },
-    fn: function id(n: number, m: number) {
+    fn: function greaterThan(n: number, m: number) {
       return m > n
     },
     description: 'Number is greater than another',

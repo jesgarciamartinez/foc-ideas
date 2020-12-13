@@ -20,6 +20,7 @@ import {
   NumberDecrementStepper,
   Checkbox,
   Text,
+  Heading,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -50,7 +51,11 @@ const TypeAndValue = React.memo(
         <TypeBadge typeAsString={type} />
         {(() => {
           if (!onChange) {
-            return <Code>{value}</Code>
+            return (
+              <Code>
+                {type === 'boolean' ? (value ? 'true' : 'false') : value}
+              </Code>
+            )
           }
           switch (type) {
             case 'string':
@@ -84,6 +89,7 @@ const TypeAndValue = React.memo(
                 </NumberInput>
               )
             case 'boolean':
+              console.log({ type, value })
               return (
                 <Checkbox
                   isChecked={value}
@@ -412,16 +418,24 @@ const FlowCard = React.memo(
         display='flex'
         flexDirection='column'
       >
-        <HStack>
-          <Text fontSize='xl'>Flow Card</Text>
-          <Button
-            leftIcon={<DeleteIcon />}
-            onClick={() => {
-              dispatch({ type: 'clearFlowCard' })
-            }}
-          >
-            Clear
-          </Button>
+        <Flex paddingLeft={2} alignItems='center'>
+          <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
+            Flow
+          </Heading>
+          <Spacer></Spacer>
+          {items.length > 0 && (
+            <Button
+              color='unison.darkPink'
+              sx={{ '&:hover': { backgroundColor: 'red.50' } }}
+              variant='ghost'
+              leftIcon={<DeleteIcon />}
+              onClick={() => {
+                dispatch({ type: 'clearFlowCard' })
+              }}
+            >
+              Clear
+            </Button>
+          )}
           <PopoverExplanation label='Flow card explanation' title='Flow card'>
             Flow is a special view for the flow/pipe function (left-to-right
             variadic compose). This is meant as a "functional Scratch" to
@@ -432,7 +446,7 @@ const FlowCard = React.memo(
             is the only effect so far. Note that functions need to be curried
             manually.
           </PopoverExplanation>
-        </HStack>
+        </Flex>
         <Divider marginTop={2}></Divider>
         <Droppable droppableId='FlowCard'>
           {(provided, snapshot) => {

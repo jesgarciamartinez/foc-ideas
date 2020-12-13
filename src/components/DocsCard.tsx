@@ -10,9 +10,20 @@ import {
   EditableProps,
   IconButton,
   Input,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Spacer,
 } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-import { AddIcon, ArrowForwardIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import {
+  AddIcon,
+  ArrowForwardIcon,
+  ChevronDownIcon,
+  DeleteIcon,
+} from '@chakra-ui/icons'
 import Card from './Card'
 // import useAutocomplete from '@material-ui/lab/useAutocomplete'
 // import Autosuggest from 'react-autosuggest'
@@ -22,6 +33,7 @@ import { Itype, Ifunction } from './interfaces'
 import { matchSorter } from 'match-sorter'
 import TypeBadge from './TypeBadge'
 import EditableText from './EditableText'
+import PopoverExplanation from './PopoverExplanation'
 
 const defaultName = 'name'
 const defaultType = '_'
@@ -58,7 +70,7 @@ const getFilteredTypeSuggestions = (
 //   }
 //
 
-const FunctionCreationForm = ({
+const DocsCard = ({
   func,
 }: {
   func?: Ifunction & { parameterTypes: Itype | '_' }
@@ -202,7 +214,42 @@ const FunctionCreationForm = ({
   }, [signature2])
 
   return (
-    <Card>
+    <Box
+      boxShadow={'base'}
+      minWidth={'48%'} //@TODO prevent Yscroll another way
+      // minHeight='100%'
+      backgroundColor='white'
+      padding={1}
+      // minWidth={'50%'}
+      minHeight='100vh'
+      height='100%'
+      position='relative'
+      display='flex'
+      flexDirection='column'
+    >
+      <Flex paddingLeft={2} alignItems='center'>
+        <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
+          Docs
+        </Heading>
+        <Spacer></Spacer>
+        {/* {items.length > 0 && (
+          <Button
+            color='unison.darkPink'
+            sx={{ '&:hover': { backgroundColor: 'red.50' } }}
+            variant='ghost'
+            leftIcon={<DeleteIcon />}
+            onClick={() => {
+              dispatch({ type: 'clearFlowCard' })
+            }}
+          >
+            Clear
+          </Button>
+        )} */}
+        <PopoverExplanation label='Docs card explanation' title='Docs card'>
+          Docs is an editable view of the documentation for a function
+        </PopoverExplanation>
+      </Flex>
+      <Divider marginTop={2}></Divider>
       <EditableText
         /* NAME */
         value={name}
@@ -335,7 +382,7 @@ const FunctionCreationForm = ({
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </Card>
+    </Box>
   )
 }
-export default FunctionCreationForm
+export default DocsCard

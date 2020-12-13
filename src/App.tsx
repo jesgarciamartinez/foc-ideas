@@ -6,7 +6,7 @@ import CardHStack from './components/CardHStack'
 import SplitPane from 'react-split-pane'
 import FlowCard from './components/FlowCard'
 import { useAppReducer } from './state'
-import FunctionCreationForm from './components/FunctionCreationForm'
+import DocsCard from './components/DocsCard'
 import { matchSorter } from 'match-sorter'
 import './styles.css'
 import { HotKeys } from 'react-hotkeys'
@@ -138,7 +138,7 @@ export const App = () => {
               dispatch={dispatch}
               name=''
             ></FlowCard>
-            <FunctionCreationForm />
+            <DocsCard />
             {/* <Card>
               <form>
                 <InputGroup size='sm'>
