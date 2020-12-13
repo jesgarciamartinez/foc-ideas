@@ -31,6 +31,7 @@ import {
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import PopoverExplanation from './PopoverExplanation'
+import './flowCardStyles.css'
 // import produce from 'immer'
 // import EditableText from './EditableText'
 
@@ -82,10 +83,10 @@ const TypeAndValue = React.memo(
                   allowMouseWheel
                 >
                   <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
+                  {/* <NumberInputStepper> */}
+                  {/* <NumberIncrementStepper /> */}
+                  {/* <NumberDecrementStepper /> */}
+                  {/* </NumberInputStepper> */}
                 </NumberInput>
               )
             case 'boolean':
@@ -232,10 +233,14 @@ export const FlowFunctionView = React.memo(
           {...rest}
           ref={ref}
           // style={style}
-          flexBasis={0}
-          minWidth={0}
-          marginY={3}
-          wrap='nowrap'
+          // flexBasis={0}
+          // minWidth={0}
+          // marginY={3}
+          // wrap='nowrap'
+          // justifyContent='space-between'
+          border='2px solid red'
+          rounded='base'
+          marginBottom={1}
         >
           <Flex flex={1} minWidth={0}>
             {/*name and params*/}
@@ -459,6 +464,8 @@ const FlowCard = React.memo(
                 minHeight='100%'
                 height='100%'
                 overflow='auto'
+                paddingX={2}
+                paddingY={4}
               >
                 <FlowFunctionsList items={items}></FlowFunctionsList>
                 {provided.placeholder}
