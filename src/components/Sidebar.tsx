@@ -341,7 +341,7 @@ const Sidebar = React.memo(
             {items &&
               items.map(item => {
                 const label = (
-                  <Text fontSize='xl' color={'unison.purple'}>
+                  <Text fontSize='lg' color={'unison.purple'}>
                     {item.label}
                   </Text>
                 )
