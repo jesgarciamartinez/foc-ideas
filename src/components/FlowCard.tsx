@@ -66,6 +66,9 @@ const TypeAndValue = React.memo(
                 <Input
                   size='sm'
                   value={value}
+                  variant='outline'
+                  backgroundColor='white'
+                  focusBorderColor={'unison.aqua'}
                   onChange={e => {
                     onChange(e.target.value)
                   }}
@@ -76,6 +79,9 @@ const TypeAndValue = React.memo(
                 <NumberInput
                   size='sm'
                   value={value}
+                  variant='outline'
+                  backgroundColor='white'
+                  focusBorderColor={'unison.aqua'}
                   onChange={(s, n) => {
                     if (isNaN(Number(n))) {
                       return
@@ -241,47 +247,42 @@ export const FlowFunctionView = React.memo(
         <Grid
           {...rest}
           ref={ref}
-          border='2px solid red'
-          rounded='base'
+          backgroundColor='gray.100' //TODO
+          rounded='md'
           marginBottom={1}
           padding={1}
-          templateColumns='repeat(6, 1fr)'
+          templateColumns='auto 25%'
+          width='100%'
           gap={1}
         >
           <GridItem
-            // colStart={6 - item.parameters.length}
-            colStart={1}
-            rowSpan={4}
             width='100%'
             display='flex'
-            justifyContent='flex-end'
+            flexDirection='row'
             alignItems='center'
-            // flex={1}
-            // whiteSpace='nowrap'
-            // overflowX='scroll'
-            // textOverflow='ellipsis'
           >
-            <Code>{item.name}</Code>
-          </GridItem>
-          {hasZeroParams || hasOneParam
-            ? null
-            : item.parameters
-                .slice(0, item.parameters.length - 1)
-                .map((param, i) => {
-                  const css =
-                    i === item.parameters.length - 2
-                      ? { transform: 'rotate(-45deg)' }
-                      : null
-                  return (
-                    <GridItem
-                      width='100%'
-                      display='flex'
-                      alignItems='center'
-                      rowSpan={1}
-                      key={i}
-                      // colStart={}
-                    >
-                      <HStack>
+            <Code justifySelf='flex-start' backgroundColor='transparent'>
+              {item.name}
+            </Code>
+
+            {hasZeroParams || hasOneParam
+              ? null
+              : item.parameters
+                  .slice(0, item.parameters.length - 1)
+                  .map((param, i) => {
+                    const css =
+                      i === item.parameters.length - 2
+                        ? { transform: 'rotate(-45deg)' }
+                        : null
+                    return (
+                      <HStack
+                        justifySelf='flex-end'
+                        width='100%'
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='flex-end'
+                        key={i}
+                      >
                         <C_TypeAndValue
                           fnId={item.id}
                           paramIndex={i}
@@ -289,11 +290,11 @@ export const FlowFunctionView = React.memo(
                         />{' '}
                         <ArrowForwardIcon css={css} />
                       </HStack>
-                    </GridItem>
-                  )
-                })}
-          <GridItem colStart={6} rowSpan={1} width='100%'>
-            <VStack width='100%'>
+                    )
+                  })}
+          </GridItem>
+          <GridItem width='100%'>
+            <VStack>
               {hasZeroParams ? (
                 <Code>()</Code>
               ) : (
