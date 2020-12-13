@@ -2,6 +2,7 @@ import produce from 'immer'
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
 import { Ifunction, Ieffect, Itype } from './components/interfaces'
+import DocsCard from './components/DocsCard'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
@@ -122,6 +123,7 @@ export type Action =
     }
   | { type: 'clearFlowCard' }
   | { type: 'sideBarSearch'; value: string }
+  | { type: 'dropFnFromSideBarToDocsCard'; draggableId: string }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
@@ -129,12 +131,15 @@ export type Action =
 //     functionId: string
 //   }
 
+type DocsType = { type: 'creating' } | { type: 'editing'; fnName: string }
+
 type State = {
   functions: Ifunction[]
   dataTypes: Itype[]
   effects: Ieffect[]
   isSideBarItemDragging: boolean
   flowCardFunctions: Array<Ifunction & { id: string }>
+  docCards: Array<DocsType>
   searchValue: string
 }
 
@@ -144,6 +149,7 @@ const initialState: State = {
   effects: initialEffects,
   isSideBarItemDragging: false,
   flowCardFunctions: [],
+  docCards: [{ type: 'creating' }],
   searchValue: '',
 }
 
@@ -257,14 +263,13 @@ function reducer(state: State, action: Action): State {
         ...state,
         searchValue: action.value,
       }
-    // case 'changeFunctionParamValue':
-    //   return produce(state, draft => {
-    //     let fn = draft.flowCardFunctions.find(
-    //       ({ id }) => id === action.functionId,
-    //     )
-    //     if (!fn) return //should not happen
-    //     fn.parameters[action.paramIndex].value = action.paramValue
-    //   })
+    case 'dropFnFromSideBarToDocsCard':
+      return {
+        ...state,
+        docCards: [
+          { type: 'editing', fnName: action.draggableId.split('_')[1] },
+        ],
+      }
   }
 }
 

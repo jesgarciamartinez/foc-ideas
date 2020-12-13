@@ -11,23 +11,6 @@ import { matchSorter } from 'match-sorter'
 import './styles.css'
 import { HotKeys } from 'react-hotkeys'
 
-// const code = 'function add(n,m){ n + m }'
-// const sc = ts.createSourceFile('x.ts', code, ts.ScriptTarget.Latest, true)
-// console.info(sc)
-// let indent = 0
-// function print(node: ts.Node) {
-//   console.log(new Array(indent + 1).join(' ') + ts.SyntaxKind[node.kind])
-//   indent++
-//   ts.forEachChild(node, print)
-//   indent--
-// }
-
-// let result = ts.transpileModule(code, {
-//   compilerOptions: { module: ts.ModuleKind.CommonJS },
-// })
-
-// print(sc)
-
 export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(
@@ -44,6 +27,7 @@ export const App = () => {
           draggableId: dropResult.draggableId,
         })
       } else if (
+        // FlowCard to FlowCard
         dropResult.source.droppableId === 'FlowCard' &&
         dropResult.destination?.droppableId === 'FlowCard'
       ) {
@@ -51,6 +35,11 @@ export const App = () => {
           type: 'dropFnFromFlowCardToFlowCard',
           sourceIndex: dropResult.source.index,
           destinationIndex: dropResult.destination.index,
+        })
+      } else if (dropResult.destination?.droppableId === 'DocsCard') {
+        dispatch({
+          type: 'dropFnFromSideBarToDocsCard',
+          draggableId: dropResult.draggableId,
         })
       } else {
         dispatch({ type: 'dropOutside' })
@@ -60,7 +49,6 @@ export const App = () => {
           `[id$='${dropResult.draggableId}']`,
         )
         if (li) {
-          console.log({ li })
           li.focus()
         }
       }

@@ -34,6 +34,7 @@ import { matchSorter } from 'match-sorter'
 import TypeBadge from './TypeBadge'
 import EditableText from './EditableText'
 import PopoverExplanation from './PopoverExplanation'
+import { Droppable } from 'react-beautiful-dnd'
 
 const defaultName = 'name'
 const defaultType = '_'
@@ -250,103 +251,119 @@ const DocsCard = ({
         </PopoverExplanation>
       </Flex>
       <Divider marginTop={2}></Divider>
-      <EditableText
-        /* NAME */
-        value={name}
-        onChange={onChangeName}
-        placeholder={defaultName}
-        fontSize='3xl'
-        textColor={nameColor}
-        fontStyle={nameFontStyle}
-      />
-      <Code fontSize='xl'>
-        {/* SIGNATURE */}
-        <HStack>
-          <EditableText
-            as='span'
-            placeholder={defaultName}
-            fontStyle={nameFontStyle}
-            width={(name || defaultName).length * 12 + 12 + 'px'}
-            value={name}
-            textColor={nameColor}
-            onChange={onChangeName}
-          />
-          <Text as='span'>: </Text>
-          {params.map((param, i) => (
-            <React.Fragment key={i}>
-              {i === 0 ? null : <ArrowForwardIcon></ArrowForwardIcon>}
-              <Editable
-                value={param.type}
-                // placeholder={defaultType} //TODOr
-                textColor={param.type === defaultType ? 'gray.400' : 'normal'}
-                display='inline'
-                width={param.type.length * 12 + 12 + 'px'}
-                onChange={v => onChangeParam(v, i)}
-                {...getComboboxProps()}
-              >
-                <EditablePreview />
-                <EditableInput
-                  onFocus={() => onFocusInput(i)}
-                  _focus={{ outline: 'none' }}
-                  {...getInputProps()}
-                />
-                <ul
-                  {...getMenuProps()}
-                  style={{
-                    position: 'absolute',
-                    background: 'white',
-                    borderRadius: '10%',
-                    border: '1px solid gray',
-                    zIndex: '20000',
-                    color: 'black',
-                  }}
-                >
-                  {isOpen &&
-                    i === focusedInputIndex &&
-                    typeSuggestions.map((item, index) => (
-                      <li
-                        style={
-                          highlightedIndex === index
-                            ? { backgroundColor: '#bde4ff' }
-                            : {}
+      <Droppable droppableId='DocsCard'>
+        {(provided, snapshot) => {
+          return (
+            <Box
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              // minWidth={'50%'}
+              flex={1}
+              minHeight='100%'
+              height='100%'
+              overflow='auto'
+              paddingX={2}
+              paddingY={2}
+            >
+              <EditableText
+                /* NAME */
+                value={name}
+                onChange={onChangeName}
+                placeholder={defaultName}
+                fontSize='3xl'
+                textColor={nameColor}
+                fontStyle={nameFontStyle}
+              />
+              <Code fontSize='xl'>
+                {/* SIGNATURE */}
+                <HStack>
+                  <EditableText
+                    as='span'
+                    placeholder={defaultName}
+                    fontStyle={nameFontStyle}
+                    width={(name || defaultName).length * 12 + 12 + 'px'}
+                    value={name}
+                    textColor={nameColor}
+                    onChange={onChangeName}
+                  />
+                  <Text as='span'>: </Text>
+                  {params.map((param, i) => (
+                    <React.Fragment key={i}>
+                      {i === 0 ? null : <ArrowForwardIcon></ArrowForwardIcon>}
+                      <Editable
+                        value={param.type}
+                        // placeholder={defaultType} //TODOr
+                        textColor={
+                          param.type === defaultType ? 'gray.400' : 'normal'
                         }
-                        key={`${item.title}${index}`}
-                        {...getItemProps({ item, index })}
+                        display='inline'
+                        width={param.type.length * 12 + 12 + 'px'}
+                        onChange={v => onChangeParam(v, i)}
+                        {...getComboboxProps()}
                       >
-                        {item.title === 'New type' ? (
-                          <Code>{item.title}</Code>
-                        ) : (
-                          <TypeBadge typeAsString={item.title.type} />
-                        )}
-                      </li>
-                    ))}
-                </ul>
-              </Editable>
-              {i === params.length - 1 ? (
-                <IconButton
-                  aria-label='Add parameter'
-                  icon={<AddIcon />}
-                  onClick={addParam}
-                />
-              ) : null}
-            </React.Fragment>
-          ))}
-        </HStack>
-      </Code>
+                        <EditablePreview />
+                        <EditableInput
+                          onFocus={() => onFocusInput(i)}
+                          _focus={{ outline: 'none' }}
+                          {...getInputProps()}
+                        />
+                        <ul
+                          {...getMenuProps()}
+                          style={{
+                            position: 'absolute',
+                            background: 'white',
+                            borderRadius: '10%',
+                            border: '1px solid gray',
+                            zIndex: '20000',
+                            color: 'black',
+                          }}
+                        >
+                          {isOpen &&
+                            i === focusedInputIndex &&
+                            typeSuggestions.map((item, index) => (
+                              <li
+                                style={
+                                  highlightedIndex === index
+                                    ? { backgroundColor: '#bde4ff' }
+                                    : {}
+                                }
+                                key={`${item.title}${index}`}
+                                {...getItemProps({ item, index })}
+                              >
+                                {item.title === 'New type' ? (
+                                  <Code>{item.title}</Code>
+                                ) : (
+                                  <TypeBadge typeAsString={item.title.type} />
+                                )}
+                              </li>
+                            ))}
+                        </ul>
+                      </Editable>
+                      {i === params.length - 1 ? (
+                        <IconButton
+                          aria-label='Add parameter'
+                          icon={<AddIcon />}
+                          onClick={addParam}
+                        />
+                      ) : null}
+                    </React.Fragment>
+                  ))}
+                </HStack>
+              </Code>
 
-      <Code fontSize='xl' display='block' marginTop={2}>
-        {/* SIGNATURE 2 */}
-        <EditableText
-          ref={signature2Ref}
-          placeholder={defaultName}
-          fontStyle={nameFontStyle}
-          width={(signature2 || defaultName).length * 12 + 12 + 'px'}
-          maxWidth='100%'
-          value={signature2}
-          textColor={nameColor}
-          onChange={onChangeSignature2}
-        />
-        {/* <Input
+              <Code fontSize='xl' display='block' marginTop={2}>
+                {/* SIGNATURE 2 */}
+                <EditableText
+                  ref={signature2Ref}
+                  placeholder={defaultName}
+                  fontStyle={nameFontStyle}
+                  width={(signature2 || defaultName).length * 12 + 12 + 'px'}
+                  maxWidth='100%'
+                  value={signature2}
+                  textColor={nameColor}
+                  onChange={onChangeSignature2}
+                />
+                {/* <Input
           onChange={e => onChangeSignature2(e.target.value)}
           ref={signature2Ref}
           placeholder={defaultName}
@@ -355,33 +372,39 @@ const DocsCard = ({
           maxWidth='100%'
           value={signature2}
         ></Input> */}
-      </Code>
+              </Code>
 
-      <Textarea
-        /* DESCRIPTION */
-        fontSize='xl'
-        placeholder='Description'
-        onChange={e => {
-          onChangeDescription(e.target.value)
+              <Textarea
+                /* DESCRIPTION */
+                fontSize='xl'
+                placeholder='Description'
+                onChange={e => {
+                  onChangeDescription(e.target.value)
+                }}
+                value={description}
+                marginTop={5}
+              ></Textarea>
+
+              <Tabs marginTop={5}>
+                <TabList>
+                  <Tab>Regular editor</Tab>
+                  <Tab>Structured editor</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <Editor value={editorValue}></Editor>
+                  </TabPanel>
+                  <TabPanel>
+                    <Code>{editorValue}</Code>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+
+              {provided.placeholder}
+            </Box>
+          )
         }}
-        value={description}
-        marginTop={5}
-      ></Textarea>
-
-      <Tabs marginTop={5}>
-        <TabList>
-          <Tab>Regular editor</Tab>
-          <Tab>Structured editor</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <Editor value={editorValue}></Editor>
-          </TabPanel>
-          <TabPanel>
-            <Code>{editorValue}</Code>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+      </Droppable>
     </Box>
   )
 }
