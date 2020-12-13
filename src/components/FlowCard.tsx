@@ -21,6 +21,8 @@ import {
   Checkbox,
   Text,
   Heading,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -48,7 +50,7 @@ const TypeAndValue = React.memo(
     direction: 'row' | 'column'
   }) => {
     return (
-      <Flex direction={direction}>
+      <Flex direction={direction} justifyContent='center' alignItems='center'>
         <TypeBadge typeAsString={type} />
         {(() => {
           if (!onChange) {
@@ -143,7 +145,14 @@ const getParamValues = (
     //TODO typecheck
 
     console.log({ parameters })
-    const returnValue = item.fn(...parameters.map(p => p.value))
+    let returnValue
+    try {
+      returnValue = item.fn(...parameters.map(p => p.value))
+    } catch (error) {
+      console.log({ error })
+      break
+    }
+    console.log('break')
 
     newItems.push({
       ...item,
@@ -229,92 +238,82 @@ export const FlowFunctionView = React.memo(
       const hasZeroParams = item.parameters.length === 0
       const hasOneParam = item.parameters.length === 1
       return (
-        <Flex
+        <Grid
           {...rest}
           ref={ref}
-          // style={style}
-          // flexBasis={0}
-          // minWidth={0}
-          // marginY={3}
-          // wrap='nowrap'
-          // justifyContent='space-between'
           border='2px solid red'
           rounded='base'
           marginBottom={1}
+          padding={1}
+          templateColumns='repeat(6, 1fr)'
+          gap={1}
         >
-          <Flex flex={1} minWidth={0}>
-            {/*name and params*/}
-            <Center
-              flex={1}
-              whiteSpace='nowrap'
-              overflow='hidden'
-              textOverflow='ellipsis'
-            >
-              <Code>{item.name}</Code>
-            </Center>
-            <Spacer></Spacer>
-            {hasZeroParams || hasOneParam
-              ? null
-              : item.parameters
-                  .slice(0, item.parameters.length - 1)
-                  .map((param, i) => {
-                    const css =
-                      i === item.parameters.length - 2
-                        ? { transform: 'rotate(-45deg)' }
-                        : null
-                    return (
-                      <HStack flex={1} key={i}>
+          <GridItem
+            // colStart={6 - item.parameters.length}
+            colStart={1}
+            rowSpan={4}
+            width='100%'
+            display='flex'
+            justifyContent='flex-end'
+            alignItems='center'
+            // flex={1}
+            // whiteSpace='nowrap'
+            // overflowX='scroll'
+            // textOverflow='ellipsis'
+          >
+            <Code>{item.name}</Code>
+          </GridItem>
+          {hasZeroParams || hasOneParam
+            ? null
+            : item.parameters
+                .slice(0, item.parameters.length - 1)
+                .map((param, i) => {
+                  const css =
+                    i === item.parameters.length - 2
+                      ? { transform: 'rotate(-45deg)' }
+                      : null
+                  return (
+                    <GridItem
+                      width='100%'
+                      display='flex'
+                      alignItems='center'
+                      rowSpan={1}
+                      key={i}
+                      // colStart={}
+                    >
+                      <HStack>
                         <C_TypeAndValue
-                          // type={param.type}
-                          // onChange={paramValue => {
-                          //   onChangeParam({ paramValue, paramIndex: i })
-                          // }}
-                          // value={param.value}
                           fnId={item.id}
                           paramIndex={i}
                           direction='column'
                         />{' '}
                         <ArrowForwardIcon css={css} />
                       </HStack>
-                    )
-                  })}
-          </Flex>
-
-          <Flex paddingY={1}>
-            {/* Last param, return type */}
-            <VStack>
+                    </GridItem>
+                  )
+                })}
+          <GridItem colStart={6} rowSpan={1} width='100%'>
+            <VStack width='100%'>
               {hasZeroParams ? (
                 <Code>()</Code>
               ) : (
                 <C_TypeAndValue
-                  // onChange={paramValue => {
-                  //   onChangeParam({
-                  //     paramValue,
-                  //     paramIndex: item.parameters.length - 1,
-                  //   })
-                  // }}
-                  // value={item.parameters[item.parameters.length - 1].value}
                   fnId={item.id}
                   paramIndex='last'
-                  direction='row'
+                  direction='column'
                   noInput={!isFirstFunctionInFlow}
-                  // type={item.parameters[item.parameters.length - 1].type}
                 />
               )}
               <ArrowDownIcon></ArrowDownIcon>
               <C_TypeAndValue
                 fnId={item.id}
-                // type={item.returns.type}
-                // onChange={() => {}} //TODO disable
                 noInput
                 paramIndex='return'
-                // value={item.returns.value}
-                direction='row'
+                direction='column'
               />
             </VStack>
-            {/* <Box>{'some example value and more stuff'}</Box> */}
-          </Flex>
-        </Flex>
+          </GridItem>
+        </Grid>
       )
     },
   ),
@@ -340,9 +339,20 @@ const getFnsValuesFromItems = (
       }
     }
 
-    //TODO typecheck
-    const returnValue = item.fn(...parameters.map(p => p.value))
+    //TODO typecheck, show error
+    console.log({ parameters })
+    let returnValue
+    let error
+    try {
+      returnValue = item.fn(...parameters.map(p => p.value))
+    } catch (err) {
+      error = err
+      console.log({ error })
+    }
 
+    console.log('break')
+
+    //TODO only push if no error
     newItems.push({
       ...item,
       parameters,
