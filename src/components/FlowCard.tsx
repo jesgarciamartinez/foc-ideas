@@ -69,6 +69,7 @@ const TypeAndValue = React.memo(
                   variant='outline'
                   backgroundColor='white'
                   focusBorderColor={'unison.aqua'}
+                  rounded='base'
                   onChange={e => {
                     onChange(e.target.value)
                   }}
@@ -82,6 +83,7 @@ const TypeAndValue = React.memo(
                   variant='outline'
                   backgroundColor='white'
                   focusBorderColor={'unison.aqua'}
+                  rounded='base'
                   onChange={(s, n) => {
                     if (isNaN(Number(n))) {
                       return
@@ -247,7 +249,7 @@ export const FlowFunctionView = React.memo(
         <Grid
           {...rest}
           ref={ref}
-          backgroundColor='gray.100' //TODO
+          backgroundColor='gray.200' //TODO
           rounded='md'
           marginBottom={1}
           padding={1}

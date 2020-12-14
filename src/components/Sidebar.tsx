@@ -173,7 +173,7 @@ const TypeTreeItem = (
     <TreeItem
       nodeId={props.nodeId}
       classes={{ content: props.isAnyItemDragging ? content : undefined }}
-      label={props.type}
+      label={<TypeBadge typeAsString={props.type}></TypeBadge>}
     />
   )
 }

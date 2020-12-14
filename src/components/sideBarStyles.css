@@ -10,18 +10,22 @@
 
 /* Tree styles  */
 .MuiTreeItem-content:hover {
-  background-color: #e6fffa !important;
+  /* background-color: #e6fffa !important; */
+  background-color: #e2e8f0 !important;
 }
 
 .MuiTreeItem-content .Mui-focused {
   /* teal.50 */
   background-color: #e6fffa !important;
+  background-color: #e2e8f0 !important;
 }
 
 .Mui-focused {
   background-color: #e6fffa !important;
+  background-color: #e2e8f0 !important;
   /* background-color: #1d4044 !important; TODO */
 }
 .Mui-expanded {
   background-color: #e6fffa !important;
+  background-color: #e2e8f0 !important;
 }

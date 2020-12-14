@@ -83,12 +83,6 @@ export const App = () => {
           defaultSize='20%'
           minSize={100}
           maxSize={-300}
-          // resizerStyle={{
-          //   border: `3px solid ${purple}`,
-          //   zIndex: 0,
-          //   cursor: 'col-resize',
-          // }}
-          // resizerClassName='splitPaneResizer'
           split='vertical'
         >
           <SideBar
@@ -126,7 +120,13 @@ export const App = () => {
               dispatch={dispatch}
               name=''
             ></FlowCard>
-            <DocsCard />
+            {state.docCards.map((doc, i) => {
+              const func =
+                doc.type === 'editing'
+                  ? state.functions.find(f => f.name === doc.fnName)
+                  : undefined
+              return <DocsCard key={i} func={func} dispatch={dispatch} />
+            })}
             {/* <Card>
               <form>
                 <InputGroup size='sm'>

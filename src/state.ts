@@ -108,7 +108,11 @@ const initialFunctions: Array<Ifunction> = [
     description: 'Number is greater than another',
   },
 ]
-const initialDataTypes: Array<Itype> = [{ type: 'string' }]
+const initialDataTypes: Array<Itype> = [
+  { type: 'string' },
+  { type: 'number' },
+  { type: 'boolean' },
+]
 const initialEffects: Array<Ieffect> = []
 
 export type Action =

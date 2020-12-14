@@ -1,23 +1,31 @@
 import * as React from 'react'
-import { Code, useTheme } from '@chakra-ui/react'
+import { Code, CodeProps, TextProps, useTheme } from '@chakra-ui/react'
 import { Itype } from './interfaces'
+
 const TypeBadge = ({
   typeAsString,
-  ...rest
+  // fontSize,
+  as,
+  children,
 }: {
   typeAsString: Itype['type']
+  // fontSize?: CodeProps['fontSize']
+  as?: CodeProps['as']
+  children?: any
+  // rest?: CodeProps
 }) => {
-  const {
-    colors: {
-      unison: { orange, yellow },
-    },
-  } = useTheme()
+  // const {
+  //   colors: {
+  //     unison: { orange, yellow },
+  //   },
+  // } = useTheme()
 
   return (
     <Code
-      paddingX={1}
-      paddingY={0.5}
-      // colorScheme={'yellow'}
+      as={as}
+      // fontSize={fontSize}
+      // paddingX={1}
+      // paddingY={0.5}
       sx={
         {
           string: { color: 'unison.darkOrange', backgroundColor: 'yellow.100' },
@@ -34,30 +42,8 @@ const TypeBadge = ({
         }[typeAsString]
       }
       rounded={'base'}
-      //   colorScheme={(() => {
-      //     switch (typeAsString) {
-      //       case 'string':
-      //         return ''
-      //       case 'number':
-      //         return 'green'
-      //       case 'boolean':
-      //         return 'blue'
-      //       case 'function':
-      //         return 'purple'
-      //       case 'object':
-      //         return 'red'
-      //       case 'array':
-      //         return 'red'
-      //       case 'undefined':
-      //         return 'black'
-      //       case 'null':
-      //         return 'black'
-      //       default:
-      //         let x: never = typeAsString
-      //     }
-      //   })()}
     >
-      {typeAsString}
+      {children ?? typeAsString}
     </Code>
   )
 }

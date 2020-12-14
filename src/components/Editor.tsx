@@ -12,8 +12,8 @@ function Editor({ value }: { value: string }) {
   return (
     <MonacoEditor
       width='100%'
-      height='50vh'
-      language='typescript'
+      height='30vh'
+      language='javascript'
       theme='vs-dark'
       value={value}
       options={options}
