@@ -238,6 +238,10 @@ const Sidebar = React.memo(
               borderRight='none'
               borderBottom={`2px solid ${purple}`}
               value={searchValue}
+              onFocus={() => {
+                if (!ref || !('current' in ref)) return
+                ref.current.setSelectionRange(0, ref.current.value.length)
+              }}
               onChange={e =>
                 dispatch({ type: 'sideBarSearch', value: e.target.value })
               }
@@ -248,6 +252,7 @@ const Sidebar = React.memo(
                 position='absolute'
                 right={2}
                 top={2}
+                pointerEvents='none'
               >
                 <Kbd>ctrl</Kbd>
                 <Text>/</Text>

@@ -14,6 +14,7 @@ import {
   Heading,
   Spacer,
   Button,
+  Fade,
 } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { AddIcon, ArrowForwardIcon, CheckIcon } from '@chakra-ui/icons'
@@ -75,6 +76,15 @@ const typeToName = (x: Itype | string, n: number): string => {
     case 'undefined':
     case 'null':
       return ''
+  }
+}
+
+function findWithRegex(regex: any, contentBlock: any, callback: any) {
+  const text = contentBlock.getText()
+  let matchArr, start
+  while ((matchArr = regex.exec(text)) !== null) {
+    start = matchArr.index
+    callback(start, start + matchArr[0].length)
   }
 }
 
@@ -190,15 +200,8 @@ const DocsCard = ({
 
   const decorator = new CompositeDecorator([
     {
+      //TypeBadge
       strategy(contentBlock, cb, contentState) {
-        function findWithRegex(regex: any, contentBlock: any, callback: any) {
-          const text = contentBlock.getText()
-          let matchArr, start
-          while ((matchArr = regex.exec(text)) !== null) {
-            start = matchArr.index
-            callback(start, start + matchArr[0].length)
-          }
-        }
         findWithRegex(
           new RegExp(
             `(${typeSuggestions.map(({ title }) => title).join('|')})`,
@@ -208,7 +211,7 @@ const DocsCard = ({
           cb,
         )
       },
-      component: (props: any) => {
+      component(props: any) {
         return (
           <TypeBadge
             typeAsString={props.decoratedText}
@@ -223,8 +226,9 @@ const DocsCard = ({
     EditorState.createEmpty(decorator),
   )
   const draftEditorRef = React.useRef(null)
+
   // const draftEditorPreviousValueRef = React.useRef('')
-  // const onChangedraftEditor = (value: string) => {
+  // const onChangedraftEditor2 = (value: string) => {
   //   const arrow = '→'
   //   let newValue = value
   //   const isDeleting = draftEditorPreviousValueRef.current.length > value.length
@@ -265,7 +269,7 @@ const DocsCard = ({
   //     }
   //   }
 
-  //   setSignature2(newValue)
+  //   // setSignature2(newValue)
   // }
   // React.useEffect(() => {
   //   const isDeleting =
@@ -278,8 +282,57 @@ const DocsCard = ({
   //   signature2PreviousValueRef.current = signature2
   // }, [signature2])
 
+  const onChangeDraftEditor = (e: EditorState) => {
+    let newEditorState: EditorState
+    switch (e.getLastChangeType()) {
+      case 'insert-characters':
+        const arrow = '→'
+        const text = e.getCurrentContent().getFirstBlock().getText()
+        let newText = text
+        const triggerArrow = text.endsWith(',') || text.endsWith(' ')
+        if (triggerArrow) {
+          //TODO arrow component
+          const previousMeaningfulCharIsArrow = text
+            .replace(',', ' ')
+            .trimEnd()
+            .endsWith(arrow)
+          const previousCharIsClosingBracket = text
+            .substr(0, text.length - 1)
+            .endsWith('}')
+          if (previousMeaningfulCharIsArrow) {
+            newText = text.substr(0, text.length - 1)
+          } else if (previousCharIsClosingBracket && text.endsWith(' ')) {
+            //abilities
+            newText = text
+          } else {
+            // only if last non-space or comma char is not arrow
+            newText = text.substr(0, text.length - 1).concat(` ${arrow} `)
+          }
+        }
+
+        newEditorState =
+          text === newText
+            ? e
+            : EditorState.moveFocusToEnd(
+                EditorState.push(
+                  e,
+                  ContentState.createFromText(newText),
+                  'insert-fragment',
+                ),
+              )
+        break
+      default:
+        newEditorState = e
+        break
+    }
+
+    setDraftEditorState(newEditorState)
+  }
+
   const hasChanges = true //TODO
   const noErrors = true
+
+  // new RegExp(/(\s|,)/, 'gi')
 
   return (
     <Box
@@ -300,7 +353,8 @@ const DocsCard = ({
           Docs
         </Heading>
         <Spacer></Spacer>
-        {hasChanges && noErrors && (
+
+        <Fade in={hasChanges && noErrors}>
           <Button
             color='unison.green'
             sx={{ '&:hover': { backgroundColor: 'green.50' } }}
@@ -312,7 +366,8 @@ const DocsCard = ({
           >
             Save
           </Button>
-        )}
+        </Fade>
+
         <PopoverExplanation label='Docs card explanation' title='Docs card'>
           Docs is an editable view of the documentation for a function
         </PopoverExplanation>
@@ -383,29 +438,7 @@ const DocsCard = ({
                     editorState={draftEditorState}
                     // onChange={handleEditorChange}
                     ref={draftEditorRef}
-                    onChange={(e: EditorState) => {
-                      let newEditorState: EditorState
-                      switch (e.getLastChangeType()) {
-                        case 'insert-characters':
-                          const text = e
-                            .getCurrentContent()
-                            .getFirstBlock()
-                            .getText()
-                          newEditorState = EditorState.moveFocusToEnd(
-                            EditorState.push(
-                              e,
-                              ContentState.createFromText(text + '!'),
-                              'insert-characters',
-                            ),
-                          )
-                          break
-                        default:
-                          newEditorState = e
-                          break
-                      }
-
-                      setDraftEditorState(newEditorState)
-                    }}
+                    onChange={onChangeDraftEditor}
                   />
                 </Code>
               </HStack>

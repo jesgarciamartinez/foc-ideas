@@ -34,6 +34,7 @@ import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import PopoverExplanation from './PopoverExplanation'
 import './flowCardStyles.css'
+import { Fade } from '@material-ui/core'
 // import produce from 'immer'
 // import EditableText from './EditableText'
 
@@ -396,14 +397,16 @@ const FlowFunctionsList = React.memo(
             <Draggable key={item.id} draggableId={item.id} index={i}>
               {(provided, snapshot) => {
                 return (
-                  <FlowFunctionView
-                    isFirstFunctionInFlow={i === 0}
-                    item={item}
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    // style={provided.draggableProps.style}
-                  />
+                  <Fade in={true}>
+                    <FlowFunctionView
+                      isFirstFunctionInFlow={i === 0}
+                      item={item}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      // style={provided.draggableProps.style}
+                    />
+                  </Fade>
                 )
               }}
             </Draggable>
@@ -441,7 +444,8 @@ const FlowCard = React.memo(
             Flow
           </Heading>
           <Spacer></Spacer>
-          {items.length > 0 && (
+
+          <Fade in={items.length > 0}>
             <Button
               color='unison.darkPink'
               sx={{ '&:hover': { backgroundColor: 'red.50' } }}
@@ -453,7 +457,8 @@ const FlowCard = React.memo(
             >
               Clear
             </Button>
-          )}
+          </Fade>
+
           <PopoverExplanation label='Flow card explanation' title='Flow card'>
             Flow is a special view for the flow function (left-to-right variadic
             compose). This is a stab at a "functional Scratch" to visually
