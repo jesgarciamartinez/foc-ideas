@@ -40,10 +40,6 @@ import {
 import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
 
-// const decorator = new CompositeDecorator({[
-
-// ]}
-
 const defaultName = 'name'
 const defaultType = '_'
 const typeSuggestions: Array<{ title: Itype['type'] | 'New type' }> = [
@@ -90,7 +86,7 @@ function findWithRegex(regex: any, contentBlock: any, callback: any) {
 
 const getStateValueFromFunc = (
   func?: Ifunction,
-): { name: string; params: any[]; description: string; code: string } => {
+): { name: string; params: any[]; description: EditorState; code: string } => {
   return {
     name: func?.name || '',
     params: [],
@@ -99,10 +95,62 @@ const getStateValueFromFunc = (
       .concat({ type: func.returnType }) ||*/
     // { type: defaultType },
     // { type: defaultType },
-    description: func?.description || '',
+    description: EditorState.createWithContent(
+      ContentState.createFromText(func?.description || ''),
+    ),
     code: func?.fn.toString() || '',
   }
 }
+
+const signatureDecorator = new CompositeDecorator([
+  {
+    //TypeBadge
+    strategy(contentBlock, cb, contentState) {
+      findWithRegex(
+        new RegExp(
+          `(${typeSuggestions.map(({ title }) => title).join('|')})`,
+          'gi',
+        ),
+        contentBlock,
+        cb,
+      )
+    },
+    component(props: any) {
+      return (
+        <TypeBadge
+          typeAsString={props.decoratedText}
+          children={props.children}
+          as='span'
+        />
+      )
+    },
+  },
+])
+
+const descriptionDecorator = new CompositeDecorator([
+  {
+    //TypeBadge
+    strategy(contentBlock, cb, contentState) {
+      // findWithRegex(
+      //   new RegExp(
+      //     `(${typeSuggestions.map(({ title }) => title).join('|')})`,
+      //     'gi',
+      //   ),
+      //   contentBlock,
+      //   cb,
+      // )
+    },
+    component(props: any) {
+      // return (
+      //   <TypeBadge
+      //     typeAsString={props.decoratedText}
+      //     children={props.children}
+      //     as='span'
+      //   />
+      // )
+    },
+  },
+])
 
 const DocsCard = ({
   func,
@@ -114,7 +162,7 @@ const DocsCard = ({
   const [state, setState] = React.useState<{
     name: string
     params: any[]
-    description: string
+    description: EditorState
     code: string
   }>(() => getStateValueFromFunc(func))
 
@@ -124,12 +172,22 @@ const DocsCard = ({
     setPreviousFunc(func)
     setState(getStateValueFromFunc(func))
   }
-
   const { name, params, description, code } = state
-  const onChangeCode = (code: string) => setState(state => ({ ...state, code }))
+
+  //Name
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
-  const onChangeDescription = (description: string) =>
+  const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
+  const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
+
+  //Description
+  const onChangeDescription = (description: EditorState) =>
     setState(state => ({ ...state, description }))
+  const descriptionHasText = description.getCurrentContent().hasText()
+  const descriptionFontStyle = descriptionHasText ? 'normal' : 'italic'
+  const descriptionColor = descriptionHasText ? 'normal' : 'gray.400'
+  const descriptionEditorRef = React.useRef(null)
+
+  //Signature
   const onChangeParam = (v: string, i: number) => {
     setState(state => {
       const params = [...state.params]
@@ -144,145 +202,12 @@ const DocsCard = ({
       params: state.params.concat({ type: defaultType }),
     }))
   }
-
-  const [typeSuggestionsList, setTypeSuggestionsList] = React.useState(
-    typeSuggestions,
+  const [signatureEditorState, setSignatureEditorState] = React.useState(() =>
+    EditorState.createEmpty(signatureDecorator),
   )
-  // const [focusedInputIndex, setFocusedInputIndex] = React.useState(0)
-  const [inputValue, setInputValue] = React.useState('')
-  // const onFocusInput = (i: number) => {
-  //   setFocusedInputIndex(i)
-  // }
+  const signatureEditorRef = React.useRef(null)
 
-  // const {
-  //   isOpen,
-  //   // getToggleButtonProps,
-  //   // getLabelProps,
-  //   getMenuProps,
-  //   getInputProps,
-  //   getComboboxProps,
-  //   highlightedIndex,
-  //   getItemProps,
-  //   // selectItem,
-  // } = useCombobox({
-  //   inputValue,
-  //   items: typeSuggestionsList,
-  //   onInputValueChange: ({ inputValue }) => {
-  //     console.log({ inputValue })
-  //     if (!inputValue) {
-  //       return
-  //     }
-  //     setTypeSuggestionsList(
-  //       getFilteredTypeSuggestions(typeSuggestionsList, inputValue),
-  //     )
-  //   },
-  // })
-  const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
-  const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
-
-  // const paramString: string = params.reduce(
-  //   (acc, p) => {
-  //     acc.typeCount[p.type] = acc.typeCount[p.type]
-  //       ? acc.typeCount[p.type] + 1
-  //       : 0
-  //     const prefix = acc.result === '' ? '' : ', '
-  //     acc.result = acc.result + typeToName(p.type, acc.typeCount[p.type])
-  //     return acc
-  //   },
-  //   { result: '', typeCount: {} },
-  // ).result
-
-  const editorValue =
-    code ||
-    `function ${name || '_'}(${params
-      .map(({ type }) => type)
-      .join(',')}) {\n\n}`
-
-  const decorator = new CompositeDecorator([
-    {
-      //TypeBadge
-      strategy(contentBlock, cb, contentState) {
-        findWithRegex(
-          new RegExp(
-            `(${typeSuggestions.map(({ title }) => title).join('|')})`,
-            'gi',
-          ),
-          contentBlock,
-          cb,
-        )
-      },
-      component(props: any) {
-        return (
-          <TypeBadge
-            typeAsString={props.decoratedText}
-            children={props.children}
-            as='span'
-          />
-        )
-      },
-    },
-  ])
-  const [draftEditorState, setDraftEditorState] = React.useState(() =>
-    EditorState.createEmpty(decorator),
-  )
-  const draftEditorRef = React.useRef(null)
-
-  // const draftEditorPreviousValueRef = React.useRef('')
-  // const onChangedraftEditor2 = (value: string) => {
-  //   const arrow = '→'
-  //   let newValue = value
-  //   const isDeleting = draftEditorPreviousValueRef.current.length > value.length
-  //   const triggerArrow = value.endsWith(',') || value.endsWith(' ')
-  //   if (
-  //     triggerArrow && // trigger arrow
-  //     !isDeleting
-  //   ) {
-  //     const previousMeaningfulCharIsArrow = value
-  //       .replace(',', ' ')
-  //       .trimEnd()
-  //       .endsWith(arrow)
-  //     const previousCharIsClosingBracket = value
-  //       .substr(0, value.length - 1)
-  //       .endsWith('}')
-  //     if (previousMeaningfulCharIsArrow) {
-  //       newValue = value.substr(0, value.length - 1)
-  //     } else if (previousCharIsClosingBracket && value.endsWith(' ')) {
-  //       //abilities
-  //       newValue = value
-  //     } else {
-  //       // only if last non-space or comma char is not arrow
-  //       newValue = value.substr(0, value.length - 1).concat(` ${arrow} `)
-  //     }
-  //   }
-  //   if (value.endsWith('[') && !isDeleting) {
-  //     newValue = value.concat(']')
-  //   }
-  //   if (value.endsWith('{') && !isDeleting) {
-  //     const valueWithoutLastLetter = value.substr(0, value.length - 1)
-  //     const previousValueIsArrow = valueWithoutLastLetter
-  //       .trimEnd()
-  //       .endsWith(arrow)
-  //     if (previousValueIsArrow) {
-  //       newValue = valueWithoutLastLetter.trimEnd().concat('{}')
-  //     } else {
-  //       newValue = value.concat('}')
-  //     }
-  //   }
-
-  //   // setSignature2(newValue)
-  // }
-  // React.useEffect(() => {
-  //   const isDeleting =
-  //     draftEditorPreviousValueRef.current.length > signature2.length //TODO fix this
-  //   if ((signature2.endsWith(']') || signature2.endsWith('}')) && !isDeleting) {
-  //     const range = signature2.length - 1
-  //     // signature2Ref.current!.focus()
-  //     signature2Ref.current!.setSelectionRange(range, range)
-  //   }
-  //   signature2PreviousValueRef.current = signature2
-  // }, [signature2])
-
-  const onChangeDraftEditor = (e: EditorState) => {
+  const onChangeSignatureEditor = (e: EditorState) => {
     let newEditorState: EditorState
     switch (e.getLastChangeType()) {
       case 'insert-characters':
@@ -326,13 +251,60 @@ const DocsCard = ({
         break
     }
 
-    setDraftEditorState(newEditorState)
+    setSignatureEditorState(newEditorState)
   }
+
+  const [typeSuggestionsList, setTypeSuggestionsList] = React.useState(
+    typeSuggestions,
+  )
+  const [inputValue, setInputValue] = React.useState('')
+
+  // const {
+  //   isOpen,
+  //   // getToggleButtonProps,
+  //   // getLabelProps,
+  //   getMenuProps,
+  //   getInputProps,
+  //   getComboboxProps,
+  //   highlightedIndex,
+  //   getItemProps,
+  //   // selectItem,
+  // } = useCombobox({
+  //   inputValue,
+  //   items: typeSuggestionsList,
+  //   onInputValueChange: ({ inputValue }) => {
+  //     console.log({ inputValue })
+  //     if (!inputValue) {
+  //       return
+  //     }
+  //     setTypeSuggestionsList(
+  //       getFilteredTypeSuggestions(typeSuggestionsList, inputValue),
+  //     )
+  //   },
+  // })
+
+  // const paramString: string = params.reduce(
+  //   (acc, p) => {
+  //     acc.typeCount[p.type] = acc.typeCount[p.type]
+  //       ? acc.typeCount[p.type] + 1
+  //       : 0
+  //     const prefix = acc.result === '' ? '' : ', '
+  //     acc.result = acc.result + typeToName(p.type, acc.typeCount[p.type])
+  //     return acc
+  //   },
+  //   { result: '', typeCount: {} },
+  // ).result
+
+  //Code
+  const onChangeCode = (code: string) => setState(state => ({ ...state, code }))
+  const editorValue =
+    code ||
+    `function ${name || '_'}(${params
+      .map(({ type }) => type)
+      .join(',')}) {\n\n}`
 
   const hasChanges = true //TODO
   const noErrors = true
-
-  // new RegExp(/(\s|,)/, 'gi')
 
   return (
     <Box
@@ -428,6 +400,7 @@ const DocsCard = ({
                   :{' '}
                 </Text>
                 <Code
+                  // SIGNATURE EDITOR
                   fontSize='sm'
                   width='100%'
                   paddingX={1}
@@ -435,10 +408,9 @@ const DocsCard = ({
                   as='span'
                 >
                   <DraftEditor
-                    editorState={draftEditorState}
-                    // onChange={handleEditorChange}
-                    ref={draftEditorRef}
-                    onChange={onChangeDraftEditor}
+                    editorState={signatureEditorState}
+                    ref={signatureEditorRef}
+                    onChange={onChangeSignatureEditor}
                   />
                 </Code>
               </HStack>
@@ -456,18 +428,22 @@ const DocsCard = ({
                   onChange={onChangeSignature2}
                 /> */}
               </Code>
-
-              <Textarea
+              <Text
                 /* DESCRIPTION */
-                fontSize='xl'
-                placeholder='Description'
-                onChange={e => {
-                  onChangeDescription(e.target.value)
-                }}
-                value={description}
+                className='description'
                 marginTop={5}
-              ></Textarea>
-
+                fontSize='xl'
+                fontStyle={descriptionFontStyle}
+                color={descriptionColor}
+                backgroundColor='yellow.50'
+                padding={3}
+              >
+                <DraftEditor
+                  placeholder='Description'
+                  editorState={description}
+                  onChange={onChangeDescription}
+                ></DraftEditor>
+              </Text>
               <Tabs marginTop={5}>
                 <TabList>
                   <Tab>Regular editor</Tab>

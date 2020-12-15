@@ -1,11 +1,12 @@
-div.DraftEditor-root {
+.description > .DraftEditor-root {
   /* border: 1px solid #000; */
-  /* background-color: beige; */
-  /* height: 200px; */
-  /* width: ''; */
+  /* yellow.50 */
+  background-color: #fffff0;
+  height: 25vh;
+  width: '100%';
   /* overflow-y: auto; */
 }
-div.DraftEditor-editorContainer,
-div.public-DraftEditor-content {
+.description > .DraftEditor-editorContainer,
+.description > .public-DraftEditor-content {
   /* height: 100%; */
 }
