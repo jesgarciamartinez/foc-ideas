@@ -17,7 +17,12 @@ import {
   Fade,
 } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-import { AddIcon, ArrowForwardIcon, CheckIcon } from '@chakra-ui/icons'
+import {
+  AddIcon,
+  ArrowForwardIcon,
+  CheckIcon,
+  CloseIcon,
+} from '@chakra-ui/icons'
 import Card from './Card'
 // import useAutocomplete from '@material-ui/lab/useAutocomplete'
 // import Autosuggest from 'react-autosuggest'
@@ -134,9 +139,11 @@ const getStateValueFromFunc = (
 const DocsCard = ({
   func,
   dispatch,
+  index,
 }: {
   func?: Ifunction //& { parameterTypes: Itype | '_' }
   dispatch: React.Dispatch<Action>
+  index: number
 }) => {
   const descriptionDecorator = new CompositeDecorator([
     {
@@ -368,6 +375,13 @@ const DocsCard = ({
         <PopoverExplanation label='Docs card explanation' title='Docs card'>
           Docs is an editable view of the documentation for a function
         </PopoverExplanation>
+        <IconButton
+          aria-label='Close card'
+          icon={<CloseIcon />}
+          variant='ghost'
+          size='sm'
+          onClick={() => dispatch({ type: 'closeDocsCard', index })}
+        />
       </Flex>
       <Divider marginTop={2}></Divider>
       <Droppable droppableId='DocsCard'>
@@ -469,20 +483,28 @@ const DocsCard = ({
                   onChange={onChangeDescription}
                 ></DraftEditor>
               </Text>
-              <Tabs marginTop={5}>
+              {/* <Tabs marginTop={5}>
                 <TabList>
                   <Tab>Regular editor</Tab>
                   <Tab>Structured editor</Tab>
                 </TabList>
                 <TabPanels>
-                  <TabPanel>
-                    <MonacoEditor value={editorValue}></MonacoEditor>
-                  </TabPanel>
+                  <TabPanel> */}
+              <Box marginTop={5}>
+                <MonacoEditor
+                  value={editorValue}
+                  onChange={(_, v: any) => {
+                    onChangeCode(v)
+                  }}
+                ></MonacoEditor>
+              </Box>
+
+              {/* </TabPanel>
                   <TabPanel>
                     <Code>{editorValue}</Code>
                   </TabPanel>
                 </TabPanels>
-              </Tabs>
+              </Tabs> */}
 
               {provided.placeholder}
             </Box>

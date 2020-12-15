@@ -129,6 +129,7 @@ export type Action =
   | { type: 'sideBarSearch'; value: string }
   | { type: 'dropFnFromSideBarToDocsCard'; draggableId: string }
   | { type: 'openDocs'; fnName: string }
+  | { type: 'closeDocsCard'; index: number }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
@@ -280,9 +281,8 @@ function reducer(state: State, action: Action): State {
       const alreadyInDocCards = state.docCards.find(d =>
         'fnName' in d ? d.fnName === action.fnName : false,
       )
-      console.log({ alreadyInDocCards })
+
       if (!fn || alreadyInDocCards) {
-        console.log('hmm')
         return state
       }
       return {
@@ -291,6 +291,11 @@ function reducer(state: State, action: Action): State {
           ...state.docCards,
           { type: 'editing', fnName: action.fnName },
         ],
+      }
+    case 'closeDocsCard':
+      return {
+        ...state,
+        docCards: state.docCards.filter((_, i) => i !== action.index),
       }
   }
 }

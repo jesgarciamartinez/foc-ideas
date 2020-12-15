@@ -125,7 +125,9 @@ export const App = () => {
                 doc.type === 'editing'
                   ? state.functions.find(f => f.name === doc.fnName)
                   : undefined
-              return <DocsCard key={i} func={func} dispatch={dispatch} />
+              return (
+                <DocsCard key={i} index={i} func={func} dispatch={dispatch} />
+              )
             })}
             {/* <Card>
               <form>
