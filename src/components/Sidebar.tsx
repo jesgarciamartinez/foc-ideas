@@ -276,6 +276,9 @@ const Sidebar = React.memo(
                   <Kbd>space</Kbd> to drag, <Kbd>right</Kbd> then{' '}
                   <Kbd>space</Kbd> to drop
                 </ListItem>
+                <ListItem>
+                  Datatypes and Effects are not interactive at this point
+                </ListItem>
               </UnorderedList>
             </PopoverExplanation>
           </Center>

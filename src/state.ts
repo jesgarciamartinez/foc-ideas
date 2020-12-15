@@ -128,6 +128,7 @@ export type Action =
   | { type: 'clearFlowCard' }
   | { type: 'sideBarSearch'; value: string }
   | { type: 'dropFnFromSideBarToDocsCard'; draggableId: string }
+  | { type: 'openDocs'; fnName: string }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
@@ -272,6 +273,23 @@ function reducer(state: State, action: Action): State {
         ...state,
         docCards: [
           { type: 'editing', fnName: action.draggableId.split('_')[1] },
+        ],
+      }
+    case 'openDocs':
+      const fn = state.functions.find(f => f.name === action.fnName)
+      const alreadyInDocCards = state.docCards.find(d =>
+        'fnName' in d ? d.fnName === action.fnName : false,
+      )
+      console.log({ alreadyInDocCards })
+      if (!fn || alreadyInDocCards) {
+        console.log('hmm')
+        return state
+      }
+      return {
+        ...state,
+        docCards: [
+          ...state.docCards,
+          { type: 'editing', fnName: action.fnName },
         ],
       }
   }

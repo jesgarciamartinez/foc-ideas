@@ -1,17 +1,26 @@
 import * as React from 'react'
-import { HStack } from '@chakra-ui/react'
+import { Box, Flex, HStack } from '@chakra-ui/react'
 
 const CardHStack = ({ children }: { children?: any }) => {
   return (
-    <HStack
-      // overflow='auto'
+    // <Flex flexGrow={1} overflowX='auto' overflowY='hidden'>
+    <Box
+      // flexDirection='row'
+      // wrap='nowrap'
+      // justifyContent='space-around'
+      overflow='auto'
+      whiteSpace={'nowrap'}
       height='100%'
+      flexGrow={1}
+      width={React.Children.count(children) * 625}
+      transition={'width 100ms cubic-bezier(0.19, 1, 0.22, 1)'}
       // flex='1'
       // padding={1}
       backgroundColor='purple.50'
     >
       {children}
-    </HStack>
+    </Box>
+    // </Flex>
   )
 }
 export default CardHStack

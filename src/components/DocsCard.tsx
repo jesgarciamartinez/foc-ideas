@@ -84,24 +84,6 @@ function findWithRegex(regex: any, contentBlock: any, callback: any) {
   }
 }
 
-const getStateValueFromFunc = (
-  func?: Ifunction,
-): { name: string; params: any[]; description: EditorState; code: string } => {
-  return {
-    name: func?.name || '',
-    params: [],
-    /*func?.parameterTypes
-      .map(type => ({ type }))
-      .concat({ type: func.returnType }) ||*/
-    // { type: defaultType },
-    // { type: defaultType },
-    description: EditorState.createWithContent(
-      ContentState.createFromText(func?.description || ''),
-    ),
-    code: func?.fn.toString() || '',
-  }
-}
-
 const signatureDecorator = new CompositeDecorator([
   {
     //TypeBadge
@@ -127,30 +109,27 @@ const signatureDecorator = new CompositeDecorator([
   },
 ])
 
-const descriptionDecorator = new CompositeDecorator([
-  {
-    //TypeBadge
-    strategy(contentBlock, cb, contentState) {
-      // findWithRegex(
-      //   new RegExp(
-      //     `(${typeSuggestions.map(({ title }) => title).join('|')})`,
-      //     'gi',
-      //   ),
-      //   contentBlock,
-      //   cb,
-      // )
-    },
-    component(props: any) {
-      // return (
-      //   <TypeBadge
-      //     typeAsString={props.decoratedText}
-      //     children={props.children}
-      //     as='span'
-      //   />
-      // )
-    },
-  },
-])
+const HANDLE_REGEX = /@[\w]+/g
+
+const getStateValueFromFunc = (
+  descriptionDecorator: CompositeDecorator,
+  func?: Ifunction,
+): { name: string; params: any[]; description: EditorState; code: string } => {
+  return {
+    name: func?.name || '',
+    params: [],
+    /*func?.parameterTypes
+      .map(type => ({ type }))
+      .concat({ type: func.returnType }) ||*/
+    // { type: defaultType },
+    // { type: defaultType },
+    description: EditorState.createWithContent(
+      ContentState.createFromText(func?.description || ''),
+      descriptionDecorator,
+    ),
+    code: func?.fn.toString() || '',
+  }
+}
 
 const DocsCard = ({
   func,
@@ -159,18 +138,51 @@ const DocsCard = ({
   func?: Ifunction //& { parameterTypes: Itype | '_' }
   dispatch: React.Dispatch<Action>
 }) => {
+  const descriptionDecorator = new CompositeDecorator([
+    {
+      //TypeBadge
+      strategy(contentBlock, cb, contentState) {
+        findWithRegex(HANDLE_REGEX, contentBlock, cb)
+      },
+      component(props: any) {
+        return (
+          <Button
+            as='span'
+            variant='link'
+            color='unison.aqua'
+            fontSize='inherit'
+            fontStyle='inherit'
+            style={{
+              direction: 'ltr',
+              unicodeBidi: 'bidi-override',
+            }}
+            data-offset-key={props.offsetKey}
+            onClick={e => {
+              console.log('e', e, props.decoratedText)
+              dispatch({
+                type: 'openDocs',
+                fnName: props.decoratedText.slice(1),
+              })
+            }}
+          >
+            {props.children}
+          </Button>
+        )
+      },
+    },
+  ])
   const [state, setState] = React.useState<{
     name: string
     params: any[]
     description: EditorState
     code: string
-  }>(() => getStateValueFromFunc(func))
+  }>(() => getStateValueFromFunc(descriptionDecorator, func))
 
   const [previousFunc, setPreviousFunc] = React.useState(func)
   if (previousFunc !== func) {
     //reference check on function from state.functions
     setPreviousFunc(func)
-    setState(getStateValueFromFunc(func))
+    setState(getStateValueFromFunc(descriptionDecorator, func))
   }
   const { name, params, description, code } = state
 
@@ -308,17 +320,30 @@ const DocsCard = ({
 
   return (
     <Box
+      display='inline-block'
       boxShadow={'base'}
       // minWidth={'48%'} //@TODO prevent Yscroll another way
       // minHeight='100%'
       backgroundColor='white'
       padding={1}
-      minWidth={'50%'}
-      minHeight='100vh'
+      // width={'50%'}
+      // minWidth='30vw'
+      flex={1}
+      // minHeight='100vh'
       height='100%'
-      position='relative'
-      display='flex'
+      // position='relative'
+      // display='flex'
       flexDirection='column'
+      // Andy
+      flexShrink={0}
+      flexGrow={1}
+      overFlowY='auto'
+      width='625px'
+      minWidth='625px'
+      top='0px'
+      position='sticky'
+      left='0px'
+      right='-585px'
     >
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>

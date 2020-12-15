@@ -431,13 +431,15 @@ const FlowCard = React.memo(
       <Box
         boxShadow={'base'}
         padding={1}
-        minWidth={'50%'}
+        flex={1}
+        width={'625px'}
         minHeight='100vh'
         height='100%'
         position='relative'
         backgroundColor='white'
-        display='flex'
+        // display='flex'
         flexDirection='column'
+        display='inline-block'
       >
         <Flex paddingLeft={2} alignItems='center'>
           <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
