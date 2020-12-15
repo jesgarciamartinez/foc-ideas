@@ -278,20 +278,28 @@ function reducer(state: State, action: Action): State {
       }
     case 'openDocs':
       const fn = state.functions.find(f => f.name === action.fnName)
-      const alreadyInDocCards = state.docCards.find(d =>
-        'fnName' in d ? d.fnName === action.fnName : false,
-      )
-
-      if (!fn || alreadyInDocCards) {
+      if (!fn) {
         return state
       }
       return {
         ...state,
-        docCards: [
-          ...state.docCards,
-          { type: 'editing', fnName: action.fnName },
-        ],
+        docCards: [{ type: 'editing', fnName: action.fnName }],
       }
+    // const fn = state.functions.find(f => f.name === action.fnName)
+    // const alreadyInDocCards = state.docCards.find(d =>
+    //   'fnName' in d ? d.fnName === action.fnName : false,
+    // )
+
+    // if (!fn || alreadyInDocCards) {
+    //   return state
+    // }
+    // return {
+    //   ...state,
+    //   docCards: [
+    //     ...state.docCards,
+    //     { type: 'editing', fnName: action.fnName },
+    //   ],
+    // }
     case 'closeDocsCard':
       return {
         ...state,

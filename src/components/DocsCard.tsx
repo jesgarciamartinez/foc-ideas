@@ -15,6 +15,7 @@ import {
   Spacer,
   Button,
   Fade,
+  ScaleFade,
 } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
@@ -165,7 +166,6 @@ const DocsCard = ({
             }}
             data-offset-key={props.offsetKey}
             onClick={e => {
-              console.log('e', e, props.decoratedText)
               dispatch({
                 type: 'openDocs',
                 fnName: props.decoratedText.slice(1),
@@ -327,30 +327,17 @@ const DocsCard = ({
 
   return (
     <Box
-      display='inline-block'
       boxShadow={'base'}
       // minWidth={'48%'} //@TODO prevent Yscroll another way
       // minHeight='100%'
       backgroundColor='white'
       padding={1}
-      // width={'50%'}
-      // minWidth='30vw'
-      flex={1}
-      // minHeight='100vh'
+      minWidth={'50%'}
+      minHeight='100vh'
       height='100%'
       // position='relative'
-      // display='flex'
+      display='flex'
       flexDirection='column'
-      // Andy
-      flexShrink={0}
-      flexGrow={1}
-      overFlowY='auto'
-      width='625px'
-      minWidth='625px'
-      top='0px'
-      position='sticky'
-      left='0px'
-      right='-585px'
     >
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
