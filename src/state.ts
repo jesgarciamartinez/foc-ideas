@@ -125,6 +125,7 @@ export type Action =
   | { type: 'openDocs'; fnName: string }
   | { type: 'closeDocsCard'; index: number }
   | { type: 'clearDocsCard'; index: number }
+  | { type: 'newDocsCard' }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
@@ -320,6 +321,11 @@ function reducer(state: State, action: Action): State {
         docCards: changeAtIndex(state.docCards, action.index, {
           type: 'creating',
         }),
+      }
+    case 'newDocsCard':
+      return {
+        ...state,
+        docCards: [{ type: 'creating' }],
       }
   }
 }

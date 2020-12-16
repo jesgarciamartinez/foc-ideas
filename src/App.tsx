@@ -1,6 +1,13 @@
 import * as React from 'react'
 import { DragDropContext } from 'react-beautiful-dnd'
-import { useTheme, useToken } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Center,
+  ScaleFade,
+  useTheme,
+  useToken,
+} from '@chakra-ui/react'
 import SideBar from './components/Sidebar'
 import CardHStack from './components/CardHStack'
 import SplitPane from 'react-split-pane'
@@ -10,6 +17,7 @@ import DocsCard from './components/DocsCard'
 import { matchSorter } from 'match-sorter'
 import './styles.css'
 import { HotKeys } from 'react-hotkeys'
+import { AddIcon } from '@chakra-ui/icons'
 
 export const App = () => {
   const [state, dispatch] = useAppReducer()
@@ -120,15 +128,33 @@ export const App = () => {
               dispatch={dispatch}
               name=''
             ></FlowCard>
-            {state.docCards.map((doc, i) => {
-              const func =
-                doc.type === 'editing'
-                  ? state.functions.find(f => f.name === doc.fnName)
-                  : undefined
-              return (
-                <DocsCard key={i} index={i} func={func} dispatch={dispatch} />
-              )
-            })}
+            {state.docCards.length > 0 ? (
+              state.docCards.map((doc, i) => {
+                const func =
+                  doc.type === 'editing'
+                    ? state.functions.find(f => f.name === doc.fnName)
+                    : undefined
+                return (
+                  <DocsCard key={i} index={i} func={func} dispatch={dispatch} />
+                )
+              })
+            ) : (
+              <Box width={'100%'}>
+                <Center>
+                  <ScaleFade in={true}>
+                    <Button
+                      leftIcon={<AddIcon />}
+                      colorScheme='teal'
+                      variant='ghost'
+                      fontSize='xl'
+                      onClick={() => dispatch({ type: 'newDocsCard' })}
+                    >
+                      New function
+                    </Button>
+                  </ScaleFade>
+                </Center>
+              </Box>
+            )}
             {/* <Card>
               <form>
                 <InputGroup size='sm'>
