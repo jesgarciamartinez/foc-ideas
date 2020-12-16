@@ -6,11 +6,10 @@
 //   description: string
 //   contract?: string
 // }
-export type Iparameter = Itype & { parameterName: string }
 
 export type Ifunction = {
   name: string
-  parameters: Array<Iparameter>
+  parameters: Array<Itype>
   returns: Itype
   fn: Function
   description: string

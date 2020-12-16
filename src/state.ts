@@ -47,7 +47,7 @@ const useLoggerReducer = <A, B extends { type: string | number }>(
 const initialFunctions: Array<Ifunction> = [
   {
     name: 'length',
-    parameters: [{ type: 'string', parameterName: 's' }],
+    parameters: [{ type: 'string' }],
     returns: { type: 'number' },
     fn: function length(s: any) {
       return s.length
@@ -56,7 +56,7 @@ const initialFunctions: Array<Ifunction> = [
   },
   {
     name: 'upperCase',
-    parameters: [{ type: 'string', parameterName: 's' }],
+    parameters: [{ type: 'string' }],
     returns: { type: 'string' },
     fn: function (s: any) {
       return s.toUpperCase()
@@ -66,10 +66,7 @@ const initialFunctions: Array<Ifunction> = [
   },
   {
     name: 'add',
-    parameters: [
-      { type: 'number', parameterName: 'x' },
-      { type: 'number', parameterName: 'y' },
-    ],
+    parameters: [{ type: 'number' }, { type: 'number' }],
     returns: { type: 'number' },
     fn: function add(x: any, y: any) {
       return x + y
@@ -88,7 +85,7 @@ const initialFunctions: Array<Ifunction> = [
   // },
   {
     name: 'id',
-    parameters: [{ type: 'string', parameterName: 's1' }],
+    parameters: [{ type: 'string' }],
     returns: { type: 'string' },
     fn: function id(s: any) {
       return s
@@ -97,10 +94,7 @@ const initialFunctions: Array<Ifunction> = [
   },
   {
     name: 'greaterThan',
-    parameters: [
-      { type: 'number', parameterName: 'n' },
-      { type: 'number', parameterName: 'm' },
-    ],
+    parameters: [{ type: 'number' }, { type: 'number' }],
     returns: { type: 'boolean' },
     fn: function greaterThan(n: number, m: number) {
       return m > n
@@ -130,6 +124,7 @@ export type Action =
   | { type: 'dropFnFromSideBarToDocsCard'; draggableId: string }
   | { type: 'openDocs'; fnName: string }
   | { type: 'closeDocsCard'; index: number }
+  | { type: 'clearDocsCard'; index: number }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
@@ -168,6 +163,12 @@ const reorder = (list: any[], startIndex: number, endIndex: number) => {
 const insert = <A>(list: Array<A>, index: number, item: A) => {
   const listCopy = [...list]
   listCopy.splice(index, 0, item)
+  return listCopy
+}
+
+const changeAtIndex = <A>(list: Array<A>, index: number, item: A) => {
+  const listCopy = [...list]
+  listCopy.splice(index, 1, item)
   return listCopy
 }
 
@@ -232,7 +233,15 @@ function reducer(state: State, action: Action): State {
     case 'isDragging':
       return { ...state, isSideBarItemDragging: true }
     case 'createFunction':
-      return { ...state, functions: state.functions.concat(action.function) }
+      const fnIndex = state.functions.findIndex(
+        f => f.name === action.function.name,
+      )
+      return fnIndex === -1
+        ? { ...state, functions: state.functions.concat(action.function) }
+        : {
+            ...state,
+            functions: changeAtIndex(state.functions, fnIndex, action.function),
+          }
     case 'dropOutside':
       return { ...state, isSideBarItemDragging: false }
     case 'dropFnFromSideBarOnFlowCard':
@@ -304,6 +313,13 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         docCards: state.docCards.filter((_, i) => i !== action.index),
+      }
+    case 'clearDocsCard':
+      return {
+        ...state,
+        docCards: changeAtIndex(state.docCards, action.index, {
+          type: 'creating',
+        }),
       }
   }
 }

@@ -23,6 +23,7 @@ import {
   ArrowForwardIcon,
   CheckIcon,
   CloseIcon,
+  DeleteIcon,
 } from '@chakra-ui/icons'
 import Card from './Card'
 // import useAutocomplete from '@material-ui/lab/useAutocomplete'
@@ -47,38 +48,66 @@ import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
 
 const defaultName = 'name'
-const defaultType = '_'
+// const defaultType = '_'
 const typeSuggestions: Array<{ title: Itype['type'] | 'New type' }> = [
   { title: 'string' },
   { title: 'boolean' },
   { title: 'number' },
 ]
+
+const safeEval = (s: string) => {
+  try {
+    return eval(`(() => ${s})()`)
+  } catch (error) {
+    return null
+  }
+}
+const getParamsAndReturns = (s: string) =>
+  s.split(arrow).map(s => ({ type: s.trim() }))
+
+const isSignatureCorrect = (
+  paramsAndReturns: Array<{ type: string }>,
+): paramsAndReturns is Array<Itype> =>
+  paramsAndReturns.length > 1 &&
+  paramsAndReturns.every(p => ['string', 'boolean', 'number'].includes(p.type))
+
 const getFilteredTypeSuggestions = (
   typeSuggestions_: typeof typeSuggestions,
   inputValue: string,
 ) => matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 
-const typeToName = (x: Itype | string, n: number): string => {
+const typeToName = (x: { type: string }, n: number): string => {
   const suffix = n || ''
-  switch (x) {
+  switch (x.type) {
     case 'string':
-      return 's' + suffix
+      return 'str' + suffix
     case 'number':
-      return 'n' + suffix
+      return 'num' + suffix
     case 'boolean':
       return 'bool' + suffix
-    case 'function':
-      return ['f', 'g', 'h', 'i', 'j'][n]
-    case 'object':
-      return 'o' + suffix
     default:
       return 'x'
-    case 'array':
-      return '' //TODO
-    case 'undefined':
-    case 'null':
-      return ''
+    // case 'function':
+    //   return ['f', 'g', 'h', 'i', 'j'][n]
+    // case 'object':
+    //   return 'o' + suffix
+
+    // case 'array':
+    //   return '' //TODO
+    // case 'undefined':
+    // case 'null':
+    //   return ''
   }
+}
+const getParamNames = (arr: Array<{ type: string }>): string[] => {
+  let result: string[] = []
+  let alreadySeenTypes: any = {}
+  arr.forEach(iType => {
+    const paramName = typeToName(iType, alreadySeenTypes[iType.type])
+    result.push(paramName)
+    alreadySeenTypes[iType.type] = (alreadySeenTypes[iType.type] || 0) + 1
+  })
+  return result
 }
 
 function findWithRegex(regex: any, contentBlock: any, callback: any) {
@@ -116,19 +145,28 @@ const signatureDecorator = new CompositeDecorator([
 ])
 
 const HANDLE_REGEX = /@[\w]+/g
+const arrow = '→'
 
 const getStateValueFromFunc = (
   descriptionDecorator: CompositeDecorator,
   func?: Ifunction,
-): { name: string; params: any[]; description: EditorState; code: string } => {
+): {
+  name: string
+  signature: EditorState
+  description: EditorState
+  code: string
+} => {
   return {
     name: func?.name || '',
-    params: [],
-    /*func?.parameterTypes
-      .map(type => ({ type }))
-      .concat({ type: func.returnType }) ||*/
-    // { type: defaultType },
-    // { type: defaultType },
+    signature: EditorState.createWithContent(
+      ContentState.createFromText(
+        func?.parameters
+          .concat(func.returns)
+          .map(p => p.type)
+          .join(` ${arrow} `) || '',
+      ),
+      signatureDecorator,
+    ),
     description: EditorState.createWithContent(
       ContentState.createFromText(func?.description || ''),
       descriptionDecorator,
@@ -137,12 +175,46 @@ const getStateValueFromFunc = (
   }
 }
 
+type DocsCardState = {
+  name: string
+  signature: EditorState
+  description: EditorState
+  code: string
+}
+
+const setOriginalState = (
+  originalState: React.MutableRefObject<{
+    name: string
+    signatureString: string
+    descriptionString: string
+    code: string
+  }>,
+  state: DocsCardState,
+) => {
+  const newOriginalState = {
+    name: state.name,
+    signatureString: state.signature.getCurrentContent().getPlainText(),
+    descriptionString: state.description.getCurrentContent().getPlainText(),
+    code: state.code,
+  }
+  console.log({ newOriginalState })
+  originalState.current = newOriginalState
+}
+
+/**
+ *
+ *
+ * DOCS CARD
+ *
+ *
+ */
+
 const DocsCard = ({
   func,
   dispatch,
   index,
 }: {
-  func?: Ifunction //& { parameterTypes: Itype | '_' }
+  func?: Ifunction
   dispatch: React.Dispatch<Action>
   index: number
 }) => {
@@ -178,20 +250,32 @@ const DocsCard = ({
       },
     },
   ])
-  const [state, setState] = React.useState<{
+  const originalState = React.useRef<{
     name: string
-    params: any[]
-    description: EditorState
+    signatureString: string
+    descriptionString: string
     code: string
-  }>(() => getStateValueFromFunc(descriptionDecorator, func))
+  }>({
+    name: '',
+    signatureString: '',
+    descriptionString: '',
+    code: '',
+  })
+  const [state, setState] = React.useState<DocsCardState>(() => {
+    const state = getStateValueFromFunc(descriptionDecorator, func)
+    setOriginalState(originalState, state)
+    return state
+  })
 
   const [previousFunc, setPreviousFunc] = React.useState(func)
   if (previousFunc !== func) {
     //reference check on function from state.functions
     setPreviousFunc(func)
-    setState(getStateValueFromFunc(descriptionDecorator, func))
+    const state = getStateValueFromFunc(descriptionDecorator, func)
+    setOriginalState(originalState, state)
+    setState(state)
   }
-  const { name, params, description, code } = state
+  const { name, signature, description, code } = state
 
   //Name
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
@@ -204,26 +288,13 @@ const DocsCard = ({
   const descriptionHasText = description.getCurrentContent().hasText()
   const descriptionFontStyle = descriptionHasText ? 'normal' : 'italic'
   const descriptionColor = descriptionHasText ? 'normal' : 'gray.400'
-  const descriptionEditorRef = React.useRef(null)
+  // const descriptionEditorRef = React.useRef(null)
 
   //Signature
-  const onChangeParam = (v: string, i: number) => {
-    setState(state => {
-      const params = [...state.params]
-      const param = params[i]
-      params[i] = { type: v }
-      return { ...state, params }
-    })
-  }
-  const addParam = () => {
-    setState(state => ({
-      ...state,
-      params: state.params.concat({ type: defaultType }),
-    }))
-  }
-  const [signatureEditorState, setSignatureEditorState] = React.useState(() =>
-    EditorState.createEmpty(signatureDecorator),
-  )
+
+  // const [signatureEditorState, setSignatureEditorState] = React.useState(() =>
+  //   EditorState.createEmpty(signatureDecorator),
+  // )
   const signatureEditorRef = React.useRef(null)
 
   const onChangeSignatureEditor = (e: EditorState) => {
@@ -270,7 +341,7 @@ const DocsCard = ({
         break
     }
 
-    setSignatureEditorState(newEditorState)
+    setState(state => ({ ...state, signature: newEditorState }))
   }
 
   const [typeSuggestionsList, setTypeSuggestionsList] = React.useState(
@@ -316,14 +387,22 @@ const DocsCard = ({
 
   //Code
   const onChangeCode = (code: string) => setState(state => ({ ...state, code }))
+  const signatureString = signature.getCurrentContent().getPlainText()
+  const paramsAndReturns = getParamsAndReturns(signatureString)
+  const params = paramsAndReturns.slice(0, paramsAndReturns.length - 1)
+  const paramNames = getParamNames(params)
   const editorValue =
-    code ||
-    `function ${name || '_'}(${params
-      .map(({ type }) => type)
-      .join(',')}) {\n\n}`
+    code || `function ${name || 'name'}(${paramNames.join(', ')}) {\n\n}`
 
-  const hasChanges = true //TODO
-  const noErrors = true
+  // const [signatureTouched, setSignatureTouched] = React.useState<boolean>(false)
+  const signatureError = !isSignatureCorrect(paramsAndReturns)
+
+  const hasChanges =
+    name !== originalState.current.name ||
+    signatureString !== originalState.current.signatureString ||
+    description.getCurrentContent().getPlainText() !==
+      originalState.current.descriptionString ||
+    code !== originalState.current.code
 
   return (
     <Box
@@ -345,14 +424,55 @@ const DocsCard = ({
         </Heading>
         <Spacer></Spacer>
 
-        <Fade in={hasChanges && noErrors}>
+        <Fade in={hasChanges}>
           <Button
-            color='unison.green'
+            color='unison.darkPink'
+            sx={{ '&:hover': { backgroundColor: 'red.50' } }}
+            variant='ghost'
+            leftIcon={<DeleteIcon />}
+            onClick={() => {
+              const state = getStateValueFromFunc(
+                descriptionDecorator,
+                undefined,
+              )
+              setOriginalState(originalState, state)
+              setState(state)
+              dispatch({ type: 'clearDocsCard', index })
+            }}
+          >
+            Clear
+          </Button>
+        </Fade>
+
+        <Fade in={hasChanges}>
+          <Button
+            color={signatureError ? 'gray.300' : 'unison.green'}
             sx={{ '&:hover': { backgroundColor: 'green.50' } }}
             variant='ghost'
             leftIcon={<CheckIcon />}
+            disabled={signatureError}
             onClick={() => {
-              // dispatch({ type: 'createFunction' })
+              const fn = safeEval(code)
+              const validParams = isSignatureCorrect(paramsAndReturns)
+              if (!fn || !validParams) {
+                console.log('hey', validParams, fn, code)
+                return //TODO alert
+              }
+              const parameters = paramsAndReturns.slice(
+                0,
+                paramsAndReturns.length - 1,
+              ) as Itype[] //TODO cast
+              const returns = paramsAndReturns.slice(-1).pop() as Itype
+              dispatch({
+                type: 'createFunction',
+                function: {
+                  name,
+                  parameters,
+                  returns,
+                  fn,
+                  description: description.getCurrentContent().getPlainText(),
+                },
+              })
             }}
           >
             Save
@@ -393,6 +513,7 @@ const DocsCard = ({
                 fontSize='2xl'
                 textColor={nameColor}
                 fontStyle={nameFontStyle}
+                marginBottom={3}
               />
 
               {/* SIGNATURE */}
@@ -434,9 +555,12 @@ const DocsCard = ({
                   as='span'
                 >
                   <DraftEditor
-                    editorState={signatureEditorState}
+                    editorState={signature}
                     ref={signatureEditorRef}
                     onChange={onChangeSignatureEditor}
+                    // onBlur={(e: any) => {
+                    //   setSignatureTouched(true)
+                    // }}
                   />
                 </Code>
               </HStack>
@@ -502,65 +626,3 @@ const DocsCard = ({
   )
 }
 export default DocsCard
-
-// {
-//   params.map((param, i) => (
-//     <React.Fragment key={i}>
-//       {i === 0 ? null : <ArrowForwardIcon></ArrowForwardIcon>}
-//       <Editable
-//         value={param.type}
-//         // placeholder={defaultType} //TODOr
-//         textColor={param.type === defaultType ? 'gray.400' : 'normal'}
-//         display='inline'
-//         width={param.type.length * 12 + 12 + 'px'}
-//         onChange={v => onChangeParam(v, i)}
-//         {...getComboboxProps()}
-//       >
-//         <EditablePreview />
-//         <EditableInput
-//           onFocus={() => onFocusInput(i)}
-//           _focus={{ outline: 'none' }}
-//           {...getInputProps()}
-//         />
-//         <ul
-//           {...getMenuProps()}
-//           style={{
-//             position: 'absolute',
-//             background: 'white',
-//             borderRadius: '10%',
-//             border: '1px solid gray',
-//             zIndex: '20000',
-//             color: 'black',
-//           }}
-//         >
-//           {isOpen &&
-//             i === focusedInputIndex &&
-//             typeSuggestions.map((item, index) => (
-//               <li
-//                 style={
-//                   highlightedIndex === index
-//                     ? { backgroundColor: '#bde4ff' }
-//                     : {}
-//                 }
-//                 key={`${item.title}${index}`}
-//                 {...getItemProps({ item, index })}
-//               >
-//                 {item.title === 'New type' ? (
-//                   <Code>{item.title}</Code>
-//                 ) : (
-//                   <TypeBadge typeAsString={item.title} />
-//                 )}
-//               </li>
-//             ))}
-//         </ul>
-//       </Editable>
-//       {i === params.length - 1 ? (
-//         <IconButton
-//           aria-label='Add parameter'
-//           icon={<AddIcon />}
-//           onClick={addParam}
-//         />
-//       ) : null}
-//     </React.Fragment>
-//   ))
-// }

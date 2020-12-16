@@ -4,8 +4,9 @@ import { HStack } from '@chakra-ui/react'
 const CardHStack = ({ children }: { children?: any }) => {
   return (
     <HStack
-      overflowY='scroll'
-      height='100%'
+      // overflowY='scroll'
+      overflowX='scroll'
+      // height='100%'
       // flex='1'
       // padding={1}
       width={'100%'}

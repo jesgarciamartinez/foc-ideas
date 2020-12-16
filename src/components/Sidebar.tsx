@@ -197,12 +197,13 @@ const Sidebar = React.memo(
       const theme = useTheme()
       const {
         colors: {
-          unison: { purple, lightPurple, pink },
+          unison: { purple, lightPurple, aqua },
         },
       } = theme
 
       //Search
       const [isHoveringSearch, setIsHoveringSearch] = React.useState(false)
+      const [isFocusedSearch, setFocusedSearch] = React.useState(false)
       const onMouseEnterSearch = React.useCallback(() => {
         setIsHoveringSearch(true)
       }, [])
@@ -211,7 +212,12 @@ const Sidebar = React.memo(
       }, [])
 
       return (
-        <Box height='100%' flex={1} backgroundColor={'purple.50'}>
+        <Box
+          height='100%'
+          flex={1}
+          backgroundColor={'purple.50'}
+          paddingTop={4}
+        >
           <InputGroup
             width='100%'
             whiteSpace='nowrap'
@@ -223,7 +229,17 @@ const Sidebar = React.memo(
           >
             <InputLeftElement
               pointerEvents='none'
-              children={<SearchIcon color={purple} />} //TODO teal
+              children={
+                <SearchIcon
+                  color={
+                    isFocusedSearch
+                      ? aqua
+                      : isHoveringSearch
+                      ? lightPurple
+                      : purple
+                  }
+                />
+              } //TODO teal
             />
             <Input
               ref={ref}
@@ -241,7 +257,9 @@ const Sidebar = React.memo(
               onFocus={() => {
                 if (!ref || !('current' in ref)) return
                 ref.current.setSelectionRange(0, ref.current.value.length)
+                setFocusedSearch(true)
               }}
+              onBlur={() => setFocusedSearch(false)}
               onChange={e =>
                 dispatch({ type: 'sideBarSearch', value: e.target.value })
               }

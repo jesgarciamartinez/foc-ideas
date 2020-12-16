@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Ifunction, Iparameter, Itype } from './interfaces'
+import { Ifunction, Itype } from './interfaces'
 import {
   Box,
   Flex,
@@ -140,7 +140,7 @@ const getParamValues = (
           : parameters[paramIndex]
       param.value = v
     }
-    const previouslastParam: Iparameter | undefined =
+    const previouslastParam: Itype | undefined =
       parameters[parameters.length - 1]
 
     if (previouslastParam) {
@@ -333,7 +333,7 @@ const getFnsValuesFromItems = (
   for (let i = 0; i < items.length; i++) {
     const item = previousItems.find(pi => pi.id === items[i].id) ?? items[i]
     const parameters = [...item.parameters]
-    const previouslastParam: Iparameter | undefined =
+    const previouslastParam: Itype | undefined =
       parameters[parameters.length - 1]
     if (previouslastParam) {
       parameters[parameters.length - 1] = {
