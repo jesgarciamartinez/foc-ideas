@@ -464,8 +464,7 @@ const FlowCard = React.memo(
             compose). This is a stab at a "functional Scratch" to visually
             explore function composition. Last argument and return type line up
             vertically to reinforce the pipeline metaphor. JavaScript is
-            executed and shown on the right if functions don't have
-            side-effects, otherwise a 'Play' button will appear.
+            executed and shown on the right.
           </PopoverExplanation>
         </Flex>
         <Divider marginTop={2}></Divider>

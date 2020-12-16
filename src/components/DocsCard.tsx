@@ -480,7 +480,12 @@ const DocsCard = ({
         </Fade>
 
         <PopoverExplanation label='Docs card explanation' title='Docs card'>
-          Docs is an editable view of the documentation for a function
+          Docs is an editable view of the documentation for a function. The
+          signature input will autocomplete types (string/boolean/number so far)
+          and arrows but will not prevent invalid states, which are signified by
+          the disabled "Save" button. The description can reference other
+          functions with "@" (triggers autocomplete) and navigate to them by
+          clicking on the link.
         </PopoverExplanation>
         <IconButton
           aria-label='Close card'
