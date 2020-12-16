@@ -111,7 +111,7 @@ const initialEffects: Array<Ieffect> = []
 
 export type Action =
   | { type: 'isDragging' }
-  | { type: 'createFunction'; function: Ifunction }
+  | { type: 'createFunction'; function: Ifunction; index: number }
   | { type: 'dropOutside' }
   | { type: 'dropFnFromSideBarOnFlowCard'; index: number; draggableId: string }
   | {
@@ -238,7 +238,14 @@ function reducer(state: State, action: Action): State {
         f => f.name === action.function.name,
       )
       return fnIndex === -1
-        ? { ...state, functions: state.functions.concat(action.function) }
+        ? {
+            ...state,
+            functions: state.functions.concat(action.function),
+            docCards: changeAtIndex(state.docCards, action.index, {
+              type: 'editing',
+              fnName: action.function.name,
+            }),
+          }
         : {
             ...state,
             functions: changeAtIndex(state.functions, fnIndex, action.function),

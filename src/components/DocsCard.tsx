@@ -472,6 +472,7 @@ const DocsCard = ({
                   fn,
                   description: description.getCurrentContent().getPlainText(),
                 },
+                index,
               })
             }}
           >
