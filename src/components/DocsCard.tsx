@@ -58,7 +58,7 @@ const isSignatureCorrect = (
   paramsAndReturns: Array<{ type: string }>,
 ): paramsAndReturns is Array<Itype> =>
   paramsAndReturns.length > 1 &&
-  paramsAndReturns.every(p => ['string', 'boolean', 'number'].includes(p.type))
+  paramsAndReturns.every(p => ['boolean', 'number', 'string'].includes(p.type))
 
 const getFilteredTypeSuggestions = (
   typeSuggestions_: typeof typeSuggestions,
@@ -288,7 +288,8 @@ const DocsCard = ({
   // const [signatureEditorState, setSignatureEditorState] = React.useState(() =>
   //   EditorState.createEmpty(signatureDecorator),
   // )
-  const signatureEditorRef = React.useRef(null)
+  const signatureEditorRef = React.useRef<DraftEditor>(null)
+  const signatureEditorParentRef = React.useRef<HTMLElement>(null)
 
   const onChangeSignatureEditor = (e: EditorState) => {
     let newEditorState: EditorState
@@ -343,8 +344,6 @@ const DocsCard = ({
         setAutocompleteState(null)
         return
       }
-      // console.log({ selection })
-      // console.log(selection?.rangeCount)
       const stateSelection = newEditorState.getSelection()
       // const contentState = newEditorState.getCurrentContent()
       // const block = contentState.getBlockForKey(stateSelection.getStartKey())
@@ -352,34 +351,29 @@ const DocsCard = ({
         !stateSelection.getHasFocus() /*||
         block.getEntityAt(stateSelection.getStartOffset() - 1*/
       ) {
-        console.log('wey')
         setAutocompleteState(null)
         return
       }
-      const range_ = selection.getRangeAt(0)
-      let text = range_.startContainer.textContent!.substring(
-        0,
-        range_.startOffset,
-      )
-      // const index = text?.lastIndexOf('@')
-      // if (index === -1) {
-      //   setAutocompleteState(null)
-      //   return
-      // }
+      const range = selection.getRangeAt(0)
+      console.log({ range }, range.getBoundingClientRect())
+      let text = range.startContainer.textContent as string //!.substring(
+      // 0,
+      // range.startOffset,
+      // )
 
-      let index = text.length //lastIndexOf(' ')
+      let index = text.length > 0 ? text.lastIndexOf(' ') : 0
       index = index === -1 ? 0 : index
-      text = text.substring(index) ?? ''
+      text = text.substring(index)
 
-      const tempRange = window.getSelection()!.getRangeAt(0).cloneRange()
-      tempRange.setStart(tempRange.startContainer, index)
-
-      const rangeRect = tempRange.getBoundingClientRect()
-      let [left, top] = [rangeRect.left, rangeRect.bottom]
+      let { left, bottom: top } = range.getBoundingClientRect()
+      if (left === 0) {
+        const editor = signatureEditorParentRef.current as HTMLElement
+        const coords = editor.getBoundingClientRect()
+        left = coords.left
+        top = coords.bottom
+      }
 
       setAutocompleteState({
-        // trigger,
-        // type,
         left,
         top,
         text,
@@ -435,6 +429,7 @@ const DocsCard = ({
         paddingX={1}
         paddingY={1}
         as='span'
+        ref={signatureEditorParentRef}
         // position='relative'
       >
         <DraftEditor
