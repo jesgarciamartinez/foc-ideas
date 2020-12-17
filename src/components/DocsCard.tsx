@@ -5,7 +5,6 @@ import {
   EditablePreview,
   EditableInput,
   Text,
-  Textarea,
   Code,
   IconButton,
   Box,
@@ -15,21 +14,10 @@ import {
   Spacer,
   Button,
   Fade,
-  ScaleFade,
 } from '@chakra-ui/react'
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-import {
-  AddIcon,
-  ArrowForwardIcon,
-  CheckIcon,
-  CloseIcon,
-  DeleteIcon,
-} from '@chakra-ui/icons'
-import Card from './Card'
-// import useAutocomplete from '@material-ui/lab/useAutocomplete'
-// import Autosuggest from 'react-autosuggest'
-// import { useCombobox, useMultipleSelection } from 'downshift'
-import MonacoEditor from './Editor'
+// import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import { CheckIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons'
+// import MonacoEditor from './Editor'
 import { Itype, Ifunction } from './interfaces'
 import { matchSorter } from 'match-sorter'
 import TypeBadge from './TypeBadge'
@@ -41,11 +29,12 @@ import {
   CompositeDecorator,
   Editor as DraftEditor,
   EditorState,
-  convertToRaw,
   ContentState,
 } from 'draft-js'
 import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
+import AutocompleteInput from './autocomplete-react-draft/src/index'
+// import SuggestionList from './autocomplete-react-draft/src/suggestions'
 
 const defaultName = 'name'
 // const defaultType = '_'
@@ -73,8 +62,12 @@ const isSignatureCorrect = (
 
 const getFilteredTypeSuggestions = (
   typeSuggestions_: typeof typeSuggestions,
-  inputValue: string,
-) => matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
+  inputValue?: string,
+) => {
+  if (inputValue == undefined) return []
+  if (inputValue === '' || inputValue === ' ') return typeSuggestions
+  return matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
+}
 
 const typeToName = (x: { type: string }, n: number): string => {
   const suffix = n || ''
@@ -340,50 +333,60 @@ const DocsCard = ({
         newEditorState = e
         break
     }
-
     setState(state => ({ ...state, signature: newEditorState }))
+
+    // autocomplete
+    window.requestAnimationFrame(() => {
+      const selection = window.getSelection() as Selection
+      if (selection.rangeCount === 0) {
+        //focus is outside
+        setAutocompleteState(null)
+        return
+      }
+      // console.log({ selection })
+      // console.log(selection?.rangeCount)
+      const stateSelection = newEditorState.getSelection()
+      // const contentState = newEditorState.getCurrentContent()
+      // const block = contentState.getBlockForKey(stateSelection.getStartKey())
+      if (
+        !stateSelection.getHasFocus() /*||
+        block.getEntityAt(stateSelection.getStartOffset() - 1*/
+      ) {
+        console.log('wey')
+        setAutocompleteState(null)
+        return
+      }
+      const range_ = selection.getRangeAt(0)
+      let text = range_.startContainer.textContent!.substring(
+        0,
+        range_.startOffset,
+      )
+      // const index = text?.lastIndexOf('@')
+      // if (index === -1) {
+      //   setAutocompleteState(null)
+      //   return
+      // }
+
+      let index = text.length //lastIndexOf(' ')
+      index = index === -1 ? 0 : index
+      text = text.substring(index) ?? ''
+
+      const tempRange = window.getSelection()!.getRangeAt(0).cloneRange()
+      tempRange.setStart(tempRange.startContainer, index)
+
+      const rangeRect = tempRange.getBoundingClientRect()
+      let [left, top] = [rangeRect.left, rangeRect.bottom]
+
+      setAutocompleteState({
+        // trigger,
+        // type,
+        left,
+        top,
+        text,
+        selectedIndex: 0,
+      })
+    })
   }
-
-  const [typeSuggestionsList, setTypeSuggestionsList] = React.useState(
-    typeSuggestions,
-  )
-  const [inputValue, setInputValue] = React.useState('')
-
-  // const {
-  //   isOpen,
-  //   // getToggleButtonProps,
-  //   // getLabelProps,
-  //   getMenuProps,
-  //   getInputProps,
-  //   getComboboxProps,
-  //   highlightedIndex,
-  //   getItemProps,
-  //   // selectItem,
-  // } = useCombobox({
-  //   inputValue,
-  //   items: typeSuggestionsList,
-  //   onInputValueChange: ({ inputValue }) => {
-  //     console.log({ inputValue })
-  //     if (!inputValue) {
-  //       return
-  //     }
-  //     setTypeSuggestionsList(
-  //       getFilteredTypeSuggestions(typeSuggestionsList, inputValue),
-  //     )
-  //   },
-  // })
-
-  // const paramString: string = params.reduce(
-  //   (acc, p) => {
-  //     acc.typeCount[p.type] = acc.typeCount[p.type]
-  //       ? acc.typeCount[p.type] + 1
-  //       : 0
-  //     const prefix = acc.result === '' ? '' : ', '
-  //     acc.result = acc.result + typeToName(p.type, acc.typeCount[p.type])
-  //     return acc
-  //   },
-  //   { result: '', typeCount: {} },
-  // ).result
 
   //Code
   const onChangeCode = (code: string) => setState(state => ({ ...state, code }))
@@ -404,6 +407,13 @@ const DocsCard = ({
       originalState.current.descriptionString ||
     code !== originalState.current.code
 
+  const [autocompleteState, setAutocompleteState] = React.useState<any>(null)
+  const filteredSuggestions = getFilteredTypeSuggestions(
+    typeSuggestions,
+    autocompleteState?.text,
+  )
+
+  console.log({ autocompleteState, filteredSuggestions })
   return (
     <Box
       boxShadow={'base'}
@@ -418,6 +428,39 @@ const DocsCard = ({
       display='flex'
       flexDirection='column'
     >
+      <Code
+        // SIGNATURE EDITOR
+        fontSize='sm'
+        width='100%'
+        paddingX={1}
+        paddingY={1}
+        as='span'
+        // position='relative'
+      >
+        <DraftEditor
+          editorState={signature}
+          ref={signatureEditorRef}
+          onChange={onChangeSignatureEditor}
+
+          // onBlur={(e: any) => {
+          //   setSignatureTouched(true)
+          // }}
+        />
+        {filteredSuggestions.length > 0 ? (
+          <ul
+            style={{
+              position: 'fixed',
+              left: autocompleteState.left,
+              top: autocompleteState.top,
+            }}
+          >
+            {filteredSuggestions.map(s => (
+              <li>{s.title}</li>
+            ))}
+          </ul>
+        ) : null}
+      </Code>
+
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
           Docs
@@ -560,14 +603,14 @@ const DocsCard = ({
                   paddingY={1}
                   as='span'
                 >
-                  <DraftEditor
+                  {/* <DraftEditor
                     editorState={signature}
                     ref={signatureEditorRef}
                     onChange={onChangeSignatureEditor}
                     // onBlur={(e: any) => {
                     //   setSignatureTouched(true)
                     // }}
-                  />
+                  /> */}
                 </Code>
               </HStack>
 
@@ -607,14 +650,14 @@ const DocsCard = ({
                 </TabList>
                 <TabPanels>
                   <TabPanel> */}
-              <Box marginTop={5}>
+              {/* <Box marginTop={5}>
                 <MonacoEditor
                   value={editorValue}
                   onChange={(_, v: any) => {
                     onChangeCode(v)
                   }}
                 ></MonacoEditor>
-              </Box>
+              </Box> */}
 
               {/* </TabPanel>
                   <TabPanel>
@@ -622,6 +665,7 @@ const DocsCard = ({
                   </TabPanel>
                 </TabPanels>
               </Tabs> */}
+              <AutocompleteInput></AutocompleteInput>
 
               {provided.placeholder}
             </Box>
