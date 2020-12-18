@@ -135,7 +135,13 @@ export const App = () => {
                     ? state.functions.find(f => f.name === doc.fnName)
                     : undefined
                 return (
-                  <DocsCard key={i} index={i} func={func} dispatch={dispatch} />
+                  <DocsCard
+                    key={i}
+                    index={i}
+                    func={func}
+                    dispatch={dispatch}
+                    functions={state.functions}
+                  />
                 )
               })
             ) : (

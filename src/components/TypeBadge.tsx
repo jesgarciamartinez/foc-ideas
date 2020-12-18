@@ -7,12 +7,13 @@ const TypeBadge = ({
   // fontSize,
   as,
   children,
+  rounded,
 }: {
   typeAsString: Itype['type']
   // fontSize?: CodeProps['fontSize']
   as?: CodeProps['as']
+  rounded?: CodeProps['rounded']
   children?: any
-  // rest?: CodeProps
 }) => {
   // const {
   //   colors: {
@@ -41,7 +42,7 @@ const TypeBadge = ({
           null: { color: 'black', backgroundColor: 'gray.100' },
         }[typeAsString]
       }
-      rounded={'base'}
+      rounded={rounded ?? 'base'}
     >
       {children ?? typeAsString}
     </Code>

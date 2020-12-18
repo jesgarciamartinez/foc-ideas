@@ -35,10 +35,12 @@ import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
 import AutocompleteInput from './autocomplete-react-draft/src/index'
 // import SuggestionList from './autocomplete-react-draft/src/suggestions'
+import { getDefaultKeyBinding, KeyBindingUtil } from 'draft-js'
+const { hasCommandModifier } = KeyBindingUtil
 
 const defaultName = 'name'
 // const defaultType = '_'
-const typeSuggestions: Array<{ title: Itype['type'] | 'New type' }> = [
+const typeSuggestions: Array<{ title: Itype['type'] /*| 'New type' */ }> = [
   { title: 'string' },
   { title: 'boolean' },
   { title: 'number' },
@@ -64,7 +66,7 @@ const getFilteredTypeSuggestions = (
   typeSuggestions_: typeof typeSuggestions,
   inputValue?: string,
 ) => {
-  if (inputValue == undefined) return []
+  if (inputValue === undefined || inputValue === null) return []
   if (inputValue === '' || inputValue === ' ') return typeSuggestions
   return matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 }
@@ -190,7 +192,7 @@ const setOriginalState = (
     descriptionString: state.description.getCurrentContent().getPlainText(),
     code: state.code,
   }
-  console.log({ newOriginalState })
+
   originalState.current = newOriginalState
 }
 
@@ -206,10 +208,12 @@ const DocsCard = ({
   func,
   dispatch,
   index,
+  functions,
 }: {
   func?: Ifunction
   dispatch: React.Dispatch<Action>
   index: number
+  functions: Ifunction[]
 }) => {
   const descriptionDecorator = new CompositeDecorator([
     {
@@ -290,6 +294,7 @@ const DocsCard = ({
   // )
   const signatureEditorRef = React.useRef<DraftEditor>(null)
   const signatureEditorParentRef = React.useRef<HTMLElement>(null)
+  const coordsSignatureEditor = React.useRef<any>(null)
 
   const onChangeSignatureEditor = (e: EditorState) => {
     let newEditorState: EditorState
@@ -309,7 +314,7 @@ const DocsCard = ({
             .substr(0, text.length - 1)
             .endsWith('}')
           if (previousMeaningfulCharIsArrow) {
-            newText = text.substr(0, text.length - 1)
+            newText = text //.substr(0, text.length - 1)
           } else if (previousCharIsClosingBracket && text.endsWith(' ')) {
             //abilities
             newText = text
@@ -355,28 +360,34 @@ const DocsCard = ({
         return
       }
       const range = selection.getRangeAt(0)
-      console.log({ range }, range.getBoundingClientRect())
-      let text = range.startContainer.textContent as string //!.substring(
-      // 0,
-      // range.startOffset,
-      // )
-
-      let index = text.length > 0 ? text.lastIndexOf(' ') : 0
+      // let text = range.startContainer.textContent//!.substring(
+      //b|oolean -> 'b
+      //0,
+      //range.startOffset,
+      //)
+      // console.log(1, { text, stateSelection })
+      const wholeWordText = range.startContainer.textContent as string //b|oolean -> 'boolean'
+      let index = wholeWordText.length > 0 ? wholeWordText.lastIndexOf(' ') : 0
       index = index === -1 ? 0 : index
-      text = text.substring(index)
+      const text = wholeWordText.substring(index).trim()
 
-      let { left, bottom: top } = range.getBoundingClientRect()
+      // console.log(3, { text })
+
+      let { left } = range.getBoundingClientRect()
+      const editorParent = signatureEditorParentRef.current as HTMLElement
+      const coords =
+        coordsSignatureEditor.current ?? editorParent.getBoundingClientRect()
+      coordsSignatureEditor.current = coords //TODO reset this cache
+      let top = coords.bottom
       if (left === 0) {
-        const editor = signatureEditorParentRef.current as HTMLElement
-        const coords = editor.getBoundingClientRect()
         left = coords.left
-        top = coords.bottom
       }
 
       setAutocompleteState({
         left,
         top,
         text,
+        wholeWordText,
         selectedIndex: 0,
       })
     })
@@ -407,7 +418,6 @@ const DocsCard = ({
     autocompleteState?.text,
   )
 
-  console.log({ autocompleteState, filteredSuggestions })
   return (
     <Box
       boxShadow={'base'}
@@ -436,23 +446,112 @@ const DocsCard = ({
           editorState={signature}
           ref={signatureEditorRef}
           onChange={onChangeSignatureEditor}
+          keyBindingFn={(e): string | null => {
+            switch (e.key) {
+              case 'ArrowDown':
+                return 'down'
+              case 'ArrowUp':
+                return 'up'
+              case 'Escape':
+                return 'close'
+              case 'Enter':
+                return 'select'
+              case 'Tab':
+                return 'select'
+              default:
+                return getDefaultKeyBinding(e)
+            }
+          }}
+          handleKeyCommand={command => {
+            switch (command) {
+              case 'up': {
+                setAutocompleteState((state: any) => ({
+                  ...state,
+                  selectedIndex:
+                    state.selectedIndex === 0 ? 0 : state.selectedIndex - 1,
+                }))
+                return 'handled'
+              }
+              case 'down': {
+                setAutocompleteState((state: any) => ({
+                  ...state,
+                  selectedIndex:
+                    state.selectedIndex === filteredSuggestions.length - 1
+                      ? filteredSuggestions.length - 1
+                      : state.selectedIndex + 1,
+                }))
+                return 'handled'
+              }
+              case 'close': {
+                signatureEditorRef.current!.blur()
+                return 'handled'
+              }
+              case 'select': {
+                const currentSelectionState = signature.getSelection()
+                const end = currentSelectionState.getAnchorOffset()
+                const anchorKey = currentSelectionState.getAnchorKey()
+                const currentContent = signature.getCurrentContent()
+                const currentBlock = currentContent.getBlockForKey(anchorKey)
+                const blockText = currentBlock.getText()
+                console.log({ blockText, signatureString })
+                // const start = blockText.substring(0, end).lastIndexOf(trigger)
+                // return {
+                // editorState,
+                // start,
+                // end,
+                // trigger,
+                // selectedIndex: autocompleteState.selectedIndex,
+                // }
+                return 'handled'
+              }
+              default:
+                return 'not-handled'
+            }
+          }}
 
           // onBlur={(e: any) => {
           //   setSignatureTouched(true)
           // }}
         />
         {filteredSuggestions.length > 0 ? (
-          <ul
-            style={{
-              position: 'fixed',
-              left: autocompleteState.left,
-              top: autocompleteState.top,
-            }}
+          <Box
+            as='ul'
+            position='fixed'
+            left={autocompleteState.left}
+            top={autocompleteState.top}
+            listStyleType='none'
+            padding={1}
+            boxShadow='lg'
+            backgroundColor='white'
+            rounded='sm'
+            zIndex={1000}
           >
-            {filteredSuggestions.map(s => (
-              <li>{s.title}</li>
+            {filteredSuggestions.map((s, i) => (
+              <Box
+                as='li'
+                key={s.title}
+                display='block'
+                textAlign='center'
+                paddingX={1}
+                paddingY={1}
+                backgroundColor={
+                  i === autocompleteState.selectedIndex
+                    ? 'unison.aqua'
+                    : s.title === 'string'
+                    ? 'yellow.100'
+                    : s.title === 'number'
+                    ? 'green.100'
+                    : s.title === 'boolean'
+                    ? 'pink.100'
+                    : 'white'
+                }
+              >
+                <TypeBadge rounded={'none'} typeAsString={s.title}>
+                  {s.title}
+                </TypeBadge>
+              </Box>
             ))}
-          </ul>
+          </Box>
         ) : null}
       </Code>
 
@@ -493,7 +592,6 @@ const DocsCard = ({
               const fn = safeEval(code)
               const validParams = isSignatureCorrect(paramsAndReturns)
               if (!fn || !validParams) {
-                console.log('hey', validParams, fn, code)
                 return //TODO alert
               }
               const parameters = paramsAndReturns.slice(
