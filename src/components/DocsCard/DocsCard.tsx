@@ -18,25 +18,53 @@ import {
 // import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { CheckIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons'
 // import MonacoEditor from './Editor'
-import { Itype, Ifunction } from './interfaces'
+import { Itype, Ifunction } from '../interfaces'
 import { matchSorter } from 'match-sorter'
-import TypeBadge from './TypeBadge'
-import EditableText from './EditableText'
-import PopoverExplanation from './PopoverExplanation'
+import TypeBadge from '../TypeBadge'
+import EditableText from '../EditableText'
+import PopoverExplanation from '../PopoverExplanation'
 import { Droppable } from 'react-beautiful-dnd'
-import { Action } from '../state'
+import { Action } from '../../state'
 import {
   CompositeDecorator,
   Editor as DraftEditor,
   EditorState,
   ContentState,
+  Entity,
+  Modifier,
 } from 'draft-js'
 import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
-import AutocompleteInput from './autocomplete-react-draft/src/index'
+import AutocompleteInput from '../autocomplete-react-draft/src/index'
 // import SuggestionList from './autocomplete-react-draft/src/suggestions'
 import { getDefaultKeyBinding, KeyBindingUtil } from 'draft-js'
+import {
+  ClearButton,
+  DocsExplanation,
+  SaveButton,
+  TypeSuggestionList,
+} from './components'
 const { hasCommandModifier } = KeyBindingUtil
+
+const { useCallback } = React
+
+const autocompleteKeyBindingFn = (e: any): string | null => {
+  //TODO e type
+  switch (e.key) {
+    case 'ArrowDown':
+      return 'down'
+    case 'ArrowUp':
+      return 'up'
+    case 'Escape':
+      return 'close'
+    case 'Enter':
+      return 'select'
+    case 'Tab':
+      return 'select'
+    default:
+      return getDefaultKeyBinding(e)
+  }
+}
 
 const defaultName = 'name'
 // const defaultType = '_'
@@ -68,8 +96,17 @@ const getFilteredTypeSuggestions = (
 ) => {
   if (inputValue === undefined || inputValue === null) return []
   if (inputValue === '' || inputValue === ' ') return typeSuggestions
+  if (typeSuggestions.some(s => s.title === inputValue)) return []
   return matchSorter(typeSuggestions_, inputValue, { keys: ['title'] })
 }
+
+const getFilteredFunctions = (functions: Ifunction[], inputValue?: string) => {
+  if (inputValue === undefined || inputValue === null) return []
+  if (inputValue === '') return functions
+  return matchSorter(functions, inputValue, { keys: ['name'] })
+}
+
+const arrow = '->'
 
 const typeToName = (x: { type: string }, n: number): string => {
   const suffix = n || ''
@@ -140,7 +177,6 @@ const signatureDecorator = new CompositeDecorator([
 ])
 
 const HANDLE_REGEX = /@[\w]+/g
-const arrow = '→'
 
 const getStateValueFromFunc = (
   descriptionDecorator: CompositeDecorator,
@@ -274,20 +310,28 @@ const DocsCard = ({
   }
   const { name, signature, description, code } = state
 
-  //Name
+  /* Name */
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
 
-  //Description
+  /* Description */
   const onChangeDescription = (description: EditorState) =>
     setState(state => ({ ...state, description }))
   const descriptionHasText = description.getCurrentContent().hasText()
   const descriptionFontStyle = descriptionHasText ? 'normal' : 'italic'
   const descriptionColor = descriptionHasText ? 'normal' : 'gray.400'
   // const descriptionEditorRef = React.useRef(null)
+  const [
+    autocompleteDescription,
+    setAutocompleteDescription,
+  ] = React.useState<any>(null)
+  const filteredFunctions = getFilteredFunctions(
+    functions,
+    autocompleteDescription?.text,
+  )
 
-  //Signature
+  /* Signature */
 
   // const [signatureEditorState, setSignatureEditorState] = React.useState(() =>
   //   EditorState.createEmpty(signatureDecorator),
@@ -300,7 +344,6 @@ const DocsCard = ({
     let newEditorState: EditorState
     switch (e.getLastChangeType()) {
       case 'insert-characters':
-        const arrow = '→'
         const text = e.getCurrentContent().getFirstBlock().getText()
         let newText = text
         const triggerArrow = text.endsWith(',') || text.endsWith(' ')
@@ -341,7 +384,8 @@ const DocsCard = ({
     }
     setState(state => ({ ...state, signature: newEditorState }))
 
-    // autocomplete
+    /* autocomplete */
+
     window.requestAnimationFrame(() => {
       const selection = window.getSelection() as Selection
       if (selection.rangeCount === 0) {
@@ -388,12 +432,106 @@ const DocsCard = ({
         top,
         text,
         wholeWordText,
+        startIndex: index,
         selectedIndex: 0,
       })
     })
   }
+  const handleKeyCommand = (command: 'up' | 'down' | 'close' | 'select') => {
+    switch (command) {
+      case 'up': {
+        setAutocompleteState((state: any) => ({
+          ...state,
+          selectedIndex:
+            state.selectedIndex === 0 ? 0 : state.selectedIndex - 1,
+        }))
+        return 'handled'
+      }
+      case 'down': {
+        setAutocompleteState((state: any) => ({
+          ...state,
+          selectedIndex:
+            state.selectedIndex === filteredSuggestions.length - 1
+              ? filteredSuggestions.length - 1
+              : state.selectedIndex + 1,
+        }))
+        return 'handled'
+      }
+      case 'close': {
+        signatureEditorRef.current!.blur()
+        return 'handled'
+      }
+      case 'select': {
+        const currentSelectionState = signature.getSelection()
+        const anchorOffset /*end */ = currentSelectionState.getAnchorOffset()
+        const anchorKey = currentSelectionState.getAnchorKey()
+        const currentContent = signature.getCurrentContent()
+        const currentBlock = currentContent.getBlockForKey(anchorKey)
+        const blockText = currentBlock.getText()
+        console.log({
+          blockText,
+          signatureString,
+          text: autocompleteState.text,
+          wholeWordText: autocompleteState.wholeWordText,
+          anchorOffset,
+          anchorKey,
+        })
+        // const start = blockText.substring(0, end).lastIndexOf(trigger)
+        // return {
+        // editorState,
+        // start,
+        // end,
+        // trigger,
+        // selectedIndex: autocompleteState.selectedIndex,
+        // }
 
-  //Code
+        // add suggestion
+        const textToInsert =
+          filteredSuggestions[autocompleteState.selectedIndex].title
+        const newCurrentContent = currentContent.createEntity(
+          'TYPE',
+          'IMMUTABLE',
+        )
+        const entityKey = newCurrentContent.getLastCreatedEntityKey()
+        const mentionTextSelection = currentSelectionState.merge({
+          anchorOffset: autocompleteState.startIndex,
+          focusOffset: anchorOffset,
+        })
+        let insertingContent = Modifier.replaceText(
+          signature.getCurrentContent(),
+          mentionTextSelection,
+          textToInsert,
+          undefined,
+          // ['link', 'BOLD'],
+          entityKey,
+        )
+        const newEditorState = EditorState.push(
+          signature,
+          insertingContent,
+          'apply-entity',
+        )
+        setState(state => ({ ...state, signature: newEditorState }))
+
+        // EditorState.forceSelection(
+        //   newEditorState,
+        //   insertingContent.getSelectionAfter(),
+        // ),
+
+        return 'handled'
+      }
+      default:
+        return 'not-handled'
+    }
+  }
+
+  const [autocompleteState, setAutocompleteState] = React.useState<any>(null)
+  const filteredSuggestions = getFilteredTypeSuggestions(
+    typeSuggestions,
+    autocompleteState?.text,
+  )
+
+  /* Code */
+
   const onChangeCode = (code: string) => setState(state => ({ ...state, code }))
   const signatureString = signature.getCurrentContent().getPlainText()
   const paramsAndReturns = getParamsAndReturns(signatureString)
@@ -412,11 +550,36 @@ const DocsCard = ({
       originalState.current.descriptionString ||
     code !== originalState.current.code
 
-  const [autocompleteState, setAutocompleteState] = React.useState<any>(null)
-  const filteredSuggestions = getFilteredTypeSuggestions(
-    typeSuggestions,
-    autocompleteState?.text,
-  )
+  const onSaveButtonClick = () => {
+    const fn = safeEval(code)
+    const validParams = isSignatureCorrect(paramsAndReturns)
+    if (!fn || !validParams) {
+      return //TODO alert
+    }
+    const parameters = paramsAndReturns.slice(
+      0,
+      paramsAndReturns.length - 1,
+    ) as Itype[] //TODO cast
+    const returns = paramsAndReturns.slice(-1).pop() as Itype
+    dispatch({
+      type: 'createFunction',
+      function: {
+        name,
+        parameters,
+        returns,
+        fn,
+        description: description.getCurrentContent().getPlainText(),
+      },
+      index,
+    })
+  }
+
+  const onClearButtonClick = useCallback(() => {
+    const state = getStateValueFromFunc(descriptionDecorator, undefined)
+    setOriginalState(originalState, state)
+    setState(state)
+    dispatch({ type: 'clearDocsCard', index })
+  }, [originalState, index])
 
   return (
     <Box
@@ -446,112 +609,20 @@ const DocsCard = ({
           editorState={signature}
           ref={signatureEditorRef}
           onChange={onChangeSignatureEditor}
-          keyBindingFn={(e): string | null => {
-            switch (e.key) {
-              case 'ArrowDown':
-                return 'down'
-              case 'ArrowUp':
-                return 'up'
-              case 'Escape':
-                return 'close'
-              case 'Enter':
-                return 'select'
-              case 'Tab':
-                return 'select'
-              default:
-                return getDefaultKeyBinding(e)
-            }
-          }}
-          handleKeyCommand={command => {
-            switch (command) {
-              case 'up': {
-                setAutocompleteState((state: any) => ({
-                  ...state,
-                  selectedIndex:
-                    state.selectedIndex === 0 ? 0 : state.selectedIndex - 1,
-                }))
-                return 'handled'
-              }
-              case 'down': {
-                setAutocompleteState((state: any) => ({
-                  ...state,
-                  selectedIndex:
-                    state.selectedIndex === filteredSuggestions.length - 1
-                      ? filteredSuggestions.length - 1
-                      : state.selectedIndex + 1,
-                }))
-                return 'handled'
-              }
-              case 'close': {
-                signatureEditorRef.current!.blur()
-                return 'handled'
-              }
-              case 'select': {
-                const currentSelectionState = signature.getSelection()
-                const end = currentSelectionState.getAnchorOffset()
-                const anchorKey = currentSelectionState.getAnchorKey()
-                const currentContent = signature.getCurrentContent()
-                const currentBlock = currentContent.getBlockForKey(anchorKey)
-                const blockText = currentBlock.getText()
-                console.log({ blockText, signatureString })
-                // const start = blockText.substring(0, end).lastIndexOf(trigger)
-                // return {
-                // editorState,
-                // start,
-                // end,
-                // trigger,
-                // selectedIndex: autocompleteState.selectedIndex,
-                // }
-                return 'handled'
-              }
-              default:
-                return 'not-handled'
-            }
-          }}
+          keyBindingFn={autocompleteKeyBindingFn}
+          handleKeyCommand={handleKeyCommand}
 
           // onBlur={(e: any) => {
           //   setSignatureTouched(true)
           // }}
         />
         {filteredSuggestions.length > 0 ? (
-          <Box
-            as='ul'
-            position='fixed'
+          <TypeSuggestionList
+            typeSuggestions={filteredSuggestions}
+            selectedIndex={autocompleteState.selectedIndex}
             left={autocompleteState.left}
             top={autocompleteState.top}
-            listStyleType='none'
-            padding={1}
-            boxShadow='lg'
-            backgroundColor='white'
-            rounded='sm'
-            zIndex={1000}
-          >
-            {filteredSuggestions.map((s, i) => (
-              <Box
-                as='li'
-                key={s.title}
-                display='block'
-                textAlign='center'
-                paddingX={1}
-                paddingY={1}
-                backgroundColor={
-                  i === autocompleteState.selectedIndex
-                    ? 'unison.aqua'
-                    : s.title === 'string'
-                    ? 'yellow.100'
-                    : s.title === 'number'
-                    ? 'green.100'
-                    : s.title === 'boolean'
-                    ? 'pink.100'
-                    : 'white'
-                }
-              >
-                <TypeBadge rounded={'none'} typeAsString={s.title}>
-                  {s.title}
-                </TypeBadge>
-              </Box>
-            ))}
-          </Box>
+          ></TypeSuggestionList>
         ) : null}
       </Code>
 
@@ -561,70 +632,20 @@ const DocsCard = ({
         </Heading>
         <Spacer></Spacer>
 
-        <Fade in={hasChanges}>
-          <Button
-            color='unison.darkPink'
-            sx={{ '&:hover': { backgroundColor: 'red.50' } }}
-            variant='ghost'
-            leftIcon={<DeleteIcon />}
-            onClick={() => {
-              const state = getStateValueFromFunc(
-                descriptionDecorator,
-                undefined,
-              )
-              setOriginalState(originalState, state)
-              setState(state)
-              dispatch({ type: 'clearDocsCard', index })
-            }}
-          >
-            Clear
-          </Button>
-        </Fade>
+        <ClearButton
+          onClick={onClearButtonClick}
+          fadeIn={hasChanges}
+        ></ClearButton>
 
-        <Fade in={hasChanges}>
-          <Button
-            color={signatureError ? 'gray.300' : 'unison.green'}
-            sx={{ '&:hover': { backgroundColor: 'green.50' } }}
-            variant='ghost'
-            leftIcon={<CheckIcon />}
-            disabled={signatureError}
-            onClick={() => {
-              const fn = safeEval(code)
-              const validParams = isSignatureCorrect(paramsAndReturns)
-              if (!fn || !validParams) {
-                return //TODO alert
-              }
-              const parameters = paramsAndReturns.slice(
-                0,
-                paramsAndReturns.length - 1,
-              ) as Itype[] //TODO cast
-              const returns = paramsAndReturns.slice(-1).pop() as Itype
-              dispatch({
-                type: 'createFunction',
-                function: {
-                  name,
-                  parameters,
-                  returns,
-                  fn,
-                  description: description.getCurrentContent().getPlainText(),
-                },
-                index,
-              })
-            }}
-          >
-            Save
-          </Button>
-        </Fade>
+        <SaveButton
+          onClick={onSaveButtonClick}
+          fadeIn={hasChanges}
+          disabled={signatureError}
+        ></SaveButton>
 
-        <PopoverExplanation label='Docs card explanation' title='Docs card'>
-          Docs is an editable view of the documentation for a function. The
-          signature input will autocomplete types (string/boolean/number so far)
-          and arrows but will not prevent invalid states, which are signified by
-          the disabled "Save" button. The description can reference other
-          functions with "@" (triggers autocomplete) and navigate to them by
-          clicking on the link.
-        </PopoverExplanation>
-        <IconButton
+        <DocsExplanation />
+
+        <IconButton //Close Button
           aria-label='Close card'
           icon={<CloseIcon />}
           variant='ghost'
@@ -707,19 +728,6 @@ const DocsCard = ({
                 </Code>
               </HStack>
 
-              <Code fontSize='xl' display='block' marginTop={2}>
-                {/* SIGNATURE 2 */}
-                {/* <EditableText
-                  ref={signature2Ref}
-                  placeholder={defaultName}
-                  fontStyle={nameFontStyle}
-                  width={(signature2 || defaultName).length * 12 + 12 + 'px'}
-                  maxWidth='100%'
-                  value={signature2}
-                  textColor={nameColor}
-                  onChange={onChangeSignature2}
-                /> */}
-              </Code>
               <Text
                 /* DESCRIPTION */
                 className='description'

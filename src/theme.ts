@@ -1,9 +1,12 @@
 import { extendTheme } from '@chakra-ui/react'
 
+const purple = '#520066'
+
 export default extendTheme({
   styles: {
     global: {
       html: {
+        backgroundColor: purple,
         minWidth: '860px',
         '*:focus': {
           outline: 'none !important',
@@ -19,7 +22,7 @@ export default extendTheme({
   },
   colors: {
     unison: {
-      purple: '#520066',
+      purple,
       lightPurple: '#8f228f',
       aqua: '#3cd6b7',
       limegreen: '#88cc00',

@@ -55,7 +55,7 @@ type IsideBarItem =
       items: Array<Ieffect>
     }
 
-const FunctionItem = (props: Ifunction) => {
+export const FunctionItem = (props: Ifunction) => {
   return (
     <Text
       wrap='nowrap'

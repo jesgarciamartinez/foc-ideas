@@ -2,7 +2,7 @@ import produce from 'immer'
 import * as React from 'react'
 import { v4 as uuid } from 'uuid'
 import { Ifunction, Ieffect, Itype } from './components/interfaces'
-import DocsCard from './components/DocsCard'
+import DocsCard from './components/DocsCard/DocsCard'
 
 type Reducer<A, B> = (a: A, b: B) => A
 
