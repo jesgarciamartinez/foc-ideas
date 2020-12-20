@@ -304,8 +304,14 @@ function reducer(state: State, action: Action): State {
         ],
       }
     case 'openDocs': {
-      const fn = state.functions.find(f => f.name === action.fnName)
-      if (!fn) {
+      if (
+        /*fn doesn't exist*/
+        !state.functions.find(f => f.name === action.fnName) ??
+        /* already open */
+        state.docCards.find(
+          d => d.type === 'editing' && d.fnName === action.fnName,
+        )
+      ) {
         return state
       }
       const docCards = state.docCards.slice(0, action.openerIndex + 1).concat({
