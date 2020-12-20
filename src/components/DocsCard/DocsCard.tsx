@@ -277,6 +277,7 @@ const DocsCard = ({
             onClick={e => {
               dispatch({
                 type: 'openDocs',
+                openerIndex: index,
                 fnName: props.decoratedText.slice(1),
               })
             }}

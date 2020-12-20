@@ -66,9 +66,10 @@ export const DocsExplanation = () => (
   <PopoverExplanation label='Docs card explanation' title='Docs card'>
     Docs is an editable view of the documentation for a function. The signature
     input will autocomplete types (string/boolean/number so far) and arrows but
-    will not prevent invalid states, which are signified by the disabled "Save"
-    button. The description can reference other functions with "@" (triggers
-    autocomplete) and navigate to them by clicking on the link.
+    will not prevent invalid states, which will disable the "Save" button. The
+    description can reference other functions with "@" (triggers autocomplete)
+    and navigate to them by clicking on the link. Navigation can be "browser
+    history style" or "panes style".
   </PopoverExplanation>
 )
 
@@ -167,16 +168,6 @@ export const FunctionSuggestionList = ({
   </Box>
 )
 
-const buttonStyles = {
-  color: 'unison.purple',
-  variant: 'ghost',
-  sx: {
-    '&:hover': {
-      color: 'unison.aqua',
-    },
-  },
-}
-
 export const DocsNavigationTypeSelector = ({
   navigationType,
   dispatch,
@@ -192,7 +183,13 @@ export const DocsNavigationTypeSelector = ({
           navigationType: navigationType === 'history' ? 'panes' : 'history',
         })
       }}
-      {...buttonStyles}
+      variant='ghost'
+      sx={{
+        color: 'unison.purple',
+        '&:hover': {
+          color: 'unison.aqua',
+        },
+      }}
       aria-label='Change navigation type'
       size='md'
       icon={
@@ -219,9 +216,27 @@ export const DocsNavigationTypeSelector = ({
       ></Switch> */
   )
 }
+
+const getButtonStyles = (isDisabled: boolean) => ({
+  variant: 'ghost',
+  sx: isDisabled
+    ? {
+        color: 'grey.300',
+      }
+    : {
+        color: 'unison.purple',
+        '&:hover': {
+          color: 'unison.aqua',
+        },
+      },
+})
+
 export const DocsNavigationArrows = () => {
   const { state, dispatch } = useContext(StateContext)
   const size = '6'
+  const backDisabled = state.docCardsSelectedIndex === 0
+  const forwardDisabled =
+    state.docCardsSelectedIndex === state.docCards.length - 1
   return (
     <HStack>
       <IconButton
@@ -232,8 +247,8 @@ export const DocsNavigationArrows = () => {
           })
         }}
         aria-label='Navigate back'
-        {...buttonStyles}
-        disabled={state.docCardsSelectedIndex === 0}
+        {...getButtonStyles(backDisabled)}
+        disabled={backDisabled}
         icon={<ChevronLeftIcon w={size} h={size}></ChevronLeftIcon>}
       ></IconButton>
 
@@ -245,10 +260,9 @@ export const DocsNavigationArrows = () => {
             to: 'forwards',
           })
         }}
-        disabled={state.docCardsSelectedIndex === state.docCards.length - 1}
+        disabled={forwardDisabled}
         aria-label='Navigate forwads'
-        {...buttonStyles}
-        // size={size}
+        {...getButtonStyles(forwardDisabled)}
         icon={<ChevronRightIcon w={size} h={size}></ChevronRightIcon>}
       ></IconButton>
     </HStack>

@@ -122,7 +122,7 @@ export type Action =
   | { type: 'clearFlowCard' }
   | { type: 'sideBarSearch'; value: string }
   | { type: 'dropFnFromSideBarToDocsCard'; draggableId: string }
-  | { type: 'openDocs'; fnName: string }
+  | { type: 'openDocs'; fnName: string; openerIndex: number }
   | { type: 'closeDocsCard'; index: number }
   | { type: 'clearDocsCard'; index: number }
   | { type: 'newDocsCard' }
@@ -308,7 +308,7 @@ function reducer(state: State, action: Action): State {
       if (!fn) {
         return state
       }
-      const docCards = state.docCards.concat({
+      const docCards = state.docCards.slice(0, action.openerIndex + 1).concat({
         type: 'editing',
         fnName: action.fnName,
       })
