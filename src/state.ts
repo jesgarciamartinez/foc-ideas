@@ -126,13 +126,15 @@ export type Action =
   | { type: 'closeDocsCard'; index: number }
   | { type: 'clearDocsCard'; index: number }
   | { type: 'newDocsCard' }
+  | { type: 'changeNavigationType'; navigationType: NavigationType }
+  | { type: 'docsNavigate'; to: 'forwards' | 'back' }
 // | {
 //     type: 'changeFunctionParamValue'
 //     paramValue: string | number | boolean
 //     paramIndex: number
 //     functionId: string
 //   }
-
+export type NavigationType = 'history' | 'panes'
 type DocsType = { type: 'creating' } | { type: 'editing'; fnName: string }
 
 type State = {
@@ -141,6 +143,8 @@ type State = {
   effects: Ieffect[]
   isSideBarItemDragging: boolean
   flowCardFunctions: Array<Ifunction & { id: string }>
+  docCardsNavigationType: NavigationType
+  docCardsSelectedIndex: number
   docCards: Array<DocsType>
   searchValue: string
 }
@@ -151,6 +155,8 @@ const initialState: State = {
   effects: initialEffects,
   isSideBarItemDragging: false,
   flowCardFunctions: [],
+  docCardsNavigationType: 'panes',
+  docCardsSelectedIndex: 0,
   docCards: [{ type: 'creating' }],
   searchValue: '',
 }
@@ -229,6 +235,10 @@ const findFunction = ({
 //   return { ...fn, id }
 // }
 
+const incrementWithinBounds = (i: number, as: any[]) =>
+  i === as.length - 1 ? i : i + 1
+const decrementPositiveNumber = (i: number) => (i === 0 ? i : i - 1)
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'isDragging':
@@ -293,15 +303,25 @@ function reducer(state: State, action: Action): State {
           { type: 'editing', fnName: action.draggableId.split('_')[1] },
         ],
       }
-    case 'openDocs':
+    case 'openDocs': {
       const fn = state.functions.find(f => f.name === action.fnName)
       if (!fn) {
         return state
       }
+      const docCards = state.docCards.concat({
+        type: 'editing',
+        fnName: action.fnName,
+      })
+      const docCardsSelectedIndex = incrementWithinBounds(
+        state.docCardsSelectedIndex,
+        docCards,
+      )
       return {
         ...state,
-        docCards: [{ type: 'editing', fnName: action.fnName }],
+        docCardsSelectedIndex,
+        docCards,
       }
+    }
     // const fn = state.functions.find(f => f.name === action.fnName)
     // const alreadyInDocCards = state.docCards.find(d =>
     //   'fnName' in d ? d.fnName === action.fnName : false,
@@ -334,8 +354,30 @@ function reducer(state: State, action: Action): State {
         ...state,
         docCards: [{ type: 'creating' }],
       }
+    case 'changeNavigationType':
+      return {
+        ...state,
+        docCardsNavigationType: action.navigationType,
+        docCardsSelectedIndex: state.docCards.length - 1,
+      }
+    case 'docsNavigate': {
+      const docCardsSelectedIndex =
+        action.to === 'forwards'
+          ? incrementWithinBounds(state.docCardsSelectedIndex, state.docCards)
+          : decrementPositiveNumber(state.docCardsSelectedIndex)
+
+      return {
+        ...state,
+        docCardsSelectedIndex,
+      }
+    }
   }
 }
+
+export const StateContext = React.createContext<{
+  state: State
+  dispatch: React.Dispatch<Action>
+}>({ state: initialState, dispatch() {} })
 
 export const useAppReducer =
   process.env.NODE_ENV === 'development'

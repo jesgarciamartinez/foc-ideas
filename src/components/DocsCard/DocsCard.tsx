@@ -16,15 +16,15 @@ import {
   Fade,
 } from '@chakra-ui/react'
 // import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-import { CheckIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons'
+import { CloseIcon, ArrowUpDownIcon } from '@chakra-ui/icons'
 // import MonacoEditor from './Editor'
+
 import { Itype, Ifunction } from '../interfaces'
 import { matchSorter } from 'match-sorter'
 import TypeBadge from '../TypeBadge'
 import EditableText from '../EditableText'
-import PopoverExplanation from '../PopoverExplanation'
 import { Droppable } from 'react-beautiful-dnd'
-import { Action } from '../../state'
+import { Action, NavigationType } from '../../state'
 import {
   CompositeDecorator,
   Editor as DraftEditor,
@@ -41,6 +41,8 @@ import { getDefaultKeyBinding, KeyBindingUtil } from 'draft-js'
 import {
   ClearButton,
   DocsExplanation,
+  DocsNavigationArrows,
+  DocsNavigationTypeSelector,
   SaveButton,
   TypeSuggestionList,
 } from './components'
@@ -245,11 +247,13 @@ const DocsCard = ({
   dispatch,
   index,
   functions,
+  navigationType,
 }: {
   func?: Ifunction
   dispatch: React.Dispatch<Action>
   index: number
   functions: Ifunction[]
+  navigationType?: NavigationType
 }) => {
   const descriptionDecorator = new CompositeDecorator([
     {
@@ -630,21 +634,26 @@ const DocsCard = ({
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
           Docs
         </Heading>
+        {navigationType === 'history' ? (
+          <DocsNavigationArrows></DocsNavigationArrows>
+        ) : null}
         <Spacer></Spacer>
-
         <ClearButton
           onClick={onClearButtonClick}
           fadeIn={hasChanges}
         ></ClearButton>
-
         <SaveButton
           onClick={onSaveButtonClick}
           fadeIn={hasChanges}
           disabled={signatureError}
         ></SaveButton>
-
         <DocsExplanation />
-
+        {navigationType ? (
+          <DocsNavigationTypeSelector
+            dispatch={dispatch}
+            navigationType={navigationType}
+          ></DocsNavigationTypeSelector>
+        ) : null}
         <IconButton //Close Button
           aria-label='Close card'
           icon={<CloseIcon />}

@@ -30,7 +30,7 @@ const PopoverExplanation = (props: {
             </Tooltip>
           }
           size='lg'
-          colorScheme='purple'
+          // colorScheme='purple'
           color='unison.purple'
           variant='ghost'
           sx={{

@@ -23,6 +23,7 @@ import {
   Heading,
   Grid,
   GridItem,
+  Fade,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -34,7 +35,7 @@ import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import PopoverExplanation from './PopoverExplanation'
 import './flowCardStyles.css'
-import { Fade } from '@material-ui/core'
+// import { Fade } from '@material-ui/core'
 // import produce from 'immer'
 // import EditableText from './EditableText'
 

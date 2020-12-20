@@ -1,10 +1,20 @@
 import * as React from 'react'
-import { Fade, Button, Box } from '@chakra-ui/react'
-import { CheckIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons'
+import { Fade, Button, Box, Switch, IconButton, HStack } from '@chakra-ui/react'
+import {
+  ArrowUpDownIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  DeleteIcon,
+} from '@chakra-ui/icons'
 import PopoverExplanation from '../PopoverExplanation'
 import TypeBadge from '../TypeBadge'
 import { Itype } from '../interfaces'
 import { FunctionItem } from '../Sidebar'
+import { GoVersions } from 'react-icons/go'
+import { Action, StateContext } from '../../state'
+const { useContext } = React
 
 export const SaveButton = ({
   onClick,
@@ -156,3 +166,91 @@ export const FunctionSuggestionList = ({
     ))}
   </Box>
 )
+
+const buttonStyles = {
+  color: 'unison.purple',
+  variant: 'ghost',
+  sx: {
+    '&:hover': {
+      color: 'unison.aqua',
+    },
+  },
+}
+
+export const DocsNavigationTypeSelector = ({
+  navigationType,
+  dispatch,
+}: {
+  navigationType: 'history' | 'panes'
+  dispatch: React.Dispatch<Action>
+}) => {
+  return (
+    <IconButton
+      onClick={() => {
+        dispatch({
+          type: 'changeNavigationType',
+          navigationType: navigationType === 'history' ? 'panes' : 'history',
+        })
+      }}
+      {...buttonStyles}
+      aria-label='Change navigation type'
+      size='md'
+      icon={
+        navigationType === 'panes' ? (
+          <ArrowUpDownIcon
+            sx={{ transform: 'rotate(90deg)' }}
+          ></ArrowUpDownIcon>
+        ) : (
+          <GoVersions></GoVersions>
+        )
+      }
+    ></IconButton>
+
+    /* <Switch
+        size='sm'
+        isChecked={navigationType === 'panes'}
+        marginX={1}
+        onChange={() => {
+          dispatch({
+            type: 'changeNavigationType',
+            navigationType: navigationType === 'history' ? 'panes' : 'history',
+          })
+        }}
+      ></Switch> */
+  )
+}
+export const DocsNavigationArrows = () => {
+  const { state, dispatch } = useContext(StateContext)
+  const size = '6'
+  return (
+    <HStack>
+      <IconButton
+        onClick={() => {
+          dispatch({
+            type: 'docsNavigate',
+            to: 'back',
+          })
+        }}
+        aria-label='Navigate back'
+        {...buttonStyles}
+        disabled={state.docCardsSelectedIndex === 0}
+        icon={<ChevronLeftIcon w={size} h={size}></ChevronLeftIcon>}
+      ></IconButton>
+
+      <IconButton
+        margin={0}
+        onClick={() => {
+          dispatch({
+            type: 'docsNavigate',
+            to: 'forwards',
+          })
+        }}
+        disabled={state.docCardsSelectedIndex === state.docCards.length - 1}
+        aria-label='Navigate forwads'
+        {...buttonStyles}
+        // size={size}
+        icon={<ChevronRightIcon w={size} h={size}></ChevronRightIcon>}
+      ></IconButton>
+    </HStack>
+  )
+}
