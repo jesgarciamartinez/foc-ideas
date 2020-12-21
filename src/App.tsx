@@ -19,6 +19,8 @@ import './styles.css'
 import { HotKeys } from 'react-hotkeys'
 import { AddIcon } from '@chakra-ui/icons'
 
+window.addEventListener('scroll', e => console.log({ e }))
+
 export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(
@@ -128,11 +130,11 @@ export const App = () => {
               ]}
             ></SideBar>
             <CardHStack>
-              <FlowCard
+              {/* <FlowCard
                 items={state.flowCardFunctions}
                 dispatch={dispatch}
                 name=''
-              ></FlowCard>
+              ></FlowCard> */}
               {state.docCards.length > 0 ? (
                 state.docCardsNavigationType === 'history' ? (
                   <DocsCard

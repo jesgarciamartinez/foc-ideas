@@ -588,15 +588,27 @@ const DocsCard = ({
 
   return (
     <Box
-      boxShadow={'base'}
+      // boxShadow={'base'}
       backgroundColor='white'
       padding={1}
-      minWidth='48%'
+      // minWidth='48%'
       minHeight='99vh'
       height='100%'
       // position='relative'
       display='flex'
       flexDirection='column'
+      //AndyM
+
+      transition='box-shadow 100ms linear,opacity 75ms linear,transform 200ms cubic-bezier(0.19, 1, 0.22, 1);'
+      flexShrink={0}
+      width='39vw'
+      maxWidth='625px'
+      top='0px'
+      position='sticky'
+      flexGrow={1}
+      overflowY='auto'
+      borderLeft='1px solid rgba(0,0,0,0.05)'
+      left={index * 40 + 'px'}
     >
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
