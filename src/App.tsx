@@ -19,8 +19,6 @@ import './styles.css'
 import { HotKeys } from 'react-hotkeys'
 import { AddIcon } from '@chakra-ui/icons'
 
-window.addEventListener('scroll', e => console.log({ e }))
-
 export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(

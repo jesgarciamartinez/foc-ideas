@@ -315,6 +315,11 @@ const DocsCard = ({
   }
   const { name, signature, description, code } = state
 
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null)
+  React.useEffect(() => {
+    closeButtonRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
+
   /* Name */
   const onChangeName = (name: string) => setState(state => ({ ...state, name }))
   const nameFontStyle = [defaultName, ''].includes(name) ? 'italic' : 'normal'
@@ -592,8 +597,8 @@ const DocsCard = ({
       backgroundColor='white'
       padding={1}
       // minWidth='48%'
-      minHeight='99vh'
-      height='100%'
+      // minHeight='99vh'
+      minHeight='100%'
       // position='relative'
       display='flex'
       flexDirection='column'
@@ -641,6 +646,11 @@ const DocsCard = ({
           variant='ghost'
           size='sm'
           onClick={() => dispatch({ type: 'closeDocsCard', index })}
+          /* Scrolling behavior */
+          ref={closeButtonRef}
+          sx={{
+            scrollMarginRight: '20px',
+          }}
         />
       </Flex>
       <Divider marginTop={2}></Divider>
