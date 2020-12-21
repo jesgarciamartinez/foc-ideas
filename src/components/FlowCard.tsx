@@ -24,6 +24,7 @@ import {
   Grid,
   GridItem,
   Fade,
+  ChakraProps,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -419,27 +420,26 @@ const FlowFunctionsList = React.memo(
 )
 
 const FlowCard = React.memo(
-  ({
-    items,
-    name,
-    dispatch,
-  }: {
-    items: Array<Ifunction & { id: string }>
-    name: string
-    dispatch: React.Dispatch<Action>
-  }) => {
+  (
+    props: {
+      items: Array<Ifunction & { id: string }>
+      dispatch: React.Dispatch<Action>
+    } & ChakraProps,
+  ) => {
+    const { items, dispatch, ...rest } = props
     return (
       <Box
         boxShadow={'base'}
         padding={1}
-        // width={'49%'}
-        minWidth='48%'
         minHeight='99vh'
         height='100%'
-        position='relative'
+        // width={'49%'}
+        // minWidth='48%'
+        // position='relative'
         backgroundColor='white'
         display='flex'
         flexDirection='column'
+        {...rest}
       >
         <Flex paddingLeft={2} alignItems='center'>
           <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>

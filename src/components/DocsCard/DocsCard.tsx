@@ -14,8 +14,8 @@ import {
   Spacer,
   Button,
   Fade,
+  ChakraProps,
 } from '@chakra-ui/react'
-// import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { CloseIcon, ArrowUpDownIcon } from '@chakra-ui/icons'
 import MonacoEditor from '../Editor'
 
@@ -248,13 +248,14 @@ const DocsCard = ({
   index,
   functions,
   navigationType,
+  ...rest
 }: {
   func?: Ifunction
   dispatch: React.Dispatch<Action>
   index: number
   functions: Ifunction[]
   navigationType?: NavigationType
-}) => {
+} & ChakraProps) => {
   const descriptionDecorator = new CompositeDecorator([
     {
       //TypeBadge
@@ -602,18 +603,7 @@ const DocsCard = ({
       // position='relative'
       display='flex'
       flexDirection='column'
-      //AndyM
-
-      transition='box-shadow 100ms linear,opacity 75ms linear,transform 200ms cubic-bezier(0.19, 1, 0.22, 1);'
-      flexShrink={0}
-      width='39vw'
-      maxWidth='625px'
-      top='0px'
-      position='sticky'
-      flexGrow={1}
-      overflowY='auto'
-      borderLeft='1px solid rgba(0,0,0,0.05)'
-      left={index * 40 + 'px'}
+      {...rest}
     >
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
