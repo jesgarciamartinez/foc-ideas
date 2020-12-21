@@ -17,7 +17,7 @@ import {
 } from '@chakra-ui/react'
 // import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { CloseIcon, ArrowUpDownIcon } from '@chakra-ui/icons'
-// import MonacoEditor from './Editor'
+import MonacoEditor from '../Editor'
 
 import { Itype, Ifunction } from '../interfaces'
 import { matchSorter } from 'match-sorter'
@@ -742,14 +742,14 @@ const DocsCard = ({
                 </TabList>
                 <TabPanels>
                   <TabPanel> */}
-              {/* <Box marginTop={5}>
+              <Box marginTop={5}>
                 <MonacoEditor
                   value={editorValue}
-                  onChange={(_, v: any) => {
+                  onChange={(_: any, v: any) => {
                     onChangeCode(v)
                   }}
                 ></MonacoEditor>
-              </Box> */}
+              </Box>
 
               {/* </TabPanel>
                   <TabPanel>
