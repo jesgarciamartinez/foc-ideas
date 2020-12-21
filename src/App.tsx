@@ -93,6 +93,10 @@ export const App = () => {
             minSize={100}
             maxSize={-300}
             split='vertical'
+            pane2Style={{
+              overflowX: 'auto',
+              // overflow: 'auto',
+            }}
           >
             <SideBar
               ref={sideBarRef}
@@ -135,6 +139,7 @@ export const App = () => {
                     index={state.docCardsSelectedIndex}
                     func={(() => {
                       const doc = state.docCards[state.docCardsSelectedIndex]
+                      console.log(state.docCards, state.docCardsSelectedIndex)
                       return doc.type === 'editing'
                         ? state.functions.find(f => f.name === doc.fnName)
                         : undefined

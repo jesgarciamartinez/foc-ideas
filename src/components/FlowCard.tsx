@@ -432,8 +432,9 @@ const FlowCard = React.memo(
       <Box
         boxShadow={'base'}
         padding={1}
-        minWidth={'50%'}
-        minHeight='100vh'
+        // width={'49%'}
+        minWidth='48%'
+        minHeight='99vh'
         height='100%'
         position='relative'
         backgroundColor='white'

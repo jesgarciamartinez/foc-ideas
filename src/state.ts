@@ -157,7 +157,11 @@ const initialState: State = {
   flowCardFunctions: [],
   docCardsNavigationType: 'panes',
   docCardsSelectedIndex: 0,
-  docCards: [{ type: 'creating' }],
+  docCards: [
+    { type: 'creating' },
+    { type: 'editing', fnName: 'add' },
+    { type: 'editing', fnName: 'id' },
+  ],
   searchValue: '',
 }
 
@@ -302,6 +306,7 @@ function reducer(state: State, action: Action): State {
         docCards: [
           { type: 'editing', fnName: action.draggableId.split('_')[1] },
         ],
+        docCardsSelectedIndex: 0,
       }
     case 'openDocs': {
       if (
@@ -328,26 +333,24 @@ function reducer(state: State, action: Action): State {
         docCards,
       }
     }
-    // const fn = state.functions.find(f => f.name === action.fnName)
-    // const alreadyInDocCards = state.docCards.find(d =>
-    //   'fnName' in d ? d.fnName === action.fnName : false,
-    // )
-
-    // if (!fn || alreadyInDocCards) {
-    //   return state
-    // }
-    // return {
-    //   ...state,
-    //   docCards: [
-    //     ...state.docCards,
-    //     { type: 'editing', fnName: action.fnName },
-    //   ],
-    // }
-    case 'closeDocsCard':
+    case 'closeDocsCard': {
+      if (state.docCardsNavigationType === 'history') {
+        return {
+          ...state,
+          docCards: [],
+          docCardsSelectedIndex: 0,
+        }
+      }
+      const docCards = state.docCards.filter((_, i) => i !== action.index)
+      const docCardsSelectedIndex = decrementPositiveNumber(
+        state.docCardsSelectedIndex,
+      )
       return {
         ...state,
-        docCards: state.docCards.filter((_, i) => i !== action.index),
+        docCards,
+        docCardsSelectedIndex,
       }
+    }
     case 'clearDocsCard':
       return {
         ...state,

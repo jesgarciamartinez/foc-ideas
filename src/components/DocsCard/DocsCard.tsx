@@ -589,48 +589,15 @@ const DocsCard = ({
   return (
     <Box
       boxShadow={'base'}
-      // minWidth={'48%'} //@TODO prevent Yscroll another way
-      // minHeight='100%'
       backgroundColor='white'
       padding={1}
-      minWidth={'50%'}
-      minHeight='100vh'
+      minWidth='48%'
+      minHeight='99vh'
       height='100%'
       // position='relative'
       display='flex'
       flexDirection='column'
     >
-      <Code
-        // SIGNATURE EDITOR
-        fontSize='sm'
-        width='100%'
-        paddingX={1}
-        paddingY={1}
-        as='span'
-        ref={signatureEditorParentRef}
-        // position='relative'
-      >
-        <DraftEditor
-          editorState={signature}
-          ref={signatureEditorRef}
-          onChange={onChangeSignatureEditor}
-          keyBindingFn={autocompleteKeyBindingFn}
-          handleKeyCommand={handleKeyCommand}
-
-          // onBlur={(e: any) => {
-          //   setSignatureTouched(true)
-          // }}
-        />
-        {filteredSuggestions.length > 0 ? (
-          <TypeSuggestionList
-            typeSuggestions={filteredSuggestions}
-            selectedIndex={autocompleteState.selectedIndex}
-            left={autocompleteState.left}
-            top={autocompleteState.top}
-          ></TypeSuggestionList>
-        ) : null}
-      </Code>
-
       <Flex paddingLeft={2} alignItems='center'>
         <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
           Docs
@@ -655,7 +622,8 @@ const DocsCard = ({
             navigationType={navigationType}
           ></DocsNavigationTypeSelector>
         ) : null}
-        <IconButton //Close Button
+        <IconButton
+          /* Close Button */
           aria-label='Close card'
           icon={<CloseIcon />}
           variant='ghost'
@@ -726,15 +694,28 @@ const DocsCard = ({
                   paddingX={1}
                   paddingY={1}
                   as='span'
+                  ref={signatureEditorParentRef}
+                  // position='relative'
                 >
-                  {/* <DraftEditor
+                  <DraftEditor
                     editorState={signature}
                     ref={signatureEditorRef}
                     onChange={onChangeSignatureEditor}
+                    keyBindingFn={autocompleteKeyBindingFn}
+                    handleKeyCommand={handleKeyCommand}
+
                     // onBlur={(e: any) => {
                     //   setSignatureTouched(true)
                     // }}
-                  /> */}
+                  />
+                  {filteredSuggestions.length > 0 ? (
+                    <TypeSuggestionList
+                      typeSuggestions={filteredSuggestions}
+                      selectedIndex={autocompleteState.selectedIndex}
+                      left={autocompleteState.left}
+                      top={autocompleteState.top}
+                    ></TypeSuggestionList>
+                  ) : null}
                 </Code>
               </HStack>
 
@@ -776,7 +757,6 @@ const DocsCard = ({
                   </TabPanel>
                 </TabPanels>
               </Tabs> */}
-              <AutocompleteInput></AutocompleteInput>
 
               {provided.placeholder}
             </Box>
