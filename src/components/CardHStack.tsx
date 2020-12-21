@@ -7,12 +7,31 @@ import { AddIcon } from '@chakra-ui/icons'
 const { useContext } = React
 
 const CardHStack = () => {
-  // const scrollContainer = React.useRef<HTMLDivElement>(null)
-  // React.useEffect(() => {
-  //   scrollContainer.current?.addEventListener('scroll', (e: any) =>
-  //     console.log('c', e.target?.scrollLeft),
-  //   )
-  // }, [])
+  const scrollContainer = React.useRef<HTMLDivElement>(null)
+  const flowCardRef = React.useRef<HTMLElement>(null)
+  const [boxShadows, setBoxShadows] = React.useState(0)
+
+  React.useEffect(() => {
+    const width = flowCardRef.current?.offsetWidth
+    // console.log({ width })
+    const listener = (e: any) => {
+      if (!width) return
+      // console.log(e.target.scrollLeft)
+      const scrollAmount = e.target.scrollLeft
+      const newBoxShadows =
+        scrollAmount < 10 ? -1 : Math.ceil(scrollAmount / (width - 40)) //discount left:40px
+      // console.log({ newBoxShadows })
+      if (newBoxShadows !== boxShadows) {
+        setBoxShadows(newBoxShadows)
+      }
+    }
+
+    scrollContainer.current?.addEventListener('scroll', listener)
+
+    return () => {
+      scrollContainer.current?.removeEventListener('scroll', listener)
+    }
+  }, [])
   const { state, dispatch } = useContext(StateContext)
   return (
     <Flex
@@ -21,9 +40,10 @@ const CardHStack = () => {
       flexGrow={1}
       height='100%'
       backgroundColor='purple.50'
-      // ref={scrollContainer}
+      ref={scrollContainer}
     >
       <HStack
+        spacing={0}
         height='100%'
         //AndyM
         width={(state.docCards.length + 1) /*(flowCard)*/ * 39 + 'vw'}
@@ -33,10 +53,12 @@ const CardHStack = () => {
         transition='width 100ms cubic-bezier(0.19, 1, 0.22, 1)'
       >
         <FlowCard
+          tran
+          ref={flowCardRef}
           items={state.flowCardFunctions}
           dispatch={dispatch}
           //AndyM
-          transition='box-shadow 100ms linear,opacity 75ms linear,transform 200ms cubic-bezier(0.19, 1, 0.22, 1);'
+          // transition='box-shadow 100ms linear,opacity 75ms linear,transform 200ms cubic-bezier(0.19, 1, 0.22, 1);'
           flexShrink={0}
           width='39vw'
           // maxWidth='625px'
@@ -100,12 +122,17 @@ const CardHStack = () => {
                   overflowY='auto'
                   borderLeft='1px solid rgba(0,0,0,0.05)'
                   left={(i + 1) * 40 + 'px'}
+                  boxShadow={
+                    i < boxShadows
+                      ? '0px 0px 15px 3px rgba(0,0,0,0.1)'
+                      : '0px 0px 15px 3px rgba(0,0,0,0)'
+                  }
                 />
               )
             })
           )
         ) : (
-          <Box width={'100%'}>
+          <Box width='39vw' flexGrow={1} flexShrink={0}>
             <Center>
               <ScaleFade in={true}>
                 <Button

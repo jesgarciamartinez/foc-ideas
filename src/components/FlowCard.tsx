@@ -420,79 +420,83 @@ const FlowFunctionsList = React.memo(
 )
 
 const FlowCard = React.memo(
-  (
-    props: {
-      items: Array<Ifunction & { id: string }>
-      dispatch: React.Dispatch<Action>
-    } & ChakraProps,
-  ) => {
-    const { items, dispatch, ...rest } = props
-    return (
-      <Box
-        boxShadow={'base'}
-        padding={1}
-        minHeight='99vh'
-        height='100%'
-        // width={'49%'}
-        // minWidth='48%'
-        // position='relative'
-        backgroundColor='white'
-        display='flex'
-        flexDirection='column'
-        {...rest}
-      >
-        <Flex paddingLeft={2} alignItems='center'>
-          <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
-            Flow
-          </Heading>
-          <Spacer></Spacer>
+  forwardRef(
+    (
+      props: {
+        items: Array<Ifunction & { id: string }>
+        dispatch: React.Dispatch<Action>
+      } & ChakraProps,
+      ref,
+    ) => {
+      const { items, dispatch, ...rest } = props
+      return (
+        <Box
+          ref={ref}
+          boxShadow={'base'}
+          padding={1}
+          minHeight='100%'
+          // height='100%'
+          // width={'49%'}
+          // minWidth='48%'
+          // position='relative'
+          backgroundColor='white'
+          display='flex'
+          flexDirection='column'
+          {...rest}
+        >
+          <Flex paddingLeft={2} alignItems='center'>
+            <Heading fontSize='xl' fontStyle='italic' color='unison.purple'>
+              Flow
+            </Heading>
+            <Spacer></Spacer>
 
-          <Fade in={items.length > 0}>
-            <Button
-              color='unison.darkPink'
-              sx={{ '&:hover': { backgroundColor: 'red.50' } }}
-              variant='ghost'
-              leftIcon={<DeleteIcon />}
-              onClick={() => {
-                dispatch({ type: 'clearFlowCard' })
-              }}
-            >
-              Clear
-            </Button>
-          </Fade>
-
-          <PopoverExplanation label='Flow card explanation' title='Flow card'>
-            Flow is a special view for the flow function (left-to-right variadic
-            compose). This is a stab at a "functional Scratch" to visually
-            explore function composition. Last argument and return type line up
-            vertically to reinforce the pipeline metaphor. JavaScript is
-            executed and shown on the right.
-          </PopoverExplanation>
-        </Flex>
-        <Divider marginTop={2}></Divider>
-        <Droppable droppableId='FlowCard'>
-          {(provided, snapshot) => {
-            return (
-              <Box
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                // minWidth={'50%'}
-                flex={1}
-                minHeight='100%'
-                height='100%'
-                overflow='auto'
-                paddingX={2}
-                paddingY={4}
+            <Fade in={items.length > 0}>
+              <Button
+                color='unison.darkPink'
+                sx={{ '&:hover': { backgroundColor: 'red.50' } }}
+                variant='ghost'
+                leftIcon={<DeleteIcon />}
+                onClick={() => {
+                  dispatch({ type: 'clearFlowCard' })
+                }}
               >
-                <FlowFunctionsList items={items}></FlowFunctionsList>
-                {provided.placeholder}
-              </Box>
-            )
-          }}
-        </Droppable>
-      </Box>
-    )
-  },
+                Clear
+              </Button>
+            </Fade>
+
+            <PopoverExplanation label='Flow card explanation' title='Flow card'>
+              Flow is a special view for the flow function (left-to-right
+              variadic compose). This is a stab at a "functional Scratch" to
+              visually explore function composition. Last argument and return
+              type line up vertically to reinforce the pipeline metaphor.
+              JavaScript is executed and shown on the right.
+            </PopoverExplanation>
+          </Flex>
+          <Divider marginTop={2}></Divider>
+          <Droppable droppableId='FlowCard'>
+            {(provided, snapshot) => {
+              return (
+                <Box
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  // minWidth={'50%'}
+                  flex={1}
+                  minHeight='100%'
+                  height='100%'
+                  overflow='auto'
+                  paddingX={2}
+                  paddingY={4}
+                >
+                  <FlowFunctionsList items={items}></FlowFunctionsList>
+                  {provided.placeholder}
+                </Box>
+              )
+            }}
+          </Droppable>
+        </Box>
+      )
+    },
+  ),
 )
 
 export default FlowCard
