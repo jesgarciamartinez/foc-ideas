@@ -1,5 +1,16 @@
 import * as React from 'react'
-import { Fade, Button, Box, Switch, IconButton, HStack } from '@chakra-ui/react'
+import {
+  Fade,
+  Button,
+  Box,
+  Switch,
+  IconButton,
+  HStack,
+  ListItem,
+  UnorderedList,
+  Text,
+  Link,
+} from '@chakra-ui/react'
 import {
   ArrowUpDownIcon,
   CheckIcon,
@@ -64,12 +75,44 @@ export const ClearButton = ({
 
 export const DocsExplanation = () => (
   <PopoverExplanation label='Docs card explanation' title='Docs card'>
-    Docs is an editable view of the documentation for a function. The signature
-    input will autocomplete types (string/boolean/number so far) and arrows but
-    will not prevent invalid states, which will disable the "Save" button. The
-    description can reference other functions with "@" (triggers autocomplete)
-    and navigate to them by clicking on the link. Navigation can be "browser
-    history style" or "panes style".
+    <UnorderedList>
+      <ListItem>
+        Docs is an editable view of the documentation for a function.
+      </ListItem>
+      <ListItem>
+        The signature input will autocomplete types (string/boolean/number so
+        far) and arrows but won't prevent invalid states, which will disable the
+        "Save" button.{' '}
+      </ListItem>
+      <ListItem>
+        The description can reference other functions with "@" (triggers
+        autocomplete) and navigate to them by clicking on the link. We could
+        imagine adding tests and examples here.
+      </ListItem>
+      <ListItem>Navigation can be </ListItem>
+      <UnorderedList styleType='none'>
+        <ListItem>
+          <ArrowUpDownIcon
+            size={'xs'}
+            sx={{ transform: 'rotate(90deg)' }}
+          ></ArrowUpDownIcon>{' '}
+          browser history style
+        </ListItem>
+        <ListItem>
+          <GoVersions
+            style={{ width: '16px', height: '16px', display: 'inline' }}
+          ></GoVersions>{' '}
+          <Link
+            href='https://notes.andymatuschak.org/About_these_notes'
+            color='unison.purple'
+            _hover={{ color: 'unison.lightPurple' }}
+          >
+            {' '}
+            panes style
+          </Link>
+        </ListItem>
+      </UnorderedList>
+    </UnorderedList>
   </PopoverExplanation>
 )
 

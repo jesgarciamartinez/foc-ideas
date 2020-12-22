@@ -7,11 +7,11 @@ import { AddIcon } from '@chakra-ui/icons'
 const { useContext } = React
 
 const CardHStack = () => {
-  const scrollContainer = React.useRef<HTMLDivElement>(null)
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const flowCardRef = React.useRef<HTMLElement>(null)
   const [boxShadows, setBoxShadows] = React.useState(0)
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const width = flowCardRef.current?.offsetWidth
     // console.log({ width })
     const listener = (e: any) => {
@@ -26,12 +26,14 @@ const CardHStack = () => {
       }
     }
 
-    scrollContainer.current?.addEventListener('scroll', listener)
-
+    const scrollContainer = scrollContainerRef.current
+    if (scrollContainer) scrollContainer.addEventListener('scroll', listener)
     return () => {
-      scrollContainer.current?.removeEventListener('scroll', listener)
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', listener)
+      }
     }
-  }, [])
+  }, [boxShadows])
   const { state, dispatch } = useContext(StateContext)
   return (
     <Flex
@@ -40,7 +42,7 @@ const CardHStack = () => {
       flexGrow={1}
       height='100%'
       backgroundColor='purple.50'
-      ref={scrollContainer}
+      ref={scrollContainerRef}
     >
       <HStack
         spacing={0}
@@ -53,7 +55,7 @@ const CardHStack = () => {
         transition='width 100ms cubic-bezier(0.19, 1, 0.22, 1)'
       >
         <FlowCard
-          tran
+          transition='box-shadow 100ms linear,opacity 75ms linear,transform 200ms cubic-bezier(0.19, 1, 0.22, 1);'
           ref={flowCardRef}
           items={state.flowCardFunctions}
           dispatch={dispatch}

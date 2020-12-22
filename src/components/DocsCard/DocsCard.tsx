@@ -32,6 +32,7 @@ import {
   ContentState,
   Entity,
   Modifier,
+  ContentBlock,
 } from 'draft-js'
 import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
@@ -43,6 +44,7 @@ import {
   DocsExplanation,
   DocsNavigationArrows,
   DocsNavigationTypeSelector,
+  FunctionSuggestionList,
   SaveButton,
   TypeSuggestionList,
 } from './components'
@@ -144,7 +146,7 @@ const getParamNames = (arr: Array<{ type: string }>): string[] => {
   return result
 }
 
-function findWithRegex(regex: any, contentBlock: any, callback: any) {
+function findWithRegex(regex: any, contentBlock: ContentBlock, callback: any) {
   const text = contentBlock.getText()
   let matchArr, start
   while ((matchArr = regex.exec(text)) !== null) {
@@ -327,11 +329,77 @@ const DocsCard = ({
   const nameColor = [defaultName, ''].includes(name) ? 'gray.400' : 'normal'
 
   /* Description */
-  const onChangeDescription = (description: EditorState) =>
-    setState(state => ({ ...state, description }))
   const descriptionHasText = description.getCurrentContent().hasText()
   const descriptionFontStyle = descriptionHasText ? 'normal' : 'italic'
   const descriptionColor = descriptionHasText ? 'normal' : 'gray.400'
+  const onChangeDescription = (description: EditorState) => {
+    setState(state => ({ ...state, description }))
+    /* autocomplete description */
+    const trigger = '@'
+    window.requestAnimationFrame(() => {
+      const selection = window.getSelection() as Selection
+      if (selection.rangeCount === 0) {
+        //focus is outside
+        setAutocompleteDescription(null)
+        return
+      }
+      const stateSelection = description.getSelection()
+      const contentState = description.getCurrentContent()
+      const block = contentState.getBlockForKey(stateSelection.getStartKey())
+      if (
+        !stateSelection.getHasFocus() ||
+        block.getEntityAt(stateSelection.getStartOffset() - 1)
+      ) {
+        // console.log('no entity')
+        setAutocompleteDescription(null)
+        return
+      }
+      console.log({ stateSelection, contentState, block })
+      const range = selection.getRangeAt(0)
+      // let text = range.startContainer.textContent!.substring(
+      //   //b|oolean -> 'b
+      //   0,
+      //   range.startOffset,
+      // )
+      const wholeWordText = range.startContainer.textContent as string //b|oolean -> 'boolean'
+      let index = /*text*/ wholeWordText.lastIndexOf(trigger)
+      if (index === -1) {
+        setAutocompleteDescription(null)
+        return
+      }
+      /*previously reassigned text here*/ let text = wholeWordText.substring(
+        index,
+      )
+      text = text === trigger ? '' : text.slice(1)
+
+      // const autocompleteRange = {
+      //   text, start:index,end: range.startOffset
+      // }
+
+      // console.log(3, { text })
+      const tempRange = window.getSelection()!.getRangeAt(0).cloneRange()
+      tempRange.setStart(tempRange.startContainer, index)
+      const rangeRect = tempRange.getBoundingClientRect()
+      let [left, top] = [rangeRect.left, rangeRect.bottom]
+      //
+      console.log({
+        left,
+        top,
+        text,
+        wholeWordText,
+        startIndex: index,
+        selectedIndex: 0,
+      })
+      setAutocompleteDescription({
+        left,
+        top,
+        text,
+        // wholeWordText,
+        startIndex: index,
+        selectedIndex: 0,
+      })
+    })
+  }
   // const descriptionEditorRef = React.useRef(null)
   const [
     autocompleteDescription,
@@ -341,6 +409,104 @@ const DocsCard = ({
     functions,
     autocompleteDescription?.text,
   )
+  const descriptionEditorRef = React.useRef<DraftEditor>(null)
+  const handleDescriptionKeyCommand = (
+    command: 'up' | 'down' | 'close' | 'select',
+  ) => {
+    if (filteredFunctions.length === 0) return 'not-handled'
+    switch (command) {
+      case 'up': {
+        setAutocompleteDescription((state: any) => ({
+          ...state,
+          selectedIndex:
+            state.selectedIndex === 0 ? 0 : state.selectedIndex - 1,
+        }))
+        return 'handled'
+      }
+      case 'down': {
+        setAutocompleteDescription((state: any) => ({
+          ...state,
+          selectedIndex:
+            state.selectedIndex === filteredSuggestions.length - 1
+              ? filteredSuggestions.length - 1
+              : state.selectedIndex + 1,
+        }))
+        return 'handled'
+      }
+      case 'close': {
+        descriptionEditorRef.current!.blur()
+        return 'handled'
+      }
+      case 'select': {
+        const trigger = '@'
+        const currentSelectionState = description.getSelection()
+        const anchorOffset /*end */ = currentSelectionState.getAnchorOffset()
+        const anchorKey = currentSelectionState.getAnchorKey()
+        const currentContent = description.getCurrentContent()
+        const currentBlock = currentContent.getBlockForKey(anchorKey)
+        const blockText = currentBlock.getText()
+        console.log({ autocompleteDescription })
+        console.log({
+          blockText,
+          // descriptionString,
+          anchorOffset,
+          anchorKey,
+        })
+        // const start = blockText.substring(0, end).lastIndexOf(trigger)
+        // return {
+        // editorState,
+        // start,
+        // end,
+        // trigger,
+        // selectedIndex: autocompleteSignature.selectedIndex,
+        // }
+
+        // add suggestion
+        const textToInsert =
+          trigger +
+          filteredFunctions[autocompleteDescription.selectedIndex].name
+        const newCurrentContent = currentContent.createEntity(
+          'FUNCTION',
+          'IMMUTABLE',
+        )
+        const entityKey = newCurrentContent.getLastCreatedEntityKey()
+        const mentionTextSelection = currentSelectionState.merge({
+          // anchorOffset: autocompleteDescription.startIndex,
+          anchorOffset: blockText.lastIndexOf(trigger),
+          focusOffset: anchorOffset,
+        })
+        let insertingContent = Modifier.replaceText(
+          description.getCurrentContent(),
+          mentionTextSelection,
+          textToInsert,
+          undefined,
+          // ['link', 'BOLD'],
+          entityKey,
+        )
+        const editorStateWithEntity = EditorState.push(
+          description,
+          insertingContent,
+          'apply-entity',
+        )
+        // const newEditorState = EditorState.push(
+        //   editorStateWithEntity,
+        //   ' ',
+        //   'insert-characters',
+        // )
+        setState(state => ({ ...state, description: editorStateWithEntity }))
+        setAutocompleteDescription(null)
+
+        // EditorState.forceSelection(
+        //   newEditorState,
+        //   insertingContent.getSelectionAfter(),
+        // ),
+
+        return 'handled'
+      }
+      default:
+        return 'not-handled'
+    }
+  }
 
   /* Signature */
 
@@ -395,13 +561,13 @@ const DocsCard = ({
     }
     setState(state => ({ ...state, signature: newEditorState }))
 
-    /* autocomplete */
+    /* autocomplete signature */
 
     window.requestAnimationFrame(() => {
       const selection = window.getSelection() as Selection
       if (selection.rangeCount === 0) {
         //focus is outside
-        setAutocompleteState(null)
+        setAutocompleteSignature(null)
         return
       }
       const stateSelection = newEditorState.getSelection()
@@ -411,7 +577,7 @@ const DocsCard = ({
         !stateSelection.getHasFocus() /*||
         block.getEntityAt(stateSelection.getStartOffset() - 1*/
       ) {
-        setAutocompleteState(null)
+        setAutocompleteSignature(null)
         return
       }
       const range = selection.getRangeAt(0)
@@ -438,7 +604,7 @@ const DocsCard = ({
         left = coords.left
       }
 
-      setAutocompleteState({
+      setAutocompleteSignature({
         left,
         top,
         text,
@@ -449,9 +615,10 @@ const DocsCard = ({
     })
   }
   const handleKeyCommand = (command: 'up' | 'down' | 'close' | 'select') => {
+    if (filteredSuggestions.length === 0) return 'not-handled'
     switch (command) {
       case 'up': {
-        setAutocompleteState((state: any) => ({
+        setAutocompleteSignature((state: any) => ({
           ...state,
           selectedIndex:
             state.selectedIndex === 0 ? 0 : state.selectedIndex - 1,
@@ -459,7 +626,7 @@ const DocsCard = ({
         return 'handled'
       }
       case 'down': {
-        setAutocompleteState((state: any) => ({
+        setAutocompleteSignature((state: any) => ({
           ...state,
           selectedIndex:
             state.selectedIndex === filteredSuggestions.length - 1
@@ -482,8 +649,8 @@ const DocsCard = ({
         console.log({
           blockText,
           signatureString,
-          text: autocompleteState.text,
-          wholeWordText: autocompleteState.wholeWordText,
+          text: autocompleteSignature.text,
+          wholeWordText: autocompleteSignature.wholeWordText,
           anchorOffset,
           anchorKey,
         })
@@ -493,19 +660,26 @@ const DocsCard = ({
         // start,
         // end,
         // trigger,
-        // selectedIndex: autocompleteState.selectedIndex,
+        // selectedIndex: autocompleteSignature.selectedIndex,
         // }
 
         // add suggestion
-        const textToInsert =
-          filteredSuggestions[autocompleteState.selectedIndex].title
         const newCurrentContent = currentContent.createEntity(
           'TYPE',
           'IMMUTABLE',
         )
         const entityKey = newCurrentContent.getLastCreatedEntityKey()
+
+        //
+        let index = blockText.length > 0 ? blockText.lastIndexOf(' ') : 0
+        index = index === -1 ? 0 : index
+
+        const fnName =
+          filteredSuggestions[autocompleteSignature.selectedIndex].title
+        const textToInsert = index === 0 ? fnName : ' ' + fnName
         const mentionTextSelection = currentSelectionState.merge({
-          anchorOffset: autocompleteState.startIndex,
+          // anchorOffset: autocompleteSignature.startIndex,
+          anchorOffset: index,
           focusOffset: anchorOffset,
         })
         let insertingContent = Modifier.replaceText(
@@ -522,7 +696,7 @@ const DocsCard = ({
           'apply-entity',
         )
         setState(state => ({ ...state, signature: newEditorState }))
-
+        setAutocompleteSignature(null)
         // EditorState.forceSelection(
         //   newEditorState,
         //   insertingContent.getSelectionAfter(),
@@ -535,10 +709,12 @@ const DocsCard = ({
     }
   }
 
-  const [autocompleteState, setAutocompleteState] = React.useState<any>(null)
+  const [autocompleteSignature, setAutocompleteSignature] = React.useState<any>(
+    null,
+  )
   const filteredSuggestions = getFilteredTypeSuggestions(
     typeSuggestions,
-    autocompleteState?.text,
+    autocompleteSignature?.text,
   )
 
   /* Code */
@@ -723,9 +899,9 @@ const DocsCard = ({
                   {filteredSuggestions.length > 0 ? (
                     <TypeSuggestionList
                       typeSuggestions={filteredSuggestions}
-                      selectedIndex={autocompleteState.selectedIndex}
-                      left={autocompleteState.left}
-                      top={autocompleteState.top}
+                      selectedIndex={autocompleteSignature.selectedIndex}
+                      left={autocompleteSignature.left}
+                      top={autocompleteSignature.top}
                     ></TypeSuggestionList>
                   ) : null}
                 </Code>
@@ -745,7 +921,17 @@ const DocsCard = ({
                   placeholder='Description'
                   editorState={description}
                   onChange={onChangeDescription}
+                  keyBindingFn={autocompleteKeyBindingFn}
+                  handleKeyCommand={handleDescriptionKeyCommand}
                 ></DraftEditor>
+                {filteredFunctions.length > 0 ? (
+                  <FunctionSuggestionList
+                    functionSuggestions={filteredFunctions}
+                    selectedIndex={autocompleteDescription.selectedIndex}
+                    left={autocompleteDescription.left}
+                    top={autocompleteDescription.top}
+                  ></FunctionSuggestionList>
+                ) : null}
               </Text>
               {/* <Tabs marginTop={5}>
                 <TabList>

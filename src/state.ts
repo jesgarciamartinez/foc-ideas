@@ -46,25 +46,6 @@ const useLoggerReducer = <A, B extends { type: string | number }>(
 
 const initialFunctions: Array<Ifunction> = [
   {
-    name: 'length',
-    parameters: [{ type: 'string' }],
-    returns: { type: 'number' },
-    fn: function length(s: any) {
-      return s.length
-    },
-    description: 'Takes a string and returns how many characters it has',
-  },
-  {
-    name: 'upperCase',
-    parameters: [{ type: 'string' }],
-    returns: { type: 'string' },
-    fn: function (s: any) {
-      return s.toUpperCase()
-    },
-    description:
-      'Takes a string and returns is with all characters in uppercase',
-  },
-  {
     name: 'add',
     parameters: [{ type: 'number' }, { type: 'number' }],
     returns: { type: 'number' },
@@ -73,16 +54,6 @@ const initialFunctions: Array<Ifunction> = [
     },
     description: 'Adds two numbers together',
   },
-  // {
-  //   name: 'map',
-  //   parameters: [
-  //     { type: 'function', parameterName: 'f' },
-  //     { type: 'array', of: { typeParam: 'A' }, parameterName: 'as' },
-  //   ],
-  //   returns: { type: 'array', of: { typeParam: 'B' } },
-  //   code: 'function map(f,as){return as.map(f)}',
-  //   description: 'Applies a function to each element of an array',
-  // },
   {
     name: 'id',
     parameters: [{ type: 'string' }],
@@ -100,6 +71,25 @@ const initialFunctions: Array<Ifunction> = [
       return m > n
     },
     description: 'Number is greater than another',
+  },
+  {
+    name: 'length',
+    parameters: [{ type: 'string' }],
+    returns: { type: 'number' },
+    fn: function length(s: any) {
+      return s.length
+    },
+    description: 'Takes a string and returns how many characters it has',
+  },
+  {
+    name: 'upperCase',
+    parameters: [{ type: 'string' }],
+    returns: { type: 'string' },
+    fn: function (s: any) {
+      return s.toUpperCase()
+    },
+    description:
+      'Takes a string and returns is with all characters in uppercase',
   },
 ]
 const initialDataTypes: Array<Itype> = [
@@ -159,8 +149,8 @@ const initialState: State = {
   docCardsSelectedIndex: 0,
   docCards: [
     { type: 'creating' },
-    { type: 'editing', fnName: 'add' },
-    { type: 'editing', fnName: 'id' },
+    // { type: 'editing', fnName: 'add' },
+    // { type: 'editing', fnName: 'id' },
   ],
   searchValue: '',
 }
@@ -254,7 +244,9 @@ function reducer(state: State, action: Action): State {
       return fnIndex === -1
         ? {
             ...state,
-            functions: state.functions.concat(action.function),
+            functions: state.functions
+              .concat(action.function)
+              .sort((a, b) => a.name.localeCompare(b.name)),
             docCards: changeAtIndex(state.docCards, action.index, {
               type: 'editing',
               fnName: action.function.name,

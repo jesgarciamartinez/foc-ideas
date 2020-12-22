@@ -25,6 +25,8 @@ import {
   GridItem,
   Fade,
   ChakraProps,
+  UnorderedList,
+  ListItem,
 } from '@chakra-ui/react'
 import {
   ArrowDownIcon,
@@ -465,11 +467,20 @@ const FlowCard = React.memo(
             </Fade>
 
             <PopoverExplanation label='Flow card explanation' title='Flow card'>
-              Flow is a special view for the flow function (left-to-right
-              variadic compose). This is a stab at a "functional Scratch" to
-              visually explore function composition. Last argument and return
-              type line up vertically to reinforce the pipeline metaphor.
-              JavaScript is executed and shown on the right.
+              <UnorderedList>
+                <ListItem>
+                  Flow is a special view for the flow function (left-to-right
+                  variadic compose). This is a stab at a "functional Scratch" to
+                  visually explore function composition.
+                </ListItem>
+              </UnorderedList>
+              <ListItem>
+                Last argument and return type line up vertically to reinforce
+                the pipeline metaphor.
+              </ListItem>
+              <ListItem>
+                JavaScript is executed and shown on the right.
+              </ListItem>
             </PopoverExplanation>
           </Flex>
           <Divider marginTop={2}></Divider>
