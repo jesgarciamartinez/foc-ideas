@@ -52,16 +52,16 @@ const initialFunctions: Array<Ifunction> = [
     fn: function add(x: any, y: any) {
       return x + y
     },
-    description: 'Adds two numbers together',
+    description: 'Adds two numbers.',
   },
   {
-    name: 'id',
-    parameters: [{ type: 'string' }],
+    name: 'example',
+    parameters: [{ type: 'boolean' }, { type: 'number' }, { type: 'string' }],
     returns: { type: 'string' },
-    fn: function id(s: any) {
-      return s
+    fn: function add(x: any, y: any, z: any) {
+      return 'Hi!'
     },
-    description: 'monomorphic id for string',
+    description: 'Example function with a link to @not.',
   },
   {
     name: 'greaterThan',
@@ -70,7 +70,8 @@ const initialFunctions: Array<Ifunction> = [
     fn: function greaterThan(n: number, m: number) {
       return m > n
     },
-    description: 'Number is greater than another',
+    description:
+      'Returns true number is greater than another number, false otherwise',
   },
   {
     name: 'length',
@@ -82,6 +83,15 @@ const initialFunctions: Array<Ifunction> = [
     description: 'Takes a string and returns how many characters it has',
   },
   {
+    name: 'not',
+    parameters: [{ type: 'boolean' }],
+    returns: { type: 'boolean' },
+    fn: function not(x: any) {
+      return !x
+    },
+    description: 'Negates a boolean value.',
+  },
+  {
     name: 'upperCase',
     parameters: [{ type: 'string' }],
     returns: { type: 'string' },
@@ -89,7 +99,7 @@ const initialFunctions: Array<Ifunction> = [
       return s.toUpperCase()
     },
     description:
-      'Takes a string and returns is with all characters in uppercase',
+      'Takes a string and returns it with all characters in uppercase',
   },
 ]
 const initialDataTypes: Array<Itype> = [
@@ -149,8 +159,7 @@ const initialState: State = {
   docCardsSelectedIndex: 0,
   docCards: [
     { type: 'creating' },
-    // { type: 'editing', fnName: 'add' },
-    // { type: 'editing', fnName: 'id' },
+    // { type: 'editing', fnName: 'example' }
   ],
   searchValue: '',
 }

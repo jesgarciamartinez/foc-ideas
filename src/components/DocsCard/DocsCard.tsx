@@ -36,7 +36,6 @@ import {
 } from 'draft-js'
 import 'draft-js/dist/Draft.css'
 import './draftEditorStyles.css'
-import AutocompleteInput from '../autocomplete-react-draft/src/index'
 // import SuggestionList from './autocomplete-react-draft/src/suggestions'
 import { getDefaultKeyBinding, KeyBindingUtil } from 'draft-js'
 import {
