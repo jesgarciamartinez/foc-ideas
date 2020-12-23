@@ -4,7 +4,6 @@ import { Ifunction, Itype } from './interfaces'
 import {
   Box,
   Flex,
-  Center,
   Spacer,
   Code,
   HStack,
@@ -15,10 +14,6 @@ import {
   Input,
   NumberInput,
   NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Checkbox,
   Text,
   Heading,
   Grid,
@@ -27,20 +22,13 @@ import {
   ChakraProps,
   UnorderedList,
   ListItem,
+  Switch,
 } from '@chakra-ui/react'
-import {
-  ArrowDownIcon,
-  ArrowForwardIcon,
-  DeleteIcon,
-  PlusSquareIcon,
-} from '@chakra-ui/icons'
+import { ArrowDownIcon, ArrowForwardIcon, DeleteIcon } from '@chakra-ui/icons'
 import TypeBadge from './TypeBadge'
 import { Action } from '../state'
 import PopoverExplanation from './PopoverExplanation'
 import './flowCardStyles.css'
-// import { Fade } from '@material-ui/core'
-// import produce from 'immer'
-// import EditableText from './EditableText'
 
 const TypeAndValue = React.memo(
   ({
@@ -105,16 +93,17 @@ const TypeAndValue = React.memo(
                 </NumberInput>
               )
             case 'boolean':
-              console.log({ type, value })
               return (
-                <Checkbox
-                  isChecked={value}
-                  onChange={e => {
-                    onChange(e.target.checked)
-                  }}
-                >
-                  {value ? 'true' : 'false'}
-                </Checkbox>
+                <>
+                  <Switch
+                    colorScheme={'purple'}
+                    isChecked={value}
+                    onChange={e => {
+                      onChange(e.target.checked)
+                    }}
+                  ></Switch>
+                  <Text>{value ? 'true' : 'false'}</Text>
+                </>
               )
             default:
               return null
@@ -157,7 +146,6 @@ const getParamValues = (
 
     //TODO typecheck
 
-    console.log({ parameters })
     let returnValue
     try {
       returnValue = item.fn(...parameters.map(p => p.value))
@@ -479,7 +467,8 @@ const FlowCard = React.memo(
                 the pipeline metaphor.
               </ListItem>
               <ListItem>
-                JavaScript is executed and shown on the right.
+                JavaScript is executed and shown on the right. There's no type
+                checking in place yet.
               </ListItem>
             </PopoverExplanation>
           </Flex>

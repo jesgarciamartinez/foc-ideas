@@ -102,14 +102,16 @@ export const DocsExplanation = () => (
           <GoVersions
             style={{ width: '16px', height: '16px', display: 'inline' }}
           ></GoVersions>{' '}
+          panes style (like
           <Link
             href='https://notes.andymatuschak.org/About_these_notes'
             color='unison.purple'
             _hover={{ color: 'unison.lightPurple' }}
           >
             {' '}
-            panes style
+            Andy Matuschak's notes
           </Link>
+          )
         </ListItem>
       </UnorderedList>
     </UnorderedList>
@@ -174,6 +176,7 @@ export const FunctionSuggestionList = ({
   selectedIndex,
   left,
   top,
+  onClick,
 }: {
   functionSuggestions: {
     name: string
@@ -181,6 +184,7 @@ export const FunctionSuggestionList = ({
   selectedIndex: number
   left: number
   top: number
+  onClick: (index: number) => void
 }) => (
   <Box
     as='ul'
@@ -196,6 +200,7 @@ export const FunctionSuggestionList = ({
   >
     {functionSuggestions.map((s, i) => (
       <Box
+        onClick={() => onClick(i)}
         as='li'
         key={s.name}
         display='block'

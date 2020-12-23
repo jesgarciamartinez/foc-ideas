@@ -63,8 +63,8 @@ const autocompleteKeyBindingFn = (e: any): string | null => {
       return 'close'
     case 'Enter':
       return 'select'
-    case 'Tab':
-      return 'select'
+    // case 'Tab':
+    //   return 'select'
     default:
       return getDefaultKeyBinding(e)
   }
@@ -411,7 +411,8 @@ const DocsCard = ({
   )
   const descriptionEditorRef = React.useRef<DraftEditor>(null)
   const handleDescriptionKeyCommand = (
-    command: 'up' | 'down' | 'close' | 'select',
+    command: 'up' | 'down' | 'close' | 'select' | string,
+    clickIndex?: number,
   ) => {
     if (filteredFunctions.length === 0) return 'not-handled'
     switch (command) {
@@ -464,7 +465,8 @@ const DocsCard = ({
         // add suggestion
         const textToInsert =
           trigger +
-          filteredFunctions[autocompleteDescription.selectedIndex].name
+          filteredFunctions[clickIndex ?? autocompleteDescription.selectedIndex]
+            .name
         const newCurrentContent = currentContent.createEntity(
           'FUNCTION',
           'IMMUTABLE',
@@ -614,7 +616,10 @@ const DocsCard = ({
       })
     })
   }
-  const handleKeyCommand = (command: 'up' | 'down' | 'close' | 'select') => {
+  const handleKeyCommand = (
+    command: 'up' | 'down' | 'close' | 'select' | string,
+    clickIndex?: number,
+  ) => {
     if (filteredSuggestions.length === 0) return 'not-handled'
     switch (command) {
       case 'up': {
@@ -675,7 +680,8 @@ const DocsCard = ({
         index = index === -1 ? 0 : index
 
         const fnName =
-          filteredSuggestions[autocompleteSignature.selectedIndex].title
+          filteredSuggestions[clickIndex ?? autocompleteSignature.selectedIndex]
+            .title
         const textToInsert = index === 0 ? fnName : ' ' + fnName
         const mentionTextSelection = currentSelectionState.merge({
           // anchorOffset: autocompleteSignature.startIndex,
@@ -890,7 +896,7 @@ const DocsCard = ({
                     ref={signatureEditorRef}
                     onChange={onChangeSignatureEditor}
                     keyBindingFn={autocompleteKeyBindingFn}
-                    handleKeyCommand={handleKeyCommand}
+                    handleKeyCommand={e => handleKeyCommand(e)}
 
                     // onBlur={(e: any) => {
                     //   setSignatureTouched(true)
@@ -918,14 +924,18 @@ const DocsCard = ({
                 padding={3}
               >
                 <DraftEditor
+                  ref={descriptionEditorRef}
                   placeholder='Description'
                   editorState={description}
                   onChange={onChangeDescription}
                   keyBindingFn={autocompleteKeyBindingFn}
-                  handleKeyCommand={handleDescriptionKeyCommand}
+                  handleKeyCommand={e => handleDescriptionKeyCommand(e)}
                 ></DraftEditor>
                 {filteredFunctions.length > 0 ? (
                   <FunctionSuggestionList
+                    onClick={(clickIndex: number) =>
+                      handleDescriptionKeyCommand('select', clickIndex)
+                    }
                     functionSuggestions={filteredFunctions}
                     selectedIndex={autocompleteDescription.selectedIndex}
                     left={autocompleteDescription.left}
