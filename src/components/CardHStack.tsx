@@ -13,14 +13,11 @@ const CardHStack = () => {
 
   React.useLayoutEffect(() => {
     const width = flowCardRef.current?.offsetWidth
-    // console.log({ width })
     const listener = (e: any) => {
       if (!width) return
-      // console.log(e.target.scrollLeft)
       const scrollAmount = e.target.scrollLeft
       const newBoxShadows =
         scrollAmount < 10 ? -1 : Math.ceil(scrollAmount / (width - 40)) //discount left:40px
-      // console.log({ newBoxShadows })
       if (newBoxShadows !== boxShadows) {
         setBoxShadows(newBoxShadows)
       }
@@ -77,7 +74,6 @@ const CardHStack = () => {
               index={state.docCardsSelectedIndex}
               func={(() => {
                 const doc = state.docCards[state.docCardsSelectedIndex]
-                console.log(state.docCards, state.docCardsSelectedIndex)
                 return doc.type === 'editing'
                   ? state.functions.find(f => f.name === doc.fnName)
                   : undefined

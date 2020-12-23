@@ -23,7 +23,6 @@ export const App = () => {
   const [state, dispatch] = useAppReducer()
   const onDragEnd = React.useCallback(
     dropResult => {
-      console.log({ dropResult })
       if (
         //SideBar to FlowCard
         dropResult.source.droppableId !== 'FlowCard' &&

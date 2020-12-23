@@ -153,7 +153,6 @@ const getParamValues = (
       console.log({ error })
       break
     }
-    console.log('break')
 
     newItems.push({
       ...item,
@@ -201,7 +200,6 @@ const C_TypeAndValue = React.memo(
               fns,
             )
             const newValues = getParamValues(affectedFns, v, paramIndex)
-            console.log({ previousFns, affectedFns, newValues })
             setFns(previousFns.concat(newValues))
           }
 
@@ -336,7 +334,6 @@ const getFnsValuesFromItems = (
     }
 
     //TODO typecheck, show error
-    console.log({ parameters })
     let returnValue
     let error
     try {
@@ -345,8 +342,6 @@ const getFnsValuesFromItems = (
       error = err
       console.log({ error })
     }
-
-    console.log('break')
 
     //TODO only push if no error
     newItems.push({

@@ -350,11 +350,9 @@ const DocsCard = ({
         !stateSelection.getHasFocus() ||
         block.getEntityAt(stateSelection.getStartOffset() - 1)
       ) {
-        // console.log('no entity')
         setAutocompleteDescription(null)
         return
       }
-      console.log({ stateSelection, contentState, block })
       const range = selection.getRangeAt(0)
       // let text = range.startContainer.textContent!.substring(
       //   //b|oolean -> 'b
@@ -376,20 +374,12 @@ const DocsCard = ({
       //   text, start:index,end: range.startOffset
       // }
 
-      // console.log(3, { text })
       const tempRange = window.getSelection()!.getRangeAt(0).cloneRange()
       tempRange.setStart(tempRange.startContainer, index)
       const rangeRect = tempRange.getBoundingClientRect()
       let [left, top] = [rangeRect.left, rangeRect.bottom]
       //
-      console.log({
-        left,
-        top,
-        text,
-        wholeWordText,
-        startIndex: index,
-        selectedIndex: 0,
-      })
+
       setAutocompleteDescription({
         left,
         top,
@@ -446,13 +436,7 @@ const DocsCard = ({
         const currentContent = description.getCurrentContent()
         const currentBlock = currentContent.getBlockForKey(anchorKey)
         const blockText = currentBlock.getText()
-        console.log({ autocompleteDescription })
-        console.log({
-          blockText,
-          // descriptionString,
-          anchorOffset,
-          anchorKey,
-        })
+
         // const start = blockText.substring(0, end).lastIndexOf(trigger)
         // return {
         // editorState,
@@ -588,13 +572,11 @@ const DocsCard = ({
       //0,
       //range.startOffset,
       //)
-      // console.log(1, { text, stateSelection })
+
       const wholeWordText = range.startContainer.textContent as string //b|oolean -> 'boolean'
       let index = wholeWordText.length > 0 ? wholeWordText.lastIndexOf(' ') : 0
       index = index === -1 ? 0 : index
       const text = wholeWordText.substring(index).trim()
-
-      // console.log(3, { text })
 
       let { left } = range.getBoundingClientRect()
       const editorParent = signatureEditorParentRef.current as HTMLElement
@@ -651,14 +633,6 @@ const DocsCard = ({
         const currentContent = signature.getCurrentContent()
         const currentBlock = currentContent.getBlockForKey(anchorKey)
         const blockText = currentBlock.getText()
-        console.log({
-          blockText,
-          signatureString,
-          text: autocompleteSignature.text,
-          wholeWordText: autocompleteSignature.wholeWordText,
-          anchorOffset,
-          anchorKey,
-        })
         // const start = blockText.substring(0, end).lastIndexOf(trigger)
         // return {
         // editorState,
